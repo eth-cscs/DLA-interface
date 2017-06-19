@@ -1,0 +1,10 @@
+# build directories
+build*
+
+# editor temporaries
+*.swp
+*.swq
+*~
+
+# OSX files
+.DS_Store
