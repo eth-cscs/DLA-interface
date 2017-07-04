@@ -22,6 +22,8 @@ CHECK_CXX_SYMBOL_EXISTS(MPI_Finalize mpi.h COMPILER_HAS_MPI)
 # If the compiler is not an MPI compiler find MPI library
 if(NOT COMPILER_HAS_MPI)
   find_package(MPI REQUIRED)
+  set(TEST_RUNNER ${MPIEXEC})
+  set(RUNNER_NP_OPT ${MPIEXEC_NUMPROC_FLAG})
 endif()
 
 include(CTest)
@@ -29,7 +31,7 @@ enable_testing()
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
-    ${MPI_C_INCLUDE_PATH}
+    ${MPI_CXX_INCLUDE_PATH}
 )
 
 # ---------------------------------------------------------------------------
@@ -37,7 +39,7 @@ include_directories(
 # ---------------------------------------------------------------------------
 set(DLA_LIBS
     ${Boost_LIBRARIES}
-    ${MPI_C_LIBRARIES}
+    ${MPI_CXX_LIBRARIES}
 )
 
 # ---------------------------------------------------------------------------
