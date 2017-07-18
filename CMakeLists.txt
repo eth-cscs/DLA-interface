@@ -9,7 +9,9 @@ set(CMAKE_CXX_STANDARD 14)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 include(dla_utils)
-
+include(dla_mpi)
+include(dla_lapack)
+include(dla_scalapack)
 # ---------------------------------------------------------------------------
 # Boost
 # ---------------------------------------------------------------------------
@@ -31,6 +33,9 @@ else()
   setoption(TEST_RUNNER_NP_OPT STRING "${MPIEXEC_NUMPROC_FLAG}" "Option passed to TEST_RUNNER to specify the number of ranks")
 endif()
 
+dla_find_lapack()
+dla_find_scalapack()
+
 include(CTest)
 enable_testing()
 
@@ -43,16 +48,26 @@ include_directories(
 # extra options
 # ---------------------------------------------------------------------------
 add_compile_options(-Wall -Wno-missing-braces)
+if(DLA_HAVE_SCALAPACK)
+  add_definitions(-DDLA_HAVE_SCALAPACK)
+endif()
 
 # ---------------------------------------------------------------------------
 # setup libraries
 # ---------------------------------------------------------------------------
 add_subdirectory(src)
+set(DLA_LA_LIBS
+    ${DLA_SCALAPACK_LIBRARY}
+    ${DLA_LAPACK_LIBRARY}
+)
 set(DLA_LIBS
     dla_interface
     ${Boost_LIBRARIES}
     ${MPI_CXX_LIBRARIES}
+    ${DLA_LA_LIBS}
 )
+message(${DLA_LIBS})
+
 # ---------------------------------------------------------------------------
 # Add sub directories
 # ---------------------------------------------------------------------------
