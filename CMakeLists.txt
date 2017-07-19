@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD 14)
 # ---------------------------------------------------------------------------
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+include(dla_utils)
+
 # ---------------------------------------------------------------------------
 # Boost
 # ---------------------------------------------------------------------------
@@ -20,10 +22,13 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 include(CheckCXXSymbolExists)
 CHECK_CXX_SYMBOL_EXISTS(MPI_Finalize mpi.h COMPILER_HAS_MPI)
 # If the compiler is not an MPI compiler find MPI library
-if(NOT COMPILER_HAS_MPI)
+if(COMPILER_HAS_MPI)
+  setoption(TEST_RUNNER FILEPATH "mpirun" "Executable for running MPI tests")
+  setoption(TEST_RUNNER_NP_OPT STRING "-n" "Option passed to TEST_RUNNER to specify the number of ranks")
+else()
   find_package(MPI REQUIRED)
-  set(TEST_RUNNER ${MPIEXEC})
-  set(RUNNER_NP_OPT ${MPIEXEC_NUMPROC_FLAG})
+  setoption(TEST_RUNNER FILEPATH "${MPIEXEC}" "Executable for running MPI tests")
+  setoption(TEST_RUNNER_NP_OPT STRING "${MPIEXEC_NUMPROC_FLAG}" "Option passed to TEST_RUNNER to specify the number of ranks")
 endif()
 
 include(CTest)
