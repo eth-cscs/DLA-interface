@@ -17,7 +17,7 @@ function(add_unit_test name)
   if(DEFINED arg_DEFS)
     target_compile_definitions(${name} PRIVATE ${arg_DEFS})
   endif()
-  target_link_libraries(${name} gtest ${arg_LIBS})
+  target_link_libraries(${name} gtest dla_interface ${arg_LIBS})
 
   if(DEFINED arg_MPIRANKS)
     if(NOT arg_MPIRANKS GREATER 0)

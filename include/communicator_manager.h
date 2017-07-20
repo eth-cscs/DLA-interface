@@ -1,6 +1,7 @@
 #ifndef DLA_INTERFACE_COMMUNICATOR_MANAGER_H
 #define DLA_INTERFACE_COMMUNICATOR_MANAGER_H
 
+#include <map>
 #include <memory>
 #include <mpi.h>
 #include "communicator_grid.h"
@@ -58,7 +59,19 @@ namespace dla_interface {
       CommunicatorManager(const CommunicatorManager&) = delete;
       CommunicatorManager operator=(const CommunicatorManager&) = delete;
 
+      public:
       ~CommunicatorManager();
+
+      private:
+      enum Status { non_initialized = 0, initialized = 1, finalized = 2 };
+      static Status status_;
+      static std::unique_ptr<CommunicatorManager> comm_manager_;
+
+      bool init_mpi_;
+      std::map<MPI_Comm, std::shared_ptr<Communicator2DGrid>> comm_grid_map;
+#ifdef DLA_HAVE_SCALAPACK
+      std::map<BlacsContextType, std::shared_ptr<Communicator2DGrid>> ictxt_grid_map;
+#endif
     };
   }
 }

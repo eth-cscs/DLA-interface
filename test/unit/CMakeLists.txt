@@ -1,4 +1,4 @@
 add_unit_test(gtest_unittest LIBS gtest_main)
-add_unit_test(test_communicator_grid MPIRANKS 6)
-add_unit_test(test_communicator_manager MPIRANKS 6)
-add_unit_test(test_communicator_manager_init SRC test_communicator_manager.cpp MPIRANKS 6 DEFS -DCOMM_INITS_MPI)
+add_unit_test(test_communicator_grid MPIRANKS 6 LIBS ${DLA_LA_LIBS})
+add_unit_test(test_communicator_manager MPIRANKS 6 LIBS ${DLA_LA_LIBS})
+add_unit_test(test_communicator_manager_init SRC test_communicator_manager.cpp MPIRANKS 6 DEFS -DCOMM_INITS_MPI LIBS ${DLA_LA_LIBS})
