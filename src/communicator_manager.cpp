@@ -2,9 +2,11 @@
 #include <memory>
 #include <mpi.h>
 #include <stdexcept>
+#include <string>
 #include "types.h"
 #include "communicator_grid.h"
 #include "communicator_manager.h"
+#include "internal_error.h"
 
 namespace dla_interface {
   namespace comm {
@@ -44,14 +46,14 @@ namespace dla_interface {
           new Communicator2DGrid(base_comm, row_size, col_size, comm_ordering));
 
       if (!comm_grid_map.insert(std::make_pair(comm_grid_->rowMPICommunicator(), comm_grid_)).second)
-        ;  // TODO: abort
-      if (!comm_grid_map.insert(std::make_pair(comm_grid_->colMPICommunicator(), comm_grid_)).second)
-        ;  // TODO: abort
+        throw error::InternalError("Cannot insert row commmunicator in the map");
+      if (comm_grid_map.insert(std::make_pair(comm_grid_->colMPICommunicator(), comm_grid_)).second)
+        throw error::InternalError("Cannot insert column commmunicator in the map");
       if (!comm_grid_map.insert(std::make_pair(comm_grid_->rowOrderedMPICommunicator(), comm_grid_)).second)
-        ;  // TODO: abort
+        throw error::InternalError("Cannot insert row ordered commmunicator in the map");
 #ifdef DLA_HAVE_SCALAPACK
       if (!ictxt_grid_map.insert(std::make_pair(comm_grid_->blacsContext(), comm_grid_)).second)
-        ;  // TODO: abort
+        throw error::InternalError("Cannot insert BLACS context id in the map");
 #endif
       return *comm_grid_;
     }
@@ -79,7 +81,9 @@ namespace dla_interface {
         int provided;
         MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &provided);
         if (provided != MPI_THREAD_SERIALIZED)
-          ;  // TODO: abort
+          throw std::runtime_error(
+              "MPI cannot be initializd with MPI_THREAD_SERIALIZED. (provided = " +
+              std::to_string(provided) + ")");
       }
     }
 
