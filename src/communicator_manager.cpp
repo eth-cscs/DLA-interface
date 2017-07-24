@@ -47,7 +47,7 @@ namespace dla_interface {
 
       if (!comm_grid_map.insert(std::make_pair(comm_grid_->rowMPICommunicator(), comm_grid_)).second)
         throw error::InternalError("Cannot insert row commmunicator in the map");
-      if (comm_grid_map.insert(std::make_pair(comm_grid_->colMPICommunicator(), comm_grid_)).second)
+      if (!comm_grid_map.insert(std::make_pair(comm_grid_->colMPICommunicator(), comm_grid_)).second)
         throw error::InternalError("Cannot insert column commmunicator in the map");
       if (!comm_grid_map.insert(std::make_pair(comm_grid_->rowOrderedMPICommunicator(), comm_grid_)).second)
         throw error::InternalError("Cannot insert row ordered commmunicator in the map");
