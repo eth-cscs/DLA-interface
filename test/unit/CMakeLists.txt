@@ -1,5 +1,6 @@
 add_unit_test(gtest_unittest LIBS gtest_main)
 add_unit_test(test_util_math LIBS gtest_main)
+add_unit_test(test_util_memory LIBS gtest_main)
 add_unit_test(test_local_matrix LIBS gtest_main)
 add_unit_test(test_communicator_grid MPIRANKS 6 LIBS ${DLA_LA_LIBS})
 add_unit_test(test_communicator_manager MPIRANKS 6 LIBS ${DLA_LA_LIBS})
