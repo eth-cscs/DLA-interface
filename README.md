@@ -1,10 +1,59 @@
 # DLA interface
 
 This is the repository for the DLA (Distributed Linear Algebra) interface code.
-The goal is to provide a generic interface to the existing distributed linear algebra libraries.
-E.g.:
-- Scalapack (Not yet supported)
-- D-Plasma (Not yet supported)
-- Chameleon (Not yet supported)
 
-Unfortunately we do not have thorough documentation of how-to guides yet.
+# Motivation
+
+The use of the LAPACK and ScaLAPACK libraries for numerical linear algebra is ubiquitous in high-performance computing applications,
+and many vendors and software providers use it as the basis of their own high-performance math libraries.
+However, there currently exists no distributed GPU-enabled library.
+Other packages for linear algebra with GPU support (or without GPU support but with better performances) exist,
+but they have different interfaces, therefore major changes in the application code are needed to adopt them.
+
+# Goals
+
+We intend to develop a distributed linear algebra (DLA) interface with the following features:
+- The DLA package for each call can be decided at runtime.
+- An interface that works with ScaLAPACK matrices.
+- Performs matrix layout conversion if needed.
+
+# Potential Benefit
+
+Each Application which uses ScaLAPACK will be able to use the DLA interface with minor changes in the code,
+and can benefit from the use of the best performing DLA package to increase the performance of the application.
+
+# DLA Interface
+
+The DLA interface features:
+- Communicator utilities
+- Matrix class (Not yet supported)
+- DLA routines C++ wrappers (Not yet supported)
+- DLA routines Fortran wrappers (Not yet supported)
+
+## List of supported DLA packages
+
+The DLA library supported are:
+- ScaLAPACK (MKL, Libsci, Netlib, ...) (Not yet supported)
+- ELPA (Not yet supported)
+- D-Plasma (ParSEC) (Not yet supported)
+- Chameleon (StarPU) (Not yet supported)
+
+For more information of which routine of each package is supported see [the list of supported routines](#list-of-supported-dla-packages)
+
+## List of supported routines
+
+## List of routines with planned support
+
+The routines which will be available are (including the ScaLAPACK corresponding name):
+- Matrix-matrix multiplication (p\*gemm)
+- Matrix-vector multiplication (p\*gemm)
+- Cholesky factorization (p\*potrf)
+- LU factorization (p\*getrf)
+- Upper/lower triangular matrix inversion (p\*trtri)
+- Matrix inversion (LU) (p\*getri)
+- Eigenvalue solver (p\*{sy,he}ev{d,x}, p\*geev)
+- Solution of linear equations system (p\*gesv)
+
+# Documentation
+
+Work in progress.
