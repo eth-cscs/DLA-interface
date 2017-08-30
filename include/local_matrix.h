@@ -10,6 +10,9 @@
 #include "util_memory.h"
 
 namespace dla_interface {
+  // Forward declaration for friend.
+  template <class ElType>
+  class DistributedMatrix;
 
   template <class ElType>
   class LocalMatrix {
@@ -150,6 +153,8 @@ namespace dla_interface {
     std::size_t offset_;
     std::pair<SizeType, SizeType> size_;
     SizeType ld_;
+
+    friend class DistributedMatrix<ElementType>;
   };
 
   // Implementation of public member functions
