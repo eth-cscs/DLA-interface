@@ -82,7 +82,9 @@ int main(int argc, char** argv) {
   int size = id_size_pair.second;
   if (size != 6) {
     std::cout << "This test need 6 MPI ranks (" << size << " provided)!" << std::endl;
+#ifndef COMM_INITS_MPI
     MPI_Finalize();
+#endif
     return 1;
   }
 
