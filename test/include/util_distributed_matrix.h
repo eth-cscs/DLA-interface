@@ -1,6 +1,10 @@
 #ifndef DLA_INTERFACE_TEST_INCLUDE_UTIL_DISTRIBUTED_MATRIX_H
 #define DLA_INTERFACE_TEST_INCLUDE_UTIL_DISTRIBUTED_MATRIX_H
 
+#include <cmath>
+#include <iostream>
+#include "types.h"
+
 namespace testing {
   using namespace dla_interface;
   template <class Type, class F>
@@ -22,6 +26,24 @@ namespace testing {
             std::cout << "Element (" << i << ", " << j << ") is wrong." << std::endl;
             std::cout << "Expected " << el_val(i, j) << "," << std::endl;
             std::cout << "Got " << mat(i, j) << "." << std::endl;
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  template <class Type, class F>
+  bool checkNearDistributedMatrix(const DistributedMatrix<Type>& mat, F& el_val, BaseType<Type> diff) {
+    for (int j = 0; j < mat.size().second; ++j) {
+      for (int i = 0; i < mat.size().first; ++i) {
+        if (mat.commGrid().id2D() == mat.getRankId2D(i, j)) {
+          if (std::abs(mat(i, j) - el_val(i, j)) > diff) {
+            std::cout << "Element (" << i << ", " << j << ") is wrong." << std::endl;
+            std::cout << "Expected " << el_val(i, j) << "," << std::endl;
+            std::cout << "Got " << mat(i, j) << "." << std::endl;
+            std::cout << "Difference " << std::abs(mat(i, j) - el_val(i, j)) << "." << std::endl;
             return false;
           }
         }
