@@ -4,7 +4,7 @@
 #include <complex>
 
 namespace dla_interface {
-  enum SolverType { scalapack = 1, elpa = 2, dplasma = 3, chameleon = 4 };
+  enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, Chameleon = 4 };
 
   enum UpLo { Lower = 'L', Upper = 'U' };
   // Distributed matrix distribution (see documentation for details):
