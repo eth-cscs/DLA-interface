@@ -15,12 +15,12 @@ namespace blacs {
     void Cblacs_gridmap(int* ictxt, int* usermap, int ldup, int nprow, int npcol);
 
     // Finalization
-    void Cblacs_freebuff(int ictxt, int Wait);
+    void Cblacs_freebuff(int ictxt, int wait);
     void Cblacs_gridexit(int ictxt);
     void Cblacs_exit(int NotDone);
 
     // Abort
-    void Cblacs_abort(int ictxt, int ErrNo);
+    void Cblacs_abort(int ictxt, int errno);
 
     // Information
     void Cblacs_gridinfo(int ictxt, int* nprow, int* npcol, int* myrow, int* mycol);
@@ -33,7 +33,7 @@ namespace blacs {
     // MPI communicator <-> Blacs context
     MPI_Comm Cblacs2sys_handle(int ictxt);
     int Csys2blacs_handle(MPI_Comm mpi_comm);
-    void Cfree_blacs_system_handle(int ISysCtxt);
+    void Cfree_blacs_system_handle(int i_sys_ctxt);
   }
 }
 #endif

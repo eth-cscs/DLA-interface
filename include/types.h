@@ -22,6 +22,19 @@ namespace dla_interface {
 #endif
 
   enum Ordering { RowMajor = 'R', ColMajor = 'C' };
+
+  const int I_ZERO = 0;
+  const float S_ZERO = 0;
+  const double D_ZERO = 0;
+#define DLA_I_ZERO (&dla_interface::I_ZERO)
+#define DLA_S_ZERO (&dla_interface::S_ZERO)
+#define DLA_D_ZERO (&dla_interface::D_ZERO)
+  const int I_ONE = 1;
+  const float S_ONE = 1;
+  const double D_ONE = 1;
+#define DLA_I_ONE (&dla_interface::I_ONE)
+#define DLA_S_ONE (&dla_interface::S_ONE)
+#define DLA_D_ONE (&dla_interface::D_ONE)
 }
 
 #endif  // DLA_INTERFACE_TYPES_H
