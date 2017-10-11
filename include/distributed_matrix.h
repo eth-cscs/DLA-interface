@@ -98,6 +98,8 @@ namespace dla_interface {
     // distribution, leading dimension, rank grid and a copy of the elements.
     DistributedMatrix(const DistributedMatrix& rhs);
 
+    ~DistributedMatrix();
+
     // Creates a distributed matrix of the same size, block size, distribution,
     // leading dimension and rank grid moving the elements of rhs.
     // Postcondition: rhs is in an unspecified state.
@@ -352,6 +354,9 @@ namespace dla_interface {
 
     Global2DIndex globalBaseIndexFromLocalBaseIndex(const char* func, const Local2DIndex& index) const;
     std::size_t storageBaseIndexFromLocalBaseIndex(const char* func, const Local2DIndex& index) const;
+    static std::size_t storageBaseIndexFromLocalBaseIndex(
+        const char* func, const Local2DIndex& index, const std::pair<SizeType, SizeType>& block_size,
+        SizeType ld, SizeType leading_nr_blocks, DistributionType dist);
     Local2DIndex localBaseIndexFromGlobalBaseIndex(const char* func, const Global2DIndex& index) const;
     std::size_t storageBaseIndexFromGlobalBaseIndex(const char* func,
                                                     const Global2DIndex& index) const;
@@ -365,7 +370,14 @@ namespace dla_interface {
                                                     int rank_src, int rank, int comm_size);
 
     void checkAndComputeLocalParam(const char* func, bool ld_set, bool ld_nr_bl_set);
-    std::size_t allocationSize(const char* func);
+    void checkOrSetLeadingDims(const char* func, int& ld, bool ld_set, int& ld_nr_blks,
+                               bool ld_nr_bl_set, DistributionType distribution);
+    std::size_t allocationSize(const char* func) const;
+    std::size_t allocationSize(const char* func, int ld, int leading_nr_blocks,
+                               DistributionType distribution) const;
+
+    void copyInternal(bool copy_back, std::shared_ptr<memory::MemoryAllocator<ElementType>> rhs_ptr,
+                      int rhs_ld, int rhs_leading_nr_blocks, DistributionType rhs_dist) noexcept;
 
     DistributedMatrix<ElType>* subMatrixInternal(const char* func, SizeType m, SizeType n,
                                                  Global2DIndex index) const;
@@ -385,6 +397,10 @@ namespace dla_interface {
     SizeType leading_nr_blocks_;
     DistributionType distribution_;
     const comm::Communicator2DGrid* comm_grid_;
+    std::shared_ptr<memory::MemoryAllocator<ElementType>> referenced_ptr_ = nullptr;
+    SizeType referenced_ld_;
+    SizeType referenced_leading_nr_blocks_;
+    DistributionType referenced_distribution_;
   };
 
 #include "distributed_matrix.ipp"
