@@ -46,8 +46,10 @@ namespace dla_interface {
     // See note (1).
     // Throws a std::invalid_argument
     //     - if m < 0, n < 0, mb < 1, nb < 1, or ld < 1
-    //     - if ld < m and n > 0 and distribution == scalapack_dist
+    //     - if ld < local_m and n > 0 and distribution == scalapack_dist
     //     - if ld < mb and distribution == tile_dist
+    //     - if leading_nr_blocks < ceil(local_m / mb) and distribution == tile_dist
+    // Note: if original_distribution == scalapack_dist leading_nr_blocks is ignored.
     DistributedMatrix(SizeType m, SizeType n, SizeType mb, SizeType nb,
                       const comm::Communicator2DGrid& comm, DistributionType new_distribution,
                       ElementType* ptr, std::size_t len, SizeType ld, SizeType leading_nr_blocks,
