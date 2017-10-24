@@ -21,7 +21,7 @@ namespace dla_interface {
       }
       default:
         throw std::logic_error(
-            errorMessage("Cholesky factorization non available for solver ", solver));
+            errorMessage("Cholesky factorization is not available for solver ", solver));
     }
   }
 }

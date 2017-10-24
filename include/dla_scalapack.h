@@ -14,7 +14,7 @@ namespace dla_interface {
       scalapack::pspotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
       if (info != 0) {
         if (info < 0)
-          throw std::invalid_argument(errorMessage("Argument ", -info, "is wrong."));
+          throw std::invalid_argument(errorMessage("Argument ", -info, " is wrong."));
         else
           throw std::invalid_argument(errorMessage("Matrix is not positive definite (", info, ")"));
       }
@@ -23,9 +23,10 @@ namespace dla_interface {
       const char char_uplo = static_cast<char>(uplo);
       int info = 0;
       scalapack::pdpotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
+      return;
       if (info != 0) {
         if (info < 0)
-          throw std::invalid_argument(errorMessage("Argument ", -info, "is wrong."));
+          throw std::invalid_argument(errorMessage("Argument ", -info, " is wrong."));
         else
           throw std::invalid_argument(errorMessage("Matrix is not positive definite (", info, ")"));
       }
@@ -36,7 +37,7 @@ namespace dla_interface {
       scalapack::pcpotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
       if (info != 0) {
         if (info < 0)
-          throw std::invalid_argument(errorMessage("Argument ", -info, "is wrong."));
+          throw std::invalid_argument(errorMessage("Argument ", -info, " is wrong."));
         else
           throw std::invalid_argument(errorMessage("Matrix is not positive definite (", info, ")"));
       }
@@ -47,7 +48,7 @@ namespace dla_interface {
       scalapack::pzpotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
       if (info != 0) {
         if (info < 0)
-          throw std::invalid_argument(errorMessage("Argument ", -info, "is wrong."));
+          throw std::invalid_argument(errorMessage("Argument ", -info, " is wrong."));
         else
           throw std::invalid_argument(errorMessage("Matrix is not positive definite (", info, ")"));
       }
