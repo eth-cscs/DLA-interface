@@ -1,4 +1,5 @@
 // public interface
+#include "util_output.h"
 
 template <class ElType>
 DistributedMatrix<ElType>::DistributedMatrix()
@@ -285,6 +286,19 @@ std::tuple<ElType*, IndexType, IndexType, std::array<int, 9>> DistributedMatrix<
 }
 #endif
 
+template <class ElType>
+template <class Out>
+void DistributedMatrix<ElType>::debugDump(Out& out) {
+  for (int j = 0; j < local_size_.second; ++j) {
+    for (int i = 0; i < local_size_.first; ++i) {
+      Local2DIndex ind(i, j);
+      util::dumpDistributedMatrixElement(
+          out, getGlobal2DIndex(ind), ind, getLocalStorageIndex(ind),
+          storageBaseIndexFromLocalBaseIndex(__func__, ind + local_base_index_), operator()(ind));
+    }
+  }
+  out << "\n";
+}
 // private interface
 
 template <class ElType>

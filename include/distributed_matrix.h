@@ -335,6 +335,9 @@ namespace dla_interface {
     DPlasmaDescriptor getDPlasmaDescription();
 #endif
 
+    template <class Out>
+    void debugDump(Out& out);
+
     private:
     // new storage
     DistributedMatrix(const char* func, std::pair<SizeType, SizeType> size,
