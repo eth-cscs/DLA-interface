@@ -65,7 +65,7 @@ TEST(DistributedMatrixTest, Constructor1) {
           lnrbl = (local_m + mb - 1) / mb;
           break;
         default:
-          EXPECT_TRUE(false);
+          ASSERT_TRUE(false);
       }
       EXPECT_LE(ld_min, mat.leadingDimension());
       EXPECT_EQ(lnrbl, mat.leadingNumberOfBlocks());
@@ -139,7 +139,7 @@ TEST(DistributedMatrixTest, Constructor2) {
           lnrbl = (local_m + mb - 1) / mb;
           break;
         default:
-          EXPECT_TRUE(false);
+          ASSERT_TRUE(false);
       }
       for (int ld : {ld_min, ld_min + 3}) {
         DistributedMatrix<Type> mat(m, n, mb, nb, ld, *comm_ptr, dist);
@@ -217,8 +217,6 @@ TEST(DistributedMatrixTest, Constructor2) {
 }
 
 TEST(DistributedMatrixTest, Constructor3) {
-  // This test handle only the case in which the distribution is the same.
-  // Refer to Constructor3Convert test for the other cases.
   using Type = double;
 
   int m = 19;
@@ -235,82 +233,107 @@ TEST(DistributedMatrixTest, Constructor3) {
     int local_n = reference_scalapack_tools::numroc(n, nb, comm_ptr->id2D().second, 0,
                                                     comm_ptr->size2D().second);
     std::size_t max_len = 0;
-    for (auto dist : {scalapack_dist, tile_dist}) {
-      int ld_min;
-      int ld_nr_bl;
-      switch (dist) {
-        case scalapack_dist:
-          ld_min = std::max(1, local_m);
-          ld_nr_bl = -1;  // ignored when scalapack_dist is used.
-          break;
-        case tile_dist:
-          ld_min = mb;
-          ld_nr_bl = (local_m + mb - 1) / mb;
-          break;
-        default:
-          EXPECT_TRUE(false);
-      }
-      for (int ld : {ld_min, ld_min + 3}) {
-        DistributedMatrix<Type> mat_ref(m, n, mb, nb, ld, *comm_ptr, dist);
-        fillDistributedMatrix(mat_ref, el_val);
-        ASSERT_EQ(Global2DIndex(0, 0), mat_ref.baseIndex());
-        std::size_t len = mat_ref.localStorageSize();
-        max_len = std::max(max_len, len);
-        {
-          DistributedMatrix<Type> mat(m, n, mb, nb, *comm_ptr, dist, mat_ref.ptr(), len,
-                                      mat_ref.leadingDimension(), mat_ref.leadingNumberOfBlocks(),
-                                      dist);
-          EXPECT_EQ(std::make_pair(m, n), mat.size());
-          EXPECT_EQ(std::make_pair(local_m, local_n), mat.localSize());
-          EXPECT_EQ(std::make_pair(mb, nb), mat.blockSize());
-          EXPECT_EQ(Global2DIndex(0, 0), mat.baseIndex());
-          EXPECT_EQ(Local2DIndex(0, 0), mat.localBaseIndex());
-          EXPECT_EQ(mat_ref.leadingDimension(), mat.leadingDimension());
-          EXPECT_EQ(mat_ref.leadingNumberOfBlocks(), mat.leadingNumberOfBlocks());
-          EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
-          if (local_m * local_n == 0)
-            EXPECT_EQ(nullptr, mat.ptr());
-          else
-            EXPECT_EQ(mat_ref.ptr(), mat.ptr());
-          EXPECT_EQ(id_2D, mat.commGrid().id2D());
-          EXPECT_EQ(dist, mat.distribution());
-
-          fillDistributedMatrix(mat, el_val2);
+    for (auto dist1 : {scalapack_dist, tile_dist}) {
+      for (auto dist2 : {scalapack_dist, tile_dist}) {
+        int ld_min_dist1;
+        int lnrbl_dist1;
+        switch (dist1) {
+          case scalapack_dist:
+            ld_min_dist1 = std::max(1, local_m);
+            lnrbl_dist1 = 1;
+            break;
+          case tile_dist:
+            ld_min_dist1 = mb;
+            lnrbl_dist1 = (local_m + mb - 1) / mb;
+            break;
+          default:
+            ASSERT_TRUE(false);
         }
-        EXPECT_TRUE(checkDistributedMatrix(mat_ref, el_val2));
-      }
+        int ld_min_dist2;
+        int lnrbl_dist2;
+        switch (dist2) {
+          case scalapack_dist:
+            ld_min_dist2 = std::max(1, local_m);
+            lnrbl_dist2 = 1;
+            break;
+          case tile_dist:
+            ld_min_dist2 = mb;
+            lnrbl_dist2 = (local_m + mb - 1) / mb;
+            break;
+          default:
+            ASSERT_TRUE(false);
+        }
+        for (int ld : {ld_min_dist1, ld_min_dist1 + 3}) {
+          DistributedMatrix<Type> mat_ref(m, n, mb, nb, ld, *comm_ptr, dist1);
+          fillDistributedMatrix(mat_ref, el_val);
+          ASSERT_EQ(Global2DIndex(0, 0), mat_ref.baseIndex());
+          std::size_t len = mat_ref.localStorageSize();
+          max_len = std::max(max_len, len);
+          {
+            DistributedMatrix<Type> mat(m, n, mb, nb, *comm_ptr, dist2, mat_ref.ptr(), len,
+                                        mat_ref.leadingDimension(), mat_ref.leadingNumberOfBlocks(),
+                                        mat_ref.distribution());
+            EXPECT_EQ(std::make_pair(m, n), mat.size());
+            EXPECT_EQ(std::make_pair(local_m, local_n), mat.localSize());
+            EXPECT_EQ(std::make_pair(mb, nb), mat.blockSize());
+            EXPECT_EQ(Global2DIndex(0, 0), mat.baseIndex());
+            EXPECT_EQ(Local2DIndex(0, 0), mat.localBaseIndex());
+            if (dist1 == dist2) {
+              EXPECT_EQ(mat_ref.leadingDimension(), mat.leadingDimension());
+              EXPECT_EQ(mat_ref.leadingNumberOfBlocks(), mat.leadingNumberOfBlocks());
+            }
+            else {
+              EXPECT_LE(ld_min_dist2, mat.leadingDimension());
+              EXPECT_EQ(lnrbl_dist2, mat.leadingNumberOfBlocks());
+            }
+            EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
+            if (local_m * local_n == 0)
+              EXPECT_EQ(nullptr, mat.ptr());
+            else if (dist1 == dist2)
+              EXPECT_EQ(mat_ref.ptr(), mat.ptr());
+            else
+              EXPECT_NE(mat_ref.ptr(), mat.ptr());
+            EXPECT_EQ(id_2D, mat.commGrid().id2D());
+            EXPECT_EQ(dist2, mat.distribution());
 
-      int ld = ld_min + 3;
-      std::vector<Type> buf(max_len);
-      if (local_m * local_n == 0)
-        EXPECT_NO_THROW(
-            DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist, nullptr, 0, ld, ld_nr_bl, dist));
-      else
-        EXPECT_THROW(DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist, nullptr, max_len, ld,
-                                             ld_nr_bl, dist),
+            fillDistributedMatrix(mat, el_val2);
+          }
+          EXPECT_EQ(dist1, mat_ref.distribution());
+          EXPECT_TRUE(checkDistributedMatrix(mat_ref, el_val2));
+        }
+
+        int ld = ld_min_dist1 + 3;
+        std::vector<Type> buf(max_len);
+        if (local_m * local_n == 0)
+          EXPECT_NO_THROW(DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist2, nullptr, 0, ld,
+                                                  lnrbl_dist1, dist1));
+        else
+          EXPECT_THROW(DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist2, nullptr, max_len, ld,
+                                               lnrbl_dist1, dist1),
+                       std::invalid_argument);
+        EXPECT_THROW(DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist2, &buf[0], max_len,
+                                             ld_min_dist1 - 1, lnrbl_dist1, dist1),
                      std::invalid_argument);
-      EXPECT_THROW(DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist, &buf[0], max_len,
-                                           ld_min - 1, ld_nr_bl, dist),
-                   std::invalid_argument);
-      if (ld_nr_bl > 0)
-        EXPECT_THROW(DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist, &buf[0], max_len,
-                                             ld_min, ld_nr_bl - 1, dist),
+        if (dist1 == scalapack_dist)  // ld_nr_bl is ignored by the constructor
+          EXPECT_NO_THROW(DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist2, &buf[0], max_len,
+                                                  ld_min_dist1, lnrbl_dist1 - 1, dist1));
+        else
+          EXPECT_THROW(DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist2, &buf[0], max_len,
+                                               ld_min_dist1, lnrbl_dist1 - 1, dist1),
+                       std::invalid_argument);
+        EXPECT_THROW(DistributedMatrix<Type>(-1, n, mb, nb, *comm_ptr, dist2, &buf[0], max_len, ld,
+                                             lnrbl_dist1, dist1),
                      std::invalid_argument);
-      else  // ld_nr_bl should be ignored by the constructor
-        EXPECT_NO_THROW(DistributedMatrix<Type>(m, n, mb, nb, *comm_ptr, dist, &buf[0], max_len,
-                                                ld_min, ld_nr_bl - 1, dist));
-      EXPECT_THROW(DistributedMatrix<Type>(-1, n, mb, nb, *comm_ptr, dist, &buf[0], max_len, ld,
-                                           ld_nr_bl, dist),
-                   std::invalid_argument);
-      EXPECT_THROW(DistributedMatrix<Type>(m, -1, mb, nb, *comm_ptr, dist, &buf[0], max_len, ld,
-                                           ld_nr_bl, dist),
-                   std::invalid_argument);
-      EXPECT_THROW(DistributedMatrix<Type>(m, n, 0, nb, *comm_ptr, dist, &buf[0], max_len, ld,
-                                           ld_nr_bl, dist),
-                   std::invalid_argument);
-      EXPECT_THROW(DistributedMatrix<Type>(m, n, mb, 0, *comm_ptr, dist, &buf[0], max_len, ld,
-                                           ld_nr_bl, dist),
-                   std::invalid_argument);
+        EXPECT_THROW(DistributedMatrix<Type>(m, -1, mb, nb, *comm_ptr, dist2, &buf[0], max_len, ld,
+                                             lnrbl_dist1, dist1),
+                     std::invalid_argument);
+        EXPECT_THROW(DistributedMatrix<Type>(m, n, 0, nb, *comm_ptr, dist2, &buf[0], max_len, ld,
+                                             lnrbl_dist1, dist1),
+                     std::invalid_argument);
+        EXPECT_THROW(DistributedMatrix<Type>(m, n, mb, 0, *comm_ptr, dist2, &buf[0], max_len, ld,
+                                             lnrbl_dist1, dist1),
+                     std::invalid_argument);
+      }
     }
   }
 
@@ -320,59 +343,65 @@ TEST(DistributedMatrixTest, Constructor3) {
     int ld = 10;
     std::vector<Type> buf(13);
     for (Type* ptr : {(Type*)nullptr, &buf[0]}) {
-      for (auto dist : {scalapack_dist, tile_dist}) {
-        DistributedMatrix<Type> mat1(0, n, mb, nb, *comm_ptr, dist, ptr, 0, ld, 1, dist);
-        EXPECT_EQ(std::make_pair(0, 0), mat1.size());
-        EXPECT_EQ(std::make_pair(0, 0), mat1.localSize());
-        EXPECT_EQ(std::make_pair(mb, nb), mat1.blockSize());
-        EXPECT_EQ(Global2DIndex(0, 0), mat1.baseIndex());
-        EXPECT_EQ(Local2DIndex(0, 0), mat1.localBaseIndex());
-        EXPECT_EQ(ld, mat1.leadingDimension());
-        EXPECT_EQ(1, mat1.leadingNumberOfBlocks());
-        EXPECT_EQ(nullptr, mat1.ptr());
-        EXPECT_EQ(id_2D, mat1.commGrid().id2D());
-        EXPECT_EQ(dist, mat1.distribution());
+      for (auto dist1 : {scalapack_dist, tile_dist}) {
+        for (auto dist2 : {scalapack_dist, tile_dist}) {
+          int ldmin_dist1 = dist1 == tile_dist ? mb : 1;
+          int ldmin_dist2 = dist2 == tile_dist ? mb : 1;
+          DistributedMatrix<Type> mat1(0, n, mb, nb, *comm_ptr, dist2, ptr, 0, ld, 1, dist1);
+          EXPECT_EQ(std::make_pair(0, 0), mat1.size());
+          EXPECT_EQ(std::make_pair(0, 0), mat1.localSize());
+          EXPECT_EQ(std::make_pair(mb, nb), mat1.blockSize());
+          EXPECT_EQ(Global2DIndex(0, 0), mat1.baseIndex());
+          EXPECT_EQ(Local2DIndex(0, 0), mat1.localBaseIndex());
+          if (dist1 == dist2)
+            EXPECT_EQ(ld, mat1.leadingDimension());
+          else
+            EXPECT_LE(ldmin_dist2, mat1.leadingDimension());
+          EXPECT_EQ(1, mat1.leadingNumberOfBlocks());
+          EXPECT_EQ(nullptr, mat1.ptr());
+          EXPECT_EQ(id_2D, mat1.commGrid().id2D());
+          EXPECT_EQ(dist2, mat1.distribution());
 
-        DistributedMatrix<Type> mat2(m, 0, mb, nb, *comm_ptr, dist, ptr, 0, ld, 1, dist);
-        EXPECT_EQ(std::make_pair(0, 0), mat2.size());
-        EXPECT_EQ(std::make_pair(0, 0), mat2.localSize());
-        EXPECT_EQ(std::make_pair(mb, nb), mat2.blockSize());
-        EXPECT_EQ(Global2DIndex(0, 0), mat2.baseIndex());
-        EXPECT_EQ(Local2DIndex(0, 0), mat2.localBaseIndex());
-        EXPECT_EQ(ld, mat2.leadingDimension());
-        EXPECT_EQ(1, mat2.leadingNumberOfBlocks());
-        EXPECT_EQ(nullptr, mat2.ptr());
-        EXPECT_EQ(id_2D, mat2.commGrid().id2D());
-        EXPECT_EQ(dist, mat2.distribution());
+          DistributedMatrix<Type> mat2(m, 0, mb, nb, *comm_ptr, dist2, ptr, 0, ld, 1, dist1);
+          EXPECT_EQ(std::make_pair(0, 0), mat2.size());
+          EXPECT_EQ(std::make_pair(0, 0), mat2.localSize());
+          EXPECT_EQ(std::make_pair(mb, nb), mat2.blockSize());
+          EXPECT_EQ(Global2DIndex(0, 0), mat2.baseIndex());
+          EXPECT_EQ(Local2DIndex(0, 0), mat2.localBaseIndex());
+          if (dist1 == dist2)
+            EXPECT_EQ(ld, mat2.leadingDimension());
+          else
+            EXPECT_LE(ldmin_dist2, mat2.leadingDimension());
+          EXPECT_EQ(1, mat2.leadingNumberOfBlocks());
+          EXPECT_EQ(nullptr, mat2.ptr());
+          EXPECT_EQ(id_2D, mat2.commGrid().id2D());
+          EXPECT_EQ(dist2, mat2.distribution());
 
-        int ld_min = dist == tile_dist ? mb : 1;
-        DistributedMatrix<Type> mat3(m, 0, mb, nb, *comm_ptr, dist, ptr, 0, ld_min, 1, dist);
-        EXPECT_EQ(std::make_pair(0, 0), mat3.size());
-        EXPECT_EQ(std::make_pair(0, 0), mat3.localSize());
-        EXPECT_EQ(std::make_pair(mb, nb), mat3.blockSize());
-        EXPECT_EQ(Global2DIndex(0, 0), mat3.baseIndex());
-        EXPECT_EQ(Local2DIndex(0, 0), mat3.localBaseIndex());
-        EXPECT_EQ(ld_min, mat3.leadingDimension());
-        EXPECT_EQ(1, mat3.leadingNumberOfBlocks());
-        EXPECT_EQ(nullptr, mat3.ptr());
-        EXPECT_EQ(id_2D, mat3.commGrid().id2D());
-        EXPECT_EQ(dist, mat3.distribution());
+          DistributedMatrix<Type> mat3(m, 0, mb, nb, *comm_ptr, dist2, ptr, 0, ldmin_dist1, 1, dist1);
+          EXPECT_EQ(std::make_pair(0, 0), mat3.size());
+          EXPECT_EQ(std::make_pair(0, 0), mat3.localSize());
+          EXPECT_EQ(std::make_pair(mb, nb), mat3.blockSize());
+          EXPECT_EQ(Global2DIndex(0, 0), mat3.baseIndex());
+          EXPECT_EQ(Local2DIndex(0, 0), mat3.localBaseIndex());
+          if (dist1 == dist2)
+            EXPECT_EQ(ldmin_dist1, mat3.leadingDimension());
+          else
+            EXPECT_LE(ldmin_dist2, mat3.leadingDimension());
+          EXPECT_EQ(1, mat3.leadingNumberOfBlocks());
+          EXPECT_EQ(nullptr, mat3.ptr());
+          EXPECT_EQ(id_2D, mat3.commGrid().id2D());
+          EXPECT_EQ(dist2, mat3.distribution());
 
-        EXPECT_THROW(
-            DistributedMatrix<Type>(0, n, mb, nb, *comm_ptr, dist, ptr, 0, ld_min - 1, 1, dist),
-            std::invalid_argument);
+          EXPECT_THROW(DistributedMatrix<Type>(0, n, mb, nb, *comm_ptr, dist2, ptr, 0,
+                                               ldmin_dist1 - 1, 1, dist1),
+                       std::invalid_argument);
+        }
       }
     }
   }
 }
 
-// TODO:
-// TEST(DistributedMatrixTest, Constructor3Convert) {
-// }
-
 TEST(DistributedMatrixTest, Constructor4) {
-  // This test handle only the case in which the distribution is the same.
-  // Refer to Constructor4Convert test for the other cases.
   using Type = double;
 
   int m = 19;
@@ -388,52 +417,68 @@ TEST(DistributedMatrixTest, Constructor4) {
                                                     comm_ptr->size2D().first);
     int local_n = reference_scalapack_tools::numroc(n, nb, comm_ptr->id2D().second, 0,
                                                     comm_ptr->size2D().second);
-    for (auto dist : {scalapack_dist, tile_dist}) {
-      int ld_min;
-      int lnrbl;
-      switch (dist) {
-        case scalapack_dist:
-          ld_min = std::max(1, local_m);
-          lnrbl = 1;
-          break;
-        case tile_dist:
-          ld_min = mb;
-          lnrbl = (local_m + mb - 1) / mb;
-          break;
-        default:
-          EXPECT_TRUE(false);
-      }
-      for (int ld : {ld_min, ld_min + 3}) {
-        DistributedMatrix<Type> mat_ref(m, n, mb, nb, ld, *comm_ptr, dist);
-        fillDistributedMatrix(mat_ref, el_val);
-        {
-          DistributedMatrix<Type> mat(dist, mat_ref);
-          EXPECT_EQ(std::make_pair(m, n), mat.size());
-          EXPECT_EQ(std::make_pair(local_m, local_n), mat.localSize());
-          EXPECT_EQ(std::make_pair(mb, nb), mat.blockSize());
-          EXPECT_EQ(Global2DIndex(0, 0), mat.baseIndex());
-          EXPECT_EQ(Local2DIndex(0, 0), mat.localBaseIndex());
-          EXPECT_EQ(ld, mat.leadingDimension());
-          EXPECT_EQ(lnrbl, mat.leadingNumberOfBlocks());
-          EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
-          if (local_m * local_n == 0)
-            EXPECT_EQ(nullptr, mat.ptr());
-          else
-            EXPECT_EQ(mat_ref.ptr(), mat.ptr());
-          EXPECT_EQ(id_2D, mat.commGrid().id2D());
-          EXPECT_EQ(dist, mat.distribution());
-
-          fillDistributedMatrix(mat, el_val2);
+    for (auto dist1 : {scalapack_dist, tile_dist}) {
+      for (auto dist2 : {scalapack_dist, tile_dist}) {
+        int ld_min_dist1;
+        switch (dist1) {
+          case scalapack_dist:
+            ld_min_dist1 = std::max(1, local_m);
+            break;
+          case tile_dist:
+            ld_min_dist1 = mb;
+            break;
+          default:
+            ASSERT_TRUE(false);
         }
-        EXPECT_TRUE(checkDistributedMatrix(mat_ref, el_val2));
+        int ld_min_dist2;
+        int lnrbl_dist2;
+        switch (dist2) {
+          case scalapack_dist:
+            ld_min_dist2 = std::max(1, local_m);
+            lnrbl_dist2 = 1;
+            break;
+          case tile_dist:
+            ld_min_dist2 = mb;
+            lnrbl_dist2 = (local_m + mb - 1) / mb;
+            break;
+          default:
+            ASSERT_TRUE(false);
+        }
+        for (int ld : {ld_min_dist1, ld_min_dist1 + 3}) {
+          DistributedMatrix<Type> mat_ref(m, n, mb, nb, ld, *comm_ptr, dist1);
+          fillDistributedMatrix(mat_ref, el_val);
+          {
+            DistributedMatrix<Type> mat(dist2, mat_ref);
+            EXPECT_EQ(std::make_pair(m, n), mat.size());
+            EXPECT_EQ(std::make_pair(local_m, local_n), mat.localSize());
+            EXPECT_EQ(std::make_pair(mb, nb), mat.blockSize());
+            EXPECT_EQ(Global2DIndex(0, 0), mat.baseIndex());
+            EXPECT_EQ(Local2DIndex(0, 0), mat.localBaseIndex());
+            EXPECT_LE(ld_min_dist2, mat.leadingDimension());
+            if (dist1 == dist2)
+              EXPECT_EQ(ld, mat.leadingDimension());
+            EXPECT_EQ(lnrbl_dist2, mat.leadingNumberOfBlocks());
+            EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
+            if (local_m * local_n == 0)
+              EXPECT_EQ(nullptr, mat.ptr());
+            else {
+              if (dist1 == dist2)
+                EXPECT_EQ(mat_ref.ptr(), mat.ptr());
+              else
+                EXPECT_NE(mat_ref.ptr(), mat.ptr());
+            }
+            EXPECT_EQ(id_2D, mat.commGrid().id2D());
+            EXPECT_EQ(dist2, mat.distribution());
+
+            fillDistributedMatrix(mat, el_val2);
+          }
+          EXPECT_EQ(dist1, mat_ref.distribution());
+          EXPECT_TRUE(checkDistributedMatrix(mat_ref, el_val2));
+        }
       }
     }
   }
 }
-
-// TODO:
-// TEST(DistributedMatrixTest, Constructor4Convert) {
-// }
 
 TEST(DistributedMatrixTest, IndexConversion) {
   using Type = double;
@@ -458,7 +503,7 @@ TEST(DistributedMatrixTest, IndexConversion) {
           ld_min = mb;
           break;
         default:
-          EXPECT_TRUE(false);
+          ASSERT_TRUE(false);
       }
 
       DistributedMatrix<Type> mat(m, n, mb, nb, ld_min + 3, *comm_ptr, dist);
@@ -511,7 +556,7 @@ TEST(DistributedMatrixTest, IndexConversion) {
                     l_index_ref, l_base_index, block_size, mat.leadingNumberOfBlocks(), ld);
                 break;
               default:
-                EXPECT_TRUE(false);
+                ASSERT_TRUE(false);
             }
             EXPECT_EQ(storage_index_ref, mat.getLocalStorageIndex(i, j));
             EXPECT_EQ(storage_index_ref, mat.getLocalStorageIndex(g_index_ref));
@@ -1100,8 +1145,7 @@ TEST(DistributedMatrixTest, LocalSubMatrix) {
 }
 
 TEST(DistributedMatrixTest, Copy) {
-  // This test handle only the case in which the distribution is the same.
-  // Refer to CopyConvert test for the other cases.
+  // This test handle the case when the distribution is the same and when is different.
   using Type = double;
   int m = 17;
   int n = 13;
@@ -1112,66 +1156,64 @@ TEST(DistributedMatrixTest, Copy) {
   auto el_val2 = [](int i, int j) { return -j + .05 * i; };
 
   for (auto comm_ptr : comms) {
-    for (auto dist : {scalapack_dist, tile_dist}) {
-      DistributedMatrix<Type> mat1(m, n, mb, nb, *comm_ptr, dist);
+    for (auto dist1 : {scalapack_dist, tile_dist}) {
+      DistributedMatrix<Type> mat1(m, n, mb, nb, *comm_ptr, dist1);
       auto pmat2 =
-          DistributedMatrix<Type>(m + 1, n + 1, mb, nb, *comm_ptr, dist).subMatrix(m, n, 1, 1);
+          DistributedMatrix<Type>(m + 1, n + 1, mb, nb, *comm_ptr, dist1).subMatrix(m, n, 1, 1);
       auto& mat2 = *pmat2;
 
-      std::vector<DistributedMatrix<Type>> vmat;
-      vmat.emplace_back(m, n, mb, nb, *comm_ptr, dist);
-      vmat.emplace_back(m, n, mb, nb, m + 2, *comm_ptr, dist);
+      for (auto dist2 : {scalapack_dist, tile_dist}) {
+        std::vector<DistributedMatrix<Type>> vmat;
+        vmat.emplace_back(m, n, mb, nb, *comm_ptr, dist2);
+        vmat.emplace_back(m, n, mb, nb, m + 2, *comm_ptr, dist2);
 
-      for (auto& mat : vmat) {
-        fillDistributedMatrix(mat1, el_val);
-        fillDistributedMatrix(mat, el_val2);
+        for (auto& mat : vmat) {
+          fillDistributedMatrix(mat1, el_val);
+          fillDistributedMatrix(mat, el_val2);
 
-        mat.copy(mat1);
-        fillDistributedMatrix(mat1, el_val2);
-        EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
+          mat.copy(mat1);
+          fillDistributedMatrix(mat1, el_val2);
+          EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
 
-        EXPECT_THROW(mat.copy(mat2), std::invalid_argument);
+          EXPECT_THROW(mat.copy(mat2), std::invalid_argument);
 
-        // Check that a reference to the object is returned.
-        auto pmat = &mat;
-        EXPECT_EQ(pmat, &(mat.copy(mat1)));
-      }
+          // Check that a reference to the object is returned.
+          auto pmat = &mat;
+          EXPECT_EQ(pmat, &(mat.copy(mat1)));
+        }
 
-      vmat.clear();
-      vmat.emplace_back(m + 1, n + 1, mb, nb, *comm_ptr, dist);
-      vmat.emplace_back(m + 1, n + 1, mb, nb, m + 4, *comm_ptr, dist);
+        vmat.clear();
+        vmat.emplace_back(m + 1, n + 1, mb, nb, *comm_ptr, dist2);
+        vmat.emplace_back(m + 1, n + 1, mb, nb, m + 4, *comm_ptr, dist2);
 
-      for (auto& full_mat : vmat) {
-        auto pmat = full_mat.subMatrix(m, n, 1, 1);
-        auto& mat = *pmat;
+        for (auto& full_mat : vmat) {
+          auto pmat = full_mat.subMatrix(m, n, 1, 1);
+          auto& mat = *pmat;
 
-        EXPECT_THROW(mat.copy(mat1), std::invalid_argument);
+          EXPECT_THROW(mat.copy(mat1), std::invalid_argument);
 
-        fillDistributedMatrix(mat2, el_val);
-        fillDistributedMatrix(mat, el_val2);
+          fillDistributedMatrix(mat2, el_val);
+          fillDistributedMatrix(mat, el_val2);
 
-        mat.copy(mat2);
-        fillDistributedMatrix(mat2, el_val2);
-        EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
-      }
+          mat.copy(mat2);
+          fillDistributedMatrix(mat2, el_val2);
+          EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
+        }
 
-      vmat.clear();
-      vmat.emplace_back(m + 1, n, mb, nb, *comm_ptr, dist);
-      vmat.emplace_back(m, n + 1, mb, nb, *comm_ptr, dist);
-      vmat.emplace_back(m, n, mb + 1, nb, *comm_ptr, dist);
-      vmat.emplace_back(m, n, mb, nb + 1, *comm_ptr, dist);
+        vmat.clear();
+        vmat.emplace_back(m + 1, n, mb, nb, *comm_ptr, dist2);
+        vmat.emplace_back(m, n + 1, mb, nb, *comm_ptr, dist2);
+        vmat.emplace_back(m, n, mb + 1, nb, *comm_ptr, dist2);
+        vmat.emplace_back(m, n, mb, nb + 1, *comm_ptr, dist2);
 
-      for (auto& mat : vmat) {
-        EXPECT_THROW(mat.copy(mat1), std::invalid_argument);
-        EXPECT_THROW(mat1.copy(mat), std::invalid_argument);
+        for (auto& mat : vmat) {
+          EXPECT_THROW(mat.copy(mat1), std::invalid_argument);
+          EXPECT_THROW(mat1.copy(mat), std::invalid_argument);
+        }
       }
     }
   }
 }
-
-// TODO:
-// TEST(DistributedMatrixTest, CopyConvert) {
-// }
 
 #ifdef DLA_HAVE_SCALAPACK
 TEST(DistributedMatrixTest, ScalapackDescriptor) {
@@ -1299,7 +1341,6 @@ int main(int argc, char** argv) {
 
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  std::cout << rank << std::endl;
 
   // Create communicators used in the tests.
   for (auto order : {RowMajor, ColMajor}) {

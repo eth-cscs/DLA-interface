@@ -46,7 +46,7 @@ TYPED_TEST(DLATypedTest, CholeskyFactorization) {
   };
 
   for (auto comm_ptr : comms) {
-    for (auto dist : {scalapack_dist}) {
+    for (auto dist : {scalapack_dist, tile_dist}) {
       for (auto solver : {ScaLAPACK}) {
         for (auto uplo : {Lower, Upper}) {
           DistributedMatrix<ElType> A(n, n, nb, nb, *comm_ptr, dist);

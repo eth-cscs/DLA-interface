@@ -26,15 +26,16 @@ DistributedMatrix<ElType>::DistributedMatrix(SizeType m, SizeType n, SizeType mb
                                              std::size_t len, SizeType ld, SizeType leading_nr_blocks,
                                              DistributionType original_distribution)
 
- : DistributedMatrix(__func__, std::make_pair(m, n), Global2DIndex(0, 0), std::make_pair(mb, nb),
-                     &comm, new_distribution,
-                     std::make_shared<memory::MemoryAllocator<ElementType>>(ptr, len), ld,
-                     leading_nr_blocks, original_distribution) {}
+ : DistributedMatrix(
+       __func__, std::make_pair(m, n), Global2DIndex(0, 0), std::make_pair(mb, nb), &comm,
+       new_distribution, std::make_shared<memory::MemoryAllocator<ElementType>>(ptr, len), ld,
+       original_distribution == scalapack_dist ? 1 : leading_nr_blocks, original_distribution) {}
 
 template <class ElType>
 DistributedMatrix<ElType>::DistributedMatrix(DistributionType distribution, DistributedMatrix& mat)
  : DistributedMatrix(__func__, mat.size_, mat.base_index_, mat.block_size_, mat.comm_grid_,
                      distribution, mat.ptr_, mat.ld_, mat.leading_nr_blocks_, mat.distribution_) {}
+
 #ifdef DLA_HAVE_SCALAPACK
 template <class ElType>
 DistributedMatrix<ElType>::DistributedMatrix(DistributionType distribution, int m, int n,
@@ -69,6 +70,14 @@ DistributedMatrix<ElType>::DistributedMatrix(DistributionType distribution, int 
                                .second))),
           desc[8], 1, scalapack_dist) {}
 #endif
+
+template <class ElType>
+DistributedMatrix<ElType>::~DistributedMatrix() {
+  if (referenced_ptr_) {
+    copyInternal(true, referenced_ptr_, referenced_ld_, referenced_leading_nr_blocks_,
+                 referenced_distribution_);
+  }
+}
 
 template <class ElType>
 DistributedMatrix<ElType>::DistributedMatrix(const DistributedMatrix& rhs)
@@ -154,35 +163,26 @@ DistributedMatrix<ElType>& DistributedMatrix<ElType>::copy(const DistributedMatr
         errorMessage("Elements are on different nodes: Local base index are: ", local_base_index_,
                      " and ", rhs.local_base_index_));
 
-  if (distribution_ != rhs.distribution_)
-    throw std::invalid_argument(errorMessage("Not yet implemented"));
+  if (distribution_ == scalapack_dist && rhs.distribution_ == scalapack_dist)
+    util::memory::copy2D(local_size_, rhs.ptr(), rhs.ld_, ptr(), ld_);
+  else {
+    // Copy tile per tile
+    int j_tile = 0;
+    int n_tile = block_size_.second - local_base_index_.col % block_size_.second;
+    while (j_tile < local_size_.second) {
+      int i_tile = 0;
+      int m_tile = block_size_.first - local_base_index_.row % block_size_.first;
+      while (i_tile < local_size_.first) {
+        Local2DIndex index(i_tile, j_tile);
+        util::memory::copy2D(std::make_pair(m_tile, n_tile), rhs.ptr(index), rhs.ld_, ptr(index),
+                             ld_);
 
-  switch (distribution_) {
-    case scalapack_dist:
-      util::memory::copy2D(local_size_, rhs.ptr(), rhs.ld_, ptr(), ld_);
-      break;
-    case tile_dist: {
-      // Copy tile per tile
-      int j_tile = 0;
-      int n_tile = block_size_.second - local_base_index_.col % block_size_.second;
-      while (j_tile < local_size_.second) {
-        int i_tile = 0;
-        int m_tile = block_size_.first - local_base_index_.row % block_size_.first;
-        while (i_tile < local_size_.first) {
-          Local2DIndex index(i_tile, j_tile);
-          util::memory::copy2D(std::make_pair(m_tile, n_tile), rhs.ptr(index), rhs.ld_, ptr(index),
-                               ld_);
-
-          i_tile = i_tile + m_tile;
-          m_tile = std::min(local_size_.first - i_tile, block_size_.first);
-        }
-        j_tile = j_tile + n_tile;
-        n_tile = std::min(local_size_.second - j_tile, block_size_.second);
+        i_tile = i_tile + m_tile;
+        m_tile = std::min(local_size_.first - i_tile, block_size_.first);
       }
-      break;
+      j_tile = j_tile + n_tile;
+      n_tile = std::min(local_size_.second - j_tile, block_size_.second);
     }
-    default:
-      throw std::invalid_argument(errorMessageFunc(__func__, "Invalid distribution: ", distribution_));
   }
 
   return *this;
@@ -298,7 +298,7 @@ DistributedMatrix<ElType>::DistributedMatrix(const char* func, std::pair<SizeTyp
   ptr_ = std::make_shared<memory::MemoryAllocator<ElementType>>(allocationSize(func));
 }
 
-// if distribution == scalapack_distribution, leading_nr_blocks is not used.
+// if distribution == scalapack_distribution, leading_nr_blocks has to be 1.
 template <class ElType>
 DistributedMatrix<ElType>::DistributedMatrix(
     const char* func, std::pair<SizeType, SizeType> size, Global2DIndex base_index,
@@ -307,8 +307,7 @@ DistributedMatrix<ElType>::DistributedMatrix(
     std::shared_ptr<memory::MemoryAllocator<ElementType>> original_ptr, SizeType original_ld,
     SizeType original_leading_nr_blocks, DistributionType original_distribution)
  : size_(size), block_size_(block_size), base_index_(base_index), ld_(original_ld),
-   leading_nr_blocks_(distribution == scalapack_dist ? 1 : original_leading_nr_blocks),
-   distribution_(distribution), comm_grid_(comm) {
+   leading_nr_blocks_(original_leading_nr_blocks), distribution_(distribution), comm_grid_(comm) {
   if (distribution_ == original_distribution) {
     checkAndComputeLocalParam(func, true, true);
     std::size_t len = allocationSize(func);
@@ -319,8 +318,24 @@ DistributedMatrix<ElType>::DistributedMatrix(
     ptr_ = original_ptr;
   }
   else {
-    throw std::invalid_argument(
-        errorMessageFunc(func, "Not implemented yet, change of distribution."));
+    checkAndComputeLocalParam(func, false, false);  // overwrites ld_ and ld_nr_blocks_.
+    std::size_t original_len =
+        allocationSize(func, original_ld, original_leading_nr_blocks, original_distribution);
+    checkOrSetLeadingDims(func, original_ld, true, original_leading_nr_blocks, true,
+                          original_distribution);
+    if (original_len > original_ptr->size())
+      throw std::invalid_argument(errorMessageFunc(func,
+                                                   "Local matrix needs more elements: Required ",
+                                                   original_len, " > given ", original_ptr->size()));
+    referenced_ptr_ = original_ptr;
+    referenced_ld_ = original_ld;
+    referenced_leading_nr_blocks_ = original_leading_nr_blocks;
+    referenced_distribution_ = original_distribution;
+
+    ptr_ = std::make_shared<memory::MemoryAllocator<ElementType>>(allocationSize(func));
+
+    copyInternal(false, referenced_ptr_, referenced_ld_, referenced_leading_nr_blocks_,
+                 referenced_distribution_);
   }
 }
 
@@ -361,19 +376,27 @@ Global2DIndex DistributedMatrix<ElType>::globalBaseIndexFromLocalBaseIndex(
 template <class ElType>
 std::size_t DistributedMatrix<ElType>::storageBaseIndexFromLocalBaseIndex(
     const char* func, const Local2DIndex& index) const {
-  switch (distribution_) {
+  return storageBaseIndexFromLocalBaseIndex(func, index, block_size_, ld_, leading_nr_blocks_,
+                                            distribution_);
+}
+
+template <class ElType>
+std::size_t DistributedMatrix<ElType>::storageBaseIndexFromLocalBaseIndex(
+    const char* func, const Local2DIndex& index, const std::pair<SizeType, SizeType>& block_size,
+    SizeType ld, SizeType leading_nr_blocks, DistributionType dist) {
+  switch (dist) {
     case scalapack_dist:
-      return index.row + ld_ * index.col;
+      return index.row + ld * index.col;
     case tile_dist: {
-      IndexType i_blk = index.row / block_size_.first;
-      IndexType j_blk = index.col / block_size_.second;
-      std::size_t block_id = util::multSize(leading_nr_blocks_, j_blk) + i_blk;
-      std::size_t block_index = util::multSize(ld_, block_size_.second) * block_id;
-      return block_index + util::multSize(ld_, index.col % block_size_.second) +
-             index.row % block_size_.first;
+      IndexType i_blk = index.row / block_size.first;
+      IndexType j_blk = index.col / block_size.second;
+      std::size_t block_id = util::multSize(leading_nr_blocks, j_blk) + i_blk;
+      std::size_t block_index = util::multSize(ld, block_size.second) * block_id;
+      return block_index + util::multSize(ld, index.col % block_size.second) +
+             index.row % block_size.first;
     }
     default:
-      throw std::invalid_argument(errorMessageFunc(func, "Invalid distribution: ", distribution_));
+      throw std::invalid_argument(errorMessageFunc(func, "Invalid distribution: ", dist));
   }
   return 0;
 }
@@ -404,9 +427,8 @@ std::pair<int, int> DistributedMatrix<ElType>::rankFromBaseGlobalIndex(
 }
 
 template <class ElType>
-IndexType DistributedMatrix<ElType>::index1DBaseGlobalFromBaseLocal(IndexType index,
-                                                                    SizeType block_size, int rank_src,
-                                                                    int rank, int comm_size) {
+IndexType DistributedMatrix<ElType>::index1DBaseGlobalFromBaseLocal(  //
+    IndexType index, SizeType block_size, int rank_src, int rank, int comm_size) {
   int my_shifted_rank = (rank - rank_src + comm_size) % comm_size;
   return block_size * (index / block_size * comm_size + my_shifted_rank) + index % block_size;
 }
@@ -418,9 +440,8 @@ int DistributedMatrix<ElType>::rank1DFromBaseGlobalIndex(IndexType index, SizeTy
 }
 
 template <class ElType>
-IndexType DistributedMatrix<ElType>::index1DBaseLocalFromBaseGlobal(IndexType index,
-                                                                    SizeType block_size, int rank_src,
-                                                                    int rank, int comm_size) {
+IndexType DistributedMatrix<ElType>::index1DBaseLocalFromBaseGlobal(  //
+    IndexType index, SizeType block_size, int rank_src, int rank, int comm_size) {
   int my_shifted_rank = (rank - rank_src + comm_size) % comm_size;
   int block_id = index / block_size;
   int shifted_rank = block_id % comm_size;
@@ -442,7 +463,6 @@ IndexType DistributedMatrix<ElType>::index1DBaseLocalFromBaseGlobal(IndexType in
 template <class ElType>
 void DistributedMatrix<ElType>::checkAndComputeLocalParam(const char* func, bool ld_set,
                                                           bool ld_nr_bl_set) {
-  constexpr int chunk = 64;
   if (size_.first < 0 || size_.second < 0) {
     throw std::invalid_argument(errorMessageFunc(func, "Invalid matrix size ", size_));
   }
@@ -455,8 +475,6 @@ void DistributedMatrix<ElType>::checkAndComputeLocalParam(const char* func, bool
     throw std::invalid_argument(errorMessageFunc(func, "Invalid base_index ", base_index_));
   }
 
-  // Needed to compute the minimum of ld or of ld_nr_blocks.
-  int loc_m = 0;
   if (size_.first == 0 || size_.second == 0) {
     size_ = std::make_pair(0, 0);
     local_size_ = std::make_pair(0, 0);
@@ -472,7 +490,7 @@ void DistributedMatrix<ElType>::checkAndComputeLocalParam(const char* func, bool
         index1DBaseLocalFromBaseGlobal(size_.first + base_index_.row, block_size_.first, 0,
                                        comm_grid_->id2D().first, comm_grid_->size2D().first) -
         local_index_i;
-    loc_m = static_cast<int>(local_m);
+
     SizeType local_n =
         index1DBaseLocalFromBaseGlobal(size_.second + base_index_.col, block_size_.second, 0,
                                        comm_grid_->id2D().second, comm_grid_->size2D().second) -
@@ -486,10 +504,25 @@ void DistributedMatrix<ElType>::checkAndComputeLocalParam(const char* func, bool
       local_size_ = std::make_pair(local_m, local_n);
     }
   }
+  checkOrSetLeadingDims(func, ld_, ld_set, leading_nr_blocks_, ld_nr_bl_set, distribution_);
+}
 
+// Checks if ld and ld_nr_blks are correct for a matrix of local_size_, block_size_, local_index_
+// and distribution.
+// Throws if one the checks fails.
+// The following operations are done before checking:
+// If ld_set == false, ld is set.
+// If ld_nr_bl_set == false, ld_nr_blks is set.
+// Precondition: local_size_, block_size_ and local_base_index_ has to be correctly set.
+template <class ElType>
+void DistributedMatrix<ElType>::checkOrSetLeadingDims(const char* func, int& ld, bool ld_set,
+                                                      int& ld_nr_blks, bool ld_nr_bl_set,
+                                                      DistributionType distribution) {
+  constexpr int chunk = 64;
   int ld_min = 1;
   int leading_nr_blocks_min = 1;
-  switch (distribution_) {
+  int loc_m = local_size_.first + local_base_index_.row;
+  switch (distribution) {
     case scalapack_dist:
       ld_min = std::max(1, loc_m);
       break;
@@ -498,24 +531,24 @@ void DistributedMatrix<ElType>::checkAndComputeLocalParam(const char* func, bool
       leading_nr_blocks_min = std::max(1, util::ceilDiv(loc_m, block_size_.first));
       break;
     default:
-      throw std::invalid_argument(errorMessageFunc(func, "Invalid distribution: ", distribution_));
+      throw std::invalid_argument(errorMessageFunc(func, "Invalid distribution: ", distribution));
   }
   if (!ld_set) {
-    ld_ = ld_min == 1 ? 1 : util::ceilDiv(ld_min, chunk) * chunk;
+    ld = ld_min == 1 ? 1 : util::ceilDiv(ld_min, chunk) * chunk;
   }
   if (!ld_nr_bl_set) {
-    leading_nr_blocks_ = leading_nr_blocks_min;
+    ld_nr_blks = leading_nr_blocks_min;
   }
-  if (ld_ < ld_min) {
+  if (ld < ld_min) {
     throw std::invalid_argument(
-        errorMessageFunc(func, "ld (", ld_, " < ", ld_min, ") is too small."));
+        errorMessageFunc(func, "ld (", ld, " < ", ld_min, ") is too small."));
   }
-  if (distribution_ == scalapack_dist && leading_nr_blocks_ != 1) {
+  if (distribution == scalapack_dist && ld_nr_blks != 1) {
     throw std::invalid_argument(errorMessageFunc(func, "leading_nr_block is not 1."));
   }
-  if (leading_nr_blocks_ < leading_nr_blocks_min) {
-    throw std::invalid_argument(errorMessageFunc(func, "leading_nr_block (", leading_nr_blocks_,
-                                                 " < ", leading_nr_blocks_min, ") is too small."));
+  else if (ld_nr_blks < leading_nr_blocks_min) {
+    throw std::invalid_argument(errorMessageFunc(func, "leading_nr_block (", ld_nr_blks, " < ",
+                                                 leading_nr_blocks_min, ") is too small."));
   }
 }
 
@@ -524,19 +557,61 @@ void DistributedMatrix<ElType>::checkAndComputeLocalParam(const char* func, bool
 // - ld_, leading_nr_blocks_, local_size_, local_base_index_, block_size_ and distribution has to
 // be set correctly.
 template <class ElType>
-std::size_t DistributedMatrix<ElType>::allocationSize(const char* func) {
-  switch (distribution_) {
+std::size_t DistributedMatrix<ElType>::allocationSize(const char* func) const {
+  return allocationSize(func, ld_, leading_nr_blocks_, distribution_);
+}
+
+// Compute the minimum size of the allocated storage for the given leadind dimensions and
+// distribution.
+// Precondition: The global parameters and the local parameter has to be set, in particular:
+// - local_size_, local_base_index_, block_size_ and distribution has to be set correctly.
+// - ld, leading_nr_blocks has to be correct.
+template <class ElType>
+std::size_t DistributedMatrix<ElType>::allocationSize(  //
+    const char* func, int ld, int leading_nr_blocks, DistributionType distribution) const {
+  switch (distribution) {
     case scalapack_dist:
-      return util::multSize(ld_, local_base_index_.col + local_size_.second);
+      return util::multSize(ld, local_base_index_.col + local_size_.second);
     case tile_dist:
-      return util::multSize(ld_, block_size_.second) *
+      return util::multSize(ld, block_size_.second) *
              util::multSize(
-                 leading_nr_blocks_,
+                 leading_nr_blocks,
                  util::ceilDiv(local_base_index_.col + local_size_.second, block_size_.second));
     default:
-      throw std::invalid_argument(errorMessageFunc(func, "Invalid distribution: ", distribution_));
+      throw std::invalid_argument(errorMessageFunc(func, "Invalid distribution: ", distribution));
   }
   return 0;
+}
+
+// Copies element of rhs to this if copy_back == false.
+// Copies element of this to rhs if copy_back == true.
+template <class ElType>
+void DistributedMatrix<ElType>::copyInternal(
+    bool copy_back, std::shared_ptr<memory::MemoryAllocator<ElementType>> rhs_ptr, int rhs_ld,
+    int rhs_leading_nr_blocks, DistributionType rhs_dist) noexcept {
+  // Copy tile per tile
+  int j_tile = 0;
+  int n_tile = block_size_.second - local_base_index_.col % block_size_.second;
+  while (j_tile < local_size_.second) {
+    int i_tile = 0;
+    int m_tile = block_size_.first - local_base_index_.row % block_size_.first;
+    while (i_tile < local_size_.first) {
+      Local2DIndex index(i_tile, j_tile);
+      std::size_t rhs_index = storageBaseIndexFromLocalBaseIndex(
+          __func__, index, block_size_, rhs_ld, rhs_leading_nr_blocks, rhs_dist);
+      if (copy_back)
+        util::memory::copy2D(std::make_pair(m_tile, n_tile), ptr(index), ld_,
+                             rhs_ptr->ptr(rhs_index), rhs_ld);
+      else
+        util::memory::copy2D(std::make_pair(m_tile, n_tile), rhs_ptr->ptr(rhs_index), rhs_ld,
+                             ptr(index), ld_);
+
+      i_tile = i_tile + m_tile;
+      m_tile = std::min(local_size_.first - i_tile, block_size_.first);
+    }
+    j_tile = j_tile + n_tile;
+    n_tile = std::min(local_size_.second - j_tile, block_size_.second);
+  }
 }
 
 template <class ElType>
