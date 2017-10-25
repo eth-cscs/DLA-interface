@@ -12,6 +12,7 @@ namespace dla_interface {
   void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType solver) {
     // check size (square), blocksize?
     switch (solver) {
+#ifdef DLA_HAVE_SCALAPACK
       case ScaLAPACK: {
         DistributedMatrix<ElType> mat_scalapack(scalapack_dist, mat);
         auto info = mat_scalapack.getScalapackDescription();
@@ -19,6 +20,7 @@ namespace dla_interface {
                                    std::get<1>(info), std::get<2>(info), &std::get<3>(info)[0]);
         break;
       }
+#endif
       default:
         throw std::invalid_argument(
             errorMessage("Cholesky factorization is not available for solver ", solver));
