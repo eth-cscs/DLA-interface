@@ -445,35 +445,41 @@ TEST(DistributedMatrixTest, Constructor4) {
             ASSERT_TRUE(false);
         }
         for (int ld : {ld_min_dist1, ld_min_dist1 + 3}) {
-          DistributedMatrix<Type> mat_ref(m, n, mb, nb, ld, *comm_ptr, dist1);
-          fillDistributedMatrix(mat_ref, el_val);
-          {
-            DistributedMatrix<Type> mat(dist2, mat_ref);
-            EXPECT_EQ(std::make_pair(m, n), mat.size());
-            EXPECT_EQ(std::make_pair(local_m, local_n), mat.localSize());
-            EXPECT_EQ(std::make_pair(mb, nb), mat.blockSize());
-            EXPECT_EQ(Global2DIndex(0, 0), mat.baseIndex());
-            EXPECT_EQ(Local2DIndex(0, 0), mat.localBaseIndex());
-            EXPECT_LE(ld_min_dist2, mat.leadingDimension());
-            if (dist1 == dist2)
-              EXPECT_EQ(ld, mat.leadingDimension());
-            EXPECT_EQ(lnrbl_dist2, mat.leadingNumberOfBlocks());
-            EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
-            if (local_m * local_n == 0)
-              EXPECT_EQ(nullptr, mat.ptr());
-            else {
+          auto mat1_ptr =
+              std::make_shared<DistributedMatrix<Type>>(m, n, mb, nb, ld, *comm_ptr, dist1);
+          auto mat2_ptr = DistributedMatrix<Type>(m, n, mb, nb, ld, *comm_ptr, dist1)
+                              .subMatrix(m - mb - 1, n - 3 * nb + 1, mb + 1, 3 * nb - 1);
+          for (auto mat_ref_ptr : {mat1_ptr, mat2_ptr}) {
+            auto& mat_ref = *mat_ref_ptr;
+            fillDistributedMatrix(mat_ref, el_val);
+            {
+              DistributedMatrix<Type> mat(dist2, mat_ref);
+              EXPECT_EQ(mat_ref.size(), mat.size());
+              EXPECT_EQ(mat_ref.localSize(), mat.localSize());
+              EXPECT_EQ(mat_ref.blockSize(), mat.blockSize());
+              EXPECT_EQ(mat_ref.baseIndex(), mat.baseIndex());
+              EXPECT_EQ(mat_ref.localBaseIndex(), mat.localBaseIndex());
+              EXPECT_LE(ld_min_dist2, mat.leadingDimension());
               if (dist1 == dist2)
-                EXPECT_EQ(mat_ref.ptr(), mat.ptr());
-              else
-                EXPECT_NE(mat_ref.ptr(), mat.ptr());
-            }
-            EXPECT_EQ(id_2D, mat.commGrid().id2D());
-            EXPECT_EQ(dist2, mat.distribution());
+                EXPECT_EQ(ld, mat.leadingDimension());
+              EXPECT_EQ(lnrbl_dist2, mat.leadingNumberOfBlocks());
+              EXPECT_TRUE(checkDistributedMatrix(mat, el_val));
+              if (local_m * local_n == 0)
+                EXPECT_EQ(nullptr, mat.ptr());
+              else {
+                if (dist1 == dist2)
+                  EXPECT_EQ(mat_ref.ptr(), mat.ptr());
+                else
+                  EXPECT_NE(mat_ref.ptr(), mat.ptr());
+              }
+              EXPECT_EQ(id_2D, mat.commGrid().id2D());
+              EXPECT_EQ(dist2, mat.distribution());
 
-            fillDistributedMatrix(mat, el_val2);
+              fillDistributedMatrix(mat, el_val2);
+            }
+            EXPECT_EQ(dist1, mat_ref.distribution());
+            EXPECT_TRUE(checkDistributedMatrix(mat_ref, el_val2));
           }
-          EXPECT_EQ(dist1, mat_ref.distribution());
-          EXPECT_TRUE(checkDistributedMatrix(mat_ref, el_val2));
         }
       }
     }
