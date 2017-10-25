@@ -624,7 +624,7 @@ void DistributedMatrix<ElType>::copyInternal(
     while (i_tile < local_size_.first) {
       Local2DIndex index(i_tile, j_tile);
       std::size_t rhs_index = storageBaseIndexFromLocalBaseIndex(
-          __func__, index, block_size_, rhs_ld, rhs_leading_nr_blocks, rhs_dist);
+          __func__, index + local_base_index_, block_size_, rhs_ld, rhs_leading_nr_blocks, rhs_dist);
       if (copy_back)
         util::memory::copy2D(std::make_pair(m_tile, n_tile), ptr(index), ld_,
                              rhs_ptr->ptr(rhs_index), rhs_ld);
