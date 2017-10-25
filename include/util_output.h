@@ -2,6 +2,7 @@
 #define DLA_INTERFACE_UTIL_OUTPUT_H
 
 #include <ostream>
+#include <iomanip>
 #include "matrix_index.h"
 
 namespace dla_interface {
@@ -17,6 +18,14 @@ namespace dla_interface {
     }
     inline std::ostream& operator<<(std::ostream& s, const Global2DIndex& index) {
       return s << "(" << index.row << ", " << index.col << ")";
+    }
+
+    template <class Out, class ElType>
+    void dumpDistributedMatrixElement(Out& out, const Global2DIndex& gindex, Local2DIndex& lindex,
+                                      std::size_t storage_index, std::size_t storage_base_index,
+                                      ElType val) {
+      out << std::setw(16) << gindex << std::setw(16) << lindex << std::setw(12) << storage_index
+          << " (" << std::setw(12) << storage_base_index << ") " << val << std::endl;
     }
   }
 }
