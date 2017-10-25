@@ -481,6 +481,11 @@ void DistributedMatrix<ElType>::checkAndComputeLocalParam(const char* func, bool
     throw std::invalid_argument(errorMessageFunc(func, "Invalid matrix size ", size_));
   }
 
+  if (!comm_grid_ && size_ != std::make_pair(0, 0)) {
+    throw std::invalid_argument(
+        errorMessageFunc(func, "Only (0, 0) matrices can have no communicator."));
+  }
+
   if (block_size_.first <= 0 || block_size_.second <= 0) {
     throw std::invalid_argument(errorMessageFunc(func, "Invalid matrix block_size ", block_size_));
   }
@@ -535,14 +540,21 @@ void DistributedMatrix<ElType>::checkOrSetLeadingDims(const char* func, SizeType
   constexpr int chunk = 64;
   SizeType ld_min = 1;
   SizeType leading_nr_blocks_min = 1;
-  SizeType loc_m = local_size_.first + local_base_index_.row;
+
+  SizeType local_total_m = 0;
+  if (comm_grid_) {
+    local_total_m =
+        index1DBaseLocalFromBaseGlobal(size_.first + base_index_.row, block_size_.first, 0,
+                                       comm_grid_->id2D().first, comm_grid_->size2D().first);
+  }
+
   switch (distribution) {
     case scalapack_dist:
-      ld_min = std::max(1, loc_m);
+      ld_min = std::max(1, local_total_m);
       break;
     case tile_dist:
       ld_min = block_size_.first;
-      leading_nr_blocks_min = std::max(1, util::ceilDiv(loc_m, block_size_.first));
+      leading_nr_blocks_min = std::max(1, util::ceilDiv(local_total_m, block_size_.first));
       break;
     default:
       throw std::invalid_argument(errorMessageFunc(func, "Invalid distribution: ", distribution));
