@@ -529,13 +529,13 @@ void DistributedMatrix<ElType>::checkAndComputeLocalParam(const char* func, bool
 // If ld_nr_bl_set == false, ld_nr_blks is set.
 // Precondition: local_size_, block_size_ and local_base_index_ has to be correctly set.
 template <class ElType>
-void DistributedMatrix<ElType>::checkOrSetLeadingDims(const char* func, int& ld, bool ld_set,
-                                                      int& ld_nr_blks, bool ld_nr_bl_set,
+void DistributedMatrix<ElType>::checkOrSetLeadingDims(const char* func, SizeType& ld, bool ld_set,
+                                                      SizeType& ld_nr_blks, bool ld_nr_bl_set,
                                                       DistributionType distribution) {
   constexpr int chunk = 64;
-  int ld_min = 1;
-  int leading_nr_blocks_min = 1;
-  int loc_m = local_size_.first + local_base_index_.row;
+  SizeType ld_min = 1;
+  SizeType leading_nr_blocks_min = 1;
+  SizeType loc_m = local_size_.first + local_base_index_.row;
   switch (distribution) {
     case scalapack_dist:
       ld_min = std::max(1, loc_m);
@@ -582,7 +582,7 @@ std::size_t DistributedMatrix<ElType>::allocationSize(const char* func) const {
 // - ld, leading_nr_blocks has to be correct.
 template <class ElType>
 std::size_t DistributedMatrix<ElType>::allocationSize(  //
-    const char* func, int ld, int leading_nr_blocks, DistributionType distribution) const {
+    const char* func, SizeType ld, SizeType leading_nr_blocks, DistributionType distribution) const {
   switch (distribution) {
     case scalapack_dist:
       return util::multSize(ld, local_base_index_.col + local_size_.second);
@@ -601,8 +601,8 @@ std::size_t DistributedMatrix<ElType>::allocationSize(  //
 // Copies element of this to rhs if copy_back == true.
 template <class ElType>
 void DistributedMatrix<ElType>::copyInternal(
-    bool copy_back, std::shared_ptr<memory::MemoryAllocator<ElementType>> rhs_ptr, int rhs_ld,
-    int rhs_leading_nr_blocks, DistributionType rhs_dist) noexcept {
+    bool copy_back, std::shared_ptr<memory::MemoryAllocator<ElementType>> rhs_ptr, SizeType rhs_ld,
+    SizeType rhs_leading_nr_blocks, DistributionType rhs_dist) noexcept {
   // Copy tile per tile
   int j_tile = 0;
   int n_tile = block_size_.second - local_base_index_.col % block_size_.second;

@@ -373,14 +373,15 @@ namespace dla_interface {
                                                     int rank_src, int rank, int comm_size);
 
     void checkAndComputeLocalParam(const char* func, bool ld_set, bool ld_nr_bl_set);
-    void checkOrSetLeadingDims(const char* func, int& ld, bool ld_set, int& ld_nr_blks,
+    void checkOrSetLeadingDims(const char* func, SizeType& ld, bool ld_set, SizeType& ld_nr_blks,
                                bool ld_nr_bl_set, DistributionType distribution);
     std::size_t allocationSize(const char* func) const;
-    std::size_t allocationSize(const char* func, int ld, int leading_nr_blocks,
+    std::size_t allocationSize(const char* func, SizeType ld, SizeType leading_nr_blocks,
                                DistributionType distribution) const;
 
     void copyInternal(bool copy_back, std::shared_ptr<memory::MemoryAllocator<ElementType>> rhs_ptr,
-                      int rhs_ld, int rhs_leading_nr_blocks, DistributionType rhs_dist) noexcept;
+                      SizeType rhs_ld, SizeType rhs_leading_nr_blocks,
+                      DistributionType rhs_dist) noexcept;
 
     DistributedMatrix<ElType>* subMatrixInternal(const char* func, SizeType m, SizeType n,
                                                  Global2DIndex index) const;
