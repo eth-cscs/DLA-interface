@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.0)
-project(cholesky CXX)
+cmake_minimum_required(VERSION 3.8)
+project(cholesky CXX C)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -17,6 +17,7 @@ include(dla_utils)
 include(dla_mpi)
 include(dla_lapack)
 include(dla_scalapack)
+include(dla_dplasma)
 # ---------------------------------------------------------------------------
 # Boost
 # ---------------------------------------------------------------------------
@@ -25,7 +26,10 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 dla_find_mpi()
 
 dla_find_lapack()
+
 dla_find_scalapack()
+
+dla_find_dplasma()
 
 include(CTest)
 enable_testing()
@@ -33,30 +37,28 @@ enable_testing()
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${MPI_CXX_INCLUDE_PATH}
+    ${DLA_DPLASMA_INCLUDE_DIRS}
 )
 
 # ---------------------------------------------------------------------------
 # extra options
 # ---------------------------------------------------------------------------
 add_compile_options(-Wall -Wno-missing-braces)
-if(DLA_HAVE_SCALAPACK)
-  add_definitions(-DDLA_HAVE_SCALAPACK)
-endif()
 
 # ---------------------------------------------------------------------------
 # setup libraries
 # ---------------------------------------------------------------------------
 add_subdirectory(src)
-set(DLA_LA_LIBS
-    ${DLA_SCALAPACK_LIBRARY}
-    ${DLA_LAPACK_LIBRARY}
-)
 set(DLA_LIBS
     dla_interface
     ${Boost_LIBRARIES}
     ${MPI_CXX_LIBRARIES}
-    ${DLA_LA_LIBS}
+    ${DLA_DPLASMA_LIBS}
+    ${DLA_DPLASMA_LIBS}
+    ${DLA_SCALAPACK_LIBRARY}
+    ${DLA_LAPACK_LIBRARY}
 )
+
 message(${DLA_LIBS})
 
 # ---------------------------------------------------------------------------
