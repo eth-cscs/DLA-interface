@@ -2,6 +2,7 @@
 #define DLA_INTERFACE_DISTRIBUTED_MATRIX_H
 
 #include <array>
+#include <mpi.h>
 #include <tuple>
 #include "communicator_grid.h"
 #include "communicator_manager.h"
@@ -332,7 +333,9 @@ namespace dla_interface {
 #endif
 #ifdef DLA_HAVE_DPLASMA
     // Returns the DPLASMA descriptor.
-    DPlasmaDescriptor getDPlasmaDescription();
+    // Throws - std::invalid_argument if the matrix is not tile distributed.
+    //        - std::invalid_argument if leadingDimension() != blockSize().first.
+    std::tuple<DPlasmaDescriptor, MPI_Comm> getDPlasmaDescription();
 #endif
 
     template <class Out>

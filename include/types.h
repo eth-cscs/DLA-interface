@@ -46,24 +46,36 @@ namespace dla_interface {
     using ElementType = float;
     using BaseType = float;
     using ComplexType = std::complex<float>;
+#ifdef DLA_HAVE_DPLASMA
+    static constexpr matrix_type dplasma_type = matrix_RealFloat;
+#endif
   };
   template <>
   struct TypeInfo<double> {
     using ElementType = double;
     using BaseType = double;
     using ComplexType = std::complex<double>;
+#ifdef DLA_HAVE_DPLASMA
+    static constexpr matrix_type dplasma_type = matrix_RealDouble;
+#endif
   };
   template <>
   struct TypeInfo<std::complex<float>> {
     using ElementType = std::complex<float>;
     using BaseType = float;
     using ComplexType = std::complex<float>;
+#ifdef DLA_HAVE_DPLASMA
+    static constexpr matrix_type dplasma_type = matrix_ComplexFloat;
+#endif
   };
   template <>
   struct TypeInfo<std::complex<double>> {
     using ElementType = std::complex<double>;
     using BaseType = double;
     using ComplexType = std::complex<double>;
+#ifdef DLA_HAVE_DPLASMA
+    static constexpr matrix_type dplasma_type = matrix_ComplexDouble;
+#endif
   };
 
   template <class ElType>
