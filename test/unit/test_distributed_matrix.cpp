@@ -1335,6 +1335,53 @@ TEST(DistributedMatrixTest, ConstructorScalapack) {
 }
 #endif
 
+#ifdef DLA_HAVE_DPLASMA
+TEST(DistributedMatrixTest, DPlasmaDescriptor) {
+  using Type = double;
+  int m = 17;
+  int n = 13;
+  int mb = 3;
+  int nb = 2;
+
+  for (auto comm_ptr : comms) {
+    DistributedMatrix<Type> mat(m, n, mb, nb, *comm_ptr, tile_dist);
+    auto psubmat1 = mat.subMatrix(m, n, 0, 0);
+    auto psubmat2 = mat.subMatrix(m - 1, n - 1, 1, 1);
+    auto psubmat3 = mat.subMatrix(3 * mb, 4 * nb, 2 * mb - 1, 2 * nb - 1);
+    for (auto pmat : {psubmat1, psubmat2, psubmat3}) {
+      auto data_dplasma = pmat->getDPlasmaDescription();
+      // The pointer of DPlasma matrix points to (0, 0) of the original matrix.
+      EXPECT_EQ(mat.ptr(), std::get<0>(data_dplasma).mat);
+      EXPECT_EQ(pmat->leadingNumberOfBlocks(), std::get<0>(data_dplasma).nb_elem_r);
+      int nb_elem_c = dla_interface::util::ceilDiv(
+          pmat->localBaseIndex().col + pmat->localSize().second, mat.blockSize().second);
+
+      EXPECT_EQ(nb_elem_c, std::get<0>(data_dplasma).nb_elem_c);
+
+      matrix_type type = TypeInfo<Type>::dplasma_type;
+      EXPECT_EQ(type, std::get<0>(data_dplasma).super.mtype);
+      EXPECT_EQ(matrix_Tile, std::get<0>(data_dplasma).super.storage);
+      EXPECT_TRUE(parsec_tiled_matrix_dc_type & std::get<0>(data_dplasma).super.dtype);
+      EXPECT_TRUE(two_dim_block_cyclic_type & std::get<0>(data_dplasma).super.dtype);
+      EXPECT_EQ(pmat->leadingDimension(), std::get<0>(data_dplasma).super.tileld);
+      EXPECT_EQ(mb, std::get<0>(data_dplasma).super.mb);
+      EXPECT_EQ(nb, std::get<0>(data_dplasma).super.nb);
+      EXPECT_EQ(pmat->leadingDimension() * nb, std::get<0>(data_dplasma).super.bsiz);
+      EXPECT_GE(util::ceilDiv(m, mb) * mb, std::get<0>(data_dplasma).super.lm);
+      EXPECT_GE(util::ceilDiv(n, nb) * nb, std::get<0>(data_dplasma).super.ln);
+      EXPECT_EQ(pmat->baseIndex().row, std::get<0>(data_dplasma).super.i);
+      EXPECT_EQ(pmat->baseIndex().col, std::get<0>(data_dplasma).super.j);
+      EXPECT_EQ(pmat->size().first, std::get<0>(data_dplasma).super.m);
+      EXPECT_EQ(pmat->size().second, std::get<0>(data_dplasma).super.n);
+      EXPECT_EQ(comm_ptr->rowOrderedMPICommunicator(), std::get<1>(data_dplasma));
+    }
+
+    DistributedMatrix<Type> scalapack_mat(m, n, mb, nb, *comm_ptr, scalapack_dist);
+    EXPECT_THROW(scalapack_mat.getDPlasmaDescription(), std::invalid_argument);
+  }
+}
+#endif
+
 int main(int argc, char** argv) {
   comm::CommunicatorManager::initialize(true);
 
