@@ -2,6 +2,10 @@
 #define DLA_INTERFACE_TYPES_H
 
 #include <complex>
+#include <mpi.h>
+#ifdef DLA_HAVE_DPLASMA
+#include "ordered_dplasma.h"
+#endif
 
 namespace dla_interface {
   enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, Chameleon = 4 };
@@ -21,6 +25,7 @@ namespace dla_interface {
   using BlacsContextType = int;
 #endif
 #ifdef DLA_HAVE_DPLASMA
+  using ParsecContext = parsec_context_t*;
   using DPlasmaDescriptor = two_dim_block_cyclic_t;
 #endif
 

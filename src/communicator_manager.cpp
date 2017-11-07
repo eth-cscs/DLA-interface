@@ -15,7 +15,13 @@ namespace dla_interface {
     std::unique_ptr<CommunicatorManager> CommunicatorManager::comm_manager_(nullptr);
 
     void CommunicatorManager::initialize(bool initialize_mpi) {
-      comm_manager_.reset(new CommunicatorManager(initialize_mpi));
+      initialize(-1, initialize_mpi);
+    }
+    void CommunicatorManager::initialize(int nr_cores, bool initialize_mpi) {
+      initialize(nr_cores, nullptr, nullptr, initialize_mpi);
+    }
+    void CommunicatorManager::initialize(int nr_cores, int* argc, char*** argv, bool initialize_mpi) {
+      comm_manager_.reset(new CommunicatorManager(nr_cores, argc, argv, initialize_mpi));
       status_ = initialized;
     }
 
@@ -23,6 +29,12 @@ namespace dla_interface {
       status_ = finalized;
       comm_manager_ = nullptr;
     }
+
+#ifdef DLA_HAVE_DPLASMA
+    ParsecContext CommunicatorManager::getParsecContext() {
+      return comm_manager_->parsec_handle_;
+    }
+#endif
 
     Communicator2DGrid& CommunicatorManager::createCommunicator2DGrid(  //
         MPI_Comm base_comm, int nr_rows, int nr_cols, Ordering comm_ordering) {
@@ -76,15 +88,20 @@ namespace dla_interface {
     }
 #endif
 
-    CommunicatorManager::CommunicatorManager(bool initialize_mpi) : init_mpi_(initialize_mpi) {
+    CommunicatorManager::CommunicatorManager(int nr_cores, int* argc, char*** argv,
+                                             bool initialize_mpi)
+     : init_mpi_(initialize_mpi) {
       if (init_mpi_) {
         int provided;
-        MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &provided);
+        MPI_Init_thread(argc, argv, MPI_THREAD_SERIALIZED, &provided);
         if (provided != MPI_THREAD_SERIALIZED)
           throw std::runtime_error(
               "MPI cannot be initializd with MPI_THREAD_SERIALIZED. (provided = " +
               std::to_string(provided) + ")");
       }
+#ifdef DLA_HAVE_DPLASMA
+      parsec_handle_ = parsec_init(nr_cores, argc, argv);
+#endif
     }
 
     CommunicatorManager::~CommunicatorManager() {
@@ -92,6 +109,9 @@ namespace dla_interface {
       comm_grid_map.clear();
 #ifdef DLA_HAVE_SCALAPACK
       ictxt_grid_map.clear();
+#endif
+#ifdef DLA_HAVE_DPLASMA
+      parsec_fini(&parsec_handle_);
 #endif
 
       if (init_mpi_) {
