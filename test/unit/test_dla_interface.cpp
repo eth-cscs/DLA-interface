@@ -36,6 +36,10 @@ bool choleskyFactorizationTestThrows(SolverType solver) {
   if (solver == ScaLAPACK)
     return false;
 #endif
+#ifdef DLA_HAVE_DPLASMA
+  if (solver == DPlasma)
+    return false;
+#endif
   return true;
 }
 
@@ -87,7 +91,7 @@ TYPED_TEST(DLATypedTest, CholeskyFactorization) {
 }
 
 int main(int argc, char** argv) {
-  comm::CommunicatorManager::initialize(true);
+  comm::CommunicatorManager::initialize(2, &argc, &argv, true);
 
   int size;
   MPI_Comm_size(MPI_COMM_WORLD, &size);
