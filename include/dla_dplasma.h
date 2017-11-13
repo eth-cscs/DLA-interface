@@ -23,7 +23,9 @@ namespace dla_interface {
     inline void dplasma_run(MPI_Comm comm, Args... args) {
       auto parsec = comm::CommunicatorManager::getParsecContext();
       // Sets the MPI communicator.
-      parsec_remote_dep_set_ctx(parsec, &comm);
+      // TODO: uncomment this after parsec issue #135 is fixed
+      //       and remove continue in test_dla_interface.cpp:66.
+      // parsec_remote_dep_set_ctx(parsec, &comm);
       // Creates and schedules the operation
       parsec_taskpool_t* taskpool = Routine::create(args...);
       parsec_enqueue(parsec, taskpool);
