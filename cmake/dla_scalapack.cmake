@@ -36,7 +36,7 @@ function(dla_find_scalapack)
 
         if(MKL_MPI_TYPE MATCHES "OpenMPI")
           set(MKL_BLACS_LIB "-lmkl_blacs_openmpi_lp64")
-        else(MKL_MPI_TYPE MATCHES "IntelMPI")
+        elseif(MKL_MPI_TYPE MATCHES "IntelMPI")
           set(MKL_BLACS_LIB "-lmkl_blacs_intelmpi_lp64")
         else()
           message(FATAL_ERROR "Unknown MKL MPI Support: ${MKL_MPI_TYPE}")
