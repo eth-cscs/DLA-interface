@@ -32,12 +32,14 @@ TEST(Communicato2DGridTest, ConstructorColMajor) {
     {
       comm::Communicator2DGrid comm(mpi_comm, size1, size2, ColMajor);
       EXPECT_EQ(std::make_pair(size1, size2), comm.size2D());
+      EXPECT_EQ(size1 * size2, comm.size());
       EXPECT_EQ(ref_id2D(id, size1), comm.id2D());
       EXPECT_EQ(ColMajor, comm.rankOrder());
     }
     if (size1 != size2) {
       comm::Communicator2DGrid comm(mpi_comm, size2, size1, ColMajor);
       EXPECT_EQ(std::make_pair(size2, size1), comm.size2D());
+      EXPECT_EQ(size1 * size2, comm.size());
       EXPECT_EQ(ref_id2D(id, size2), comm.id2D());
       EXPECT_EQ(ColMajor, comm.rankOrder());
     }
@@ -64,12 +66,14 @@ TEST(Communicato2DGridTest, ConstructorRowMajor) {
     {
       comm::Communicator2DGrid comm(mpi_comm, size1, size2, RowMajor);
       EXPECT_EQ(std::make_pair(size1, size2), comm.size2D());
+      EXPECT_EQ(size1 * size2, comm.size());
       EXPECT_EQ(ref_id2D(id, size2), comm.id2D());
       EXPECT_EQ(RowMajor, comm.rankOrder());
     }
     if (size1 != size2) {
       comm::Communicator2DGrid comm(mpi_comm, size2, size1, RowMajor);
       EXPECT_EQ(std::make_pair(size2, size1), comm.size2D());
+      EXPECT_EQ(size1 * size2, comm.size());
       EXPECT_EQ(ref_id2D(id, size1), comm.id2D());
       EXPECT_EQ(RowMajor, comm.rankOrder());
     }
