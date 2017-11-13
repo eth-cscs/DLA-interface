@@ -1,7 +1,7 @@
 include(dla_utils)
 include(CheckCXXSymbolExists)
 
-function(find_mpi)
+function(dla_find_mpi)
   # Check if a MPI compiler is used, otherwise it looks for an MPI library.
   CHECK_CXX_SYMBOL_EXISTS(MPI_Finalize mpi.h COMPILER_HAS_MPI)
   # If the compiler is not an MPI compiler find MPI library
