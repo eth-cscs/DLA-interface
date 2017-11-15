@@ -35,15 +35,20 @@ namespace testing {
   }
 
   template <class Type, class F>
-  bool checkNearDistributedMatrix(const DistributedMatrix<Type>& mat, F& el_val, BaseType<Type> diff) {
+  bool checkNearDistributedMatrix(const DistributedMatrix<Type>& mat, F& el_val,
+                                  BaseType<Type> diff, BaseType<Type> threshold_rel_abs = 1e-3) {
     for (int j = 0; j < mat.size().second; ++j) {
       for (int i = 0; i < mat.size().first; ++i) {
         if (mat.commGrid().id2D() == mat.getRankId2D(i, j)) {
-          if (std::abs(mat(i, j) - el_val(i, j)) > diff) {
+          BaseType<Type> el_diff =
+              std::abs(mat(i, j) - el_val(i, j)) /
+              std::max(std::max(threshold_rel_abs, std::abs(mat(i, j))), std::abs(el_val(i, j)));
+          if (el_diff > diff) {
             std::cout << "Element (" << i << ", " << j << ") is wrong." << std::endl;
             std::cout << "Expected " << el_val(i, j) << "," << std::endl;
             std::cout << "Got " << mat(i, j) << "." << std::endl;
-            std::cout << "Difference " << std::abs(mat(i, j) - el_val(i, j)) << "." << std::endl;
+            std::cout << "Difference abs" << std::abs(mat(i, j) - el_val(i, j)) << "." << std::endl;
+            std::cout << "Difference rel/abs" << el_diff << "." << std::endl;
             return false;
           }
         }
