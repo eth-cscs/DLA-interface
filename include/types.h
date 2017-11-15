@@ -10,6 +10,7 @@
 namespace dla_interface {
   enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, Chameleon = 4 };
 
+  enum OpTrans { NoTrans = 'N', Trans = 'T', ConjTrans = 'C' };
   enum UpLo { Lower = 'L', Upper = 'U' };
   // Distributed matrix distribution (see documentation for details):
   // Scalapack = 2D block cyclic distribution,
