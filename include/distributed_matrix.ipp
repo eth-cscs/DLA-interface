@@ -285,6 +285,42 @@ std::tuple<ElType*, IndexType, IndexType, std::array<int, 9>> DistributedMatrix<
   return std::make_tuple(ptr_->ptr(), i, j, desc);
 }
 #endif
+#ifdef DLA_HAVE_DPLASMA
+template <class ElType>
+std::tuple<DPlasmaDescriptor, MPI_Comm> DistributedMatrix<ElType>::getDPlasmaDescription() {
+  if (distribution_ != tile_dist) {
+    throw std::invalid_argument(errorMessage(
+        "Cannot return DPlasma descriptor of this matrix. distribution() != tile_dist"));
+  }
+  if (ld_ != block_size_.first) {
+    throw std::invalid_argument(errorMessage(
+        "leadingDimension() ", ld_, " != mb (i.e. blockSize().first())", block_size_.first));
+  }
+
+  DPlasmaDescriptor desc;
+  MPI_Comm row_ordered_comm = comm_grid_->rowOrderedMPICommunicator();
+  int rank;
+  int size;
+  MPI_Comm_rank(row_ordered_comm, &rank);
+  MPI_Comm_size(row_ordered_comm, &size);
+
+  // The following expression gives the right leading number of blocks (nb_elem_r)
+  // in DPlasma, but it is not consistent among the ranks.
+  int m_full_estimate = std::max(
+      base_index_.row + size_.first,
+      ((leading_nr_blocks_ - 1) * comm_grid_->size2D().first + comm_grid_->id2D().first + 1) *
+          block_size_.first);
+
+  two_dim_block_cyclic_init(&desc, TypeInfo<ElType>::dplasma_type, matrix_Tile, size, rank,
+                            block_size_.first, block_size_.second, m_full_estimate,
+                            base_index_.col + size_.second, base_index_.row, base_index_.col,
+                            size_.first, size_.second, 1, 1, comm_grid_->size2D().first);
+
+  desc.mat = ptr_->ptr();
+
+  return std::make_tuple(desc, row_ordered_comm);
+}
+#endif
 
 template <class ElType>
 template <class Out>
@@ -539,6 +575,7 @@ void DistributedMatrix<ElType>::checkOrSetLeadingDims(const char* func, SizeType
                                                       DistributionType distribution) {
   constexpr int chunk = 64;
   SizeType ld_min = 1;
+  SizeType ld_val = 1;
   SizeType leading_nr_blocks_min = 1;
 
   SizeType local_total_m = 0;
@@ -551,16 +588,18 @@ void DistributedMatrix<ElType>::checkOrSetLeadingDims(const char* func, SizeType
   switch (distribution) {
     case scalapack_dist:
       ld_min = std::max(1, local_total_m);
+      ld_val = ld_min == 1 ? 1 : util::ceilDiv(ld_min, chunk) * chunk;
       break;
     case tile_dist:
       ld_min = block_size_.first;
+      ld_val = block_size_.first;
       leading_nr_blocks_min = std::max(1, util::ceilDiv(local_total_m, block_size_.first));
       break;
     default:
       throw std::invalid_argument(errorMessageFunc(func, "Invalid distribution: ", distribution));
   }
   if (!ld_set) {
-    ld = ld_min == 1 ? 1 : util::ceilDiv(ld_min, chunk) * chunk;
+    ld = ld_val;
   }
   if (!ld_nr_bl_set) {
     ld_nr_blks = leading_nr_blocks_min;

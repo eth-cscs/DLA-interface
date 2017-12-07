@@ -36,6 +36,10 @@ bool choleskyFactorizationTestThrows(SolverType solver) {
   if (solver == ScaLAPACK)
     return false;
 #endif
+#ifdef DLA_HAVE_DPLASMA
+  if (solver == DPlasma)
+    return false;
+#endif
   return true;
 }
 
@@ -58,6 +62,9 @@ TYPED_TEST(DLATypedTest, CholeskyFactorization) {
   for (auto comm_ptr : comms) {
     for (auto dist : dists) {
       for (auto solver : solvers) {
+        // TODO: See dla_dplasma.h:28
+        if (solver == DPlasma && (comm_ptr->rankOrder() == ColMajor || comm_ptr->size() != 6))
+          continue;
         for (auto uplo : {Lower, Upper}) {
           auto A1 = std::make_shared<DistributedMatrix<ElType>>(n, n, nb, nb, *comm_ptr, dist);
           auto A2 =
@@ -87,7 +94,7 @@ TYPED_TEST(DLATypedTest, CholeskyFactorization) {
 }
 
 int main(int argc, char** argv) {
-  comm::CommunicatorManager::initialize(true);
+  comm::CommunicatorManager::initialize(2, &argc, &argv, true);
 
   int size;
   MPI_Comm_size(MPI_COMM_WORLD, &size);

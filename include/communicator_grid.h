@@ -53,6 +53,10 @@ namespace dla_interface {
       std::pair<int, int> size2D() const {
         return size2D_;
       }
+      // Returns the the total size of this grid.
+      int size() const {
+        return size2D_.first * size2D_.second;
+      }
 
       // Returns the rank order of this grid.
       Ordering rankOrder() const {

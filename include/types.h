@@ -2,6 +2,10 @@
 #define DLA_INTERFACE_TYPES_H
 
 #include <complex>
+#include <mpi.h>
+#ifdef DLA_HAVE_DPLASMA
+#include "ordered_dplasma.h"
+#endif
 
 namespace dla_interface {
   enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, Chameleon = 4 };
@@ -21,6 +25,7 @@ namespace dla_interface {
   using BlacsContextType = int;
 #endif
 #ifdef DLA_HAVE_DPLASMA
+  using ParsecContext = parsec_context_t*;
   using DPlasmaDescriptor = two_dim_block_cyclic_t;
 #endif
 
@@ -41,24 +46,36 @@ namespace dla_interface {
     using ElementType = float;
     using BaseType = float;
     using ComplexType = std::complex<float>;
+#ifdef DLA_HAVE_DPLASMA
+    static constexpr matrix_type dplasma_type = matrix_RealFloat;
+#endif
   };
   template <>
   struct TypeInfo<double> {
     using ElementType = double;
     using BaseType = double;
     using ComplexType = std::complex<double>;
+#ifdef DLA_HAVE_DPLASMA
+    static constexpr matrix_type dplasma_type = matrix_RealDouble;
+#endif
   };
   template <>
   struct TypeInfo<std::complex<float>> {
     using ElementType = std::complex<float>;
     using BaseType = float;
     using ComplexType = std::complex<float>;
+#ifdef DLA_HAVE_DPLASMA
+    static constexpr matrix_type dplasma_type = matrix_ComplexFloat;
+#endif
   };
   template <>
   struct TypeInfo<std::complex<double>> {
     using ElementType = std::complex<double>;
     using BaseType = double;
     using ComplexType = std::complex<double>;
+#ifdef DLA_HAVE_DPLASMA
+    static constexpr matrix_type dplasma_type = matrix_ComplexDouble;
+#endif
   };
 
   template <class ElType>
