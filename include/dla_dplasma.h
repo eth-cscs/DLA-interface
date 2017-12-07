@@ -19,6 +19,17 @@ namespace dla_interface {
       }
     }
 
+    inline PLASMA_enum plasmaTrans(OpTrans trans) {
+      switch (trans) {
+        case NoTrans:
+          return PlasmaNoTrans;
+        case Trans:
+          return PlasmaTrans;
+        case ConjTrans:
+          return PlasmaConjTrans;
+      }
+    }
+
     template <class Routine, class... Args>
     inline void dplasma_run(MPI_Comm comm, Args... args) {
       auto parsec = comm::CommunicatorManager::getParsecContext();
@@ -34,6 +45,41 @@ namespace dla_interface {
       // Wait for the completion
       parsec_context_wait(parsec);
     }
+
+    template <class ElType>
+    struct pgemm {};
+
+    template <>
+    struct pgemm<float> {
+      template <class... Args>
+      static auto create(Args... args) {
+        return dplasma_sgemm_New(args...);
+      }
+    };
+
+    template <>
+    struct pgemm<double> {
+      template <class... Args>
+      static auto create(Args... args) {
+        return dplasma_dgemm_New(args...);
+      }
+    };
+
+    template <>
+    struct pgemm<std::complex<float>> {
+      template <class... Args>
+      static auto create(Args... args) {
+        return dplasma_cgemm_New(args...);
+      }
+    };
+
+    template <>
+    struct pgemm<std::complex<double>> {
+      template <class... Args>
+      static auto create(Args... args) {
+        return dplasma_zgemm_New(args...);
+      }
+    };
 
     template <class ElType>
     struct ppotrf {};

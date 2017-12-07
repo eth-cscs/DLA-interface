@@ -93,6 +93,101 @@ TYPED_TEST(DLATypedTest, CholeskyFactorization) {
   }
 }
 
+bool matrixMultiplyTestThrows(SolverType solver) {
+#ifdef DLA_HAVE_SCALAPACK
+  if (solver == ScaLAPACK)
+    return false;
+#endif
+#ifdef DLA_HAVE_DPLASMA
+  if (solver == DPlasma)
+    return false;
+#endif
+  return true;
+}
+
+TYPED_TEST(DLATypedTest, Gemm) {
+  using ElType = TypeParam;
+  int m = 49;
+  int n = 59;
+  int k = 37;
+  int nb = 3;
+
+  ElType alpha(2);
+  ElType beta(-1);
+
+  auto el_val_c = [this](int i, int j) {
+    return this->value(static_cast<BaseType<ElType>>(i + 1) / (j + 1), -i + j);
+  };
+  auto el_val_c_expected = [this, k, alpha, beta](int i, int j) {
+    return this->value(static_cast<BaseType<ElType>>(i + 1) / (j + 1), -i + j) *
+           (alpha * static_cast<BaseType<ElType>>(k) + beta);
+  };
+
+  for (auto trans_a : {NoTrans, Trans, ConjTrans}) {
+    int a_m = trans_a == NoTrans ? m : k;
+    int a_n = trans_a == NoTrans ? k : m;
+    bool swap_index_a = trans_a == NoTrans ? false : true;
+    int exp_complex_a = trans_a == ConjTrans ? -1 : 1;
+
+    auto el_val_a = [this, swap_index_a, exp_complex_a](int i, int j) {
+      if (swap_index_a)
+        std::swap(i, j);
+      return this->value(static_cast<BaseType<ElType>>(i + 1) / (j + 1), exp_complex_a * (-i + j));
+    };
+    for (auto trans_b : {NoTrans, Trans, ConjTrans}) {
+      int b_m = trans_b == NoTrans ? k : n;
+      int b_n = trans_b == NoTrans ? n : k;
+      bool swap_index_b = trans_b == NoTrans ? false : true;
+      int exp_complex_b = trans_b == ConjTrans ? -1 : 1;
+
+      auto el_val_b = [this, swap_index_b, exp_complex_b](int i, int j) {
+        if (swap_index_b)
+          std::swap(i, j);
+        return this->value(static_cast<BaseType<ElType>>(i + 1) / (j + 1), exp_complex_b * (-i + j));
+      };
+
+      for (auto comm_ptr : comms) {
+        for (auto dist : dists) {
+          for (auto solver : solvers) {
+            // TODO: See dla_dplasma.h:28
+            if (solver == DPlasma && (comm_ptr->rankOrder() == ColMajor || comm_ptr->size() != 6))
+              continue;
+            // DPlasma doesn't support trans = 'C' for real cases.
+            if (std::is_same<ElType, BaseType<ElType>>::value && solver == DPlasma &&
+                (trans_a == ConjTrans || trans_b == ConjTrans))
+              continue;
+            auto a_ptr = DistributedMatrix<ElType>(a_m + nb, a_n + nb, nb, nb, *comm_ptr, dist)
+                             .subMatrix(a_m, a_n, nb, nb);
+            auto b_ptr = DistributedMatrix<ElType>(b_m + 2 * nb, b_n, nb, nb, *comm_ptr, dist)
+                             .subMatrix(b_m, b_n, 2 * nb, 0);
+            auto c_ptr =
+                DistributedMatrix<ElType>(m, n + nb, nb, nb, *comm_ptr, dist).subMatrix(m, n, 0, nb);
+
+            auto& a = *a_ptr;
+            auto& b = *b_ptr;
+            auto& c = *c_ptr;
+
+            fillDistributedMatrix(a, el_val_a);
+            fillDistributedMatrix(b, el_val_b);
+            fillDistributedMatrix(c, el_val_c);
+
+            if (matrixMultiplyTestThrows(solver)) {
+              EXPECT_THROW(matrixMultiply(trans_a, trans_b, alpha, a, b, beta, c, solver),
+                           std::invalid_argument);
+            }
+            else {
+              std::cout << trans_a << trans_b << std::endl;
+              matrixMultiply(trans_a, trans_b, alpha, a, b, beta, c, solver);
+
+              EXPECT_TRUE(checkNearDistributedMatrix(c, el_val_c_expected, k * this->epsilon()));
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 int main(int argc, char** argv) {
   comm::CommunicatorManager::initialize(2, &argc, &argv, true);
 
