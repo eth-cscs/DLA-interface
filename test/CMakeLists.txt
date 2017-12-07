@@ -1,5 +1,3 @@
-# google test framework
-#set(gtest_inc ${PROJECT_SOURCE_DIR}/test/gtest)
 add_library(gtest gtest/src/gtest-all.cpp)
 target_include_directories(gtest PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gtest>)
 

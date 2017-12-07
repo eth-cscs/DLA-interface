@@ -38,6 +38,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${MPI_CXX_INCLUDE_PATH}
     ${DLA_DPLASMA_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
 )
 
 # ---------------------------------------------------------------------------
@@ -64,5 +65,6 @@ message(${DLA_LIBS})
 # ---------------------------------------------------------------------------
 # Add sub directories
 # ---------------------------------------------------------------------------
+add_subdirectory(miniapp)
 add_subdirectory(test)
 
