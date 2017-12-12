@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
       mat_copy = std::make_unique<DistributedMatrix<double>>(mat);
     }
 
-    choleskyFactorization(uplo, mat, solver);
+    choleskyFactorization(uplo, mat, solver, 2);
 
     if (check) {
       if (uplo == Lower) {
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
           }
         }
 
-        matrixMultiply(NoTrans, Trans, -1., mat, mat, 1., *mat_copy, solver);
+        matrixMultiply(NoTrans, Trans, -1., mat, mat, 1., *mat_copy, solver, 2);
       }
       else {
         for (int j = 0; j < mat.localSize().second; ++j) {
@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
           }
         }
 
-        matrixMultiply(Trans, NoTrans, -1., mat, mat, 1., *mat_copy, solver);
+        matrixMultiply(Trans, NoTrans, -1., mat, mat, 1., *mat_copy, solver, 2);
       }
 
       for (int j = 0; j < mat_copy->localSize().second; ++j) {
