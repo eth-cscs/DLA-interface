@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <cstring>
 #include <map>
 #include <memory>
 #include <mpi.h>
