@@ -26,21 +26,23 @@ and can benefit from the use of the best performing DLA package to increase the 
 
 The DLA interface features:
 - Communicator utilities
-- Matrix class (Not yet supported)
-- DLA routines C++ wrappers (Not yet supported)
+- Matrix class
+- DLA routines C++ wrappers (Partially implemented)
 - DLA routines Fortran wrappers (Not yet supported)
 
 ## List of supported DLA packages
 
 The DLA library supported are:
-- ScaLAPACK (MKL, Libsci, Netlib, ...) (Not yet supported)
+- ScaLAPACK (MKL, Libsci, Netlib, ...)
 - ELPA (Not yet supported)
-- D-Plasma (ParSEC) (Not yet supported)
+- D-Plasma (ParSEC) (partially supported, see [limitations](#known-current-limitations))
 - Chameleon (StarPU) (Not yet supported)
 
 For more information of which routine of each package is supported see [the list of supported routines](#list-of-supported-dla-packages)
 
 ## List of supported routines
+- Matrix-matrix multiplication (p\*gemm) (ScaLAPACK, DPlasma)
+- Cholesky factorization (p\*potrf) (ScaLAPACK, DPlasma)
 
 ## List of routines with planned support
 
@@ -56,4 +58,15 @@ The routines which will be available are (including the ScaLAPACK corresponding 
 
 # Documentation
 
-Work in progress.
+- [Install](INSTALL.md)
+- [Example (C++)](miniapp/overlap_gaussian_orbitals.cpp)
+- Example (Fortran) (Available when Fortran Interface is ready)
+
+# Known current limitations
+
+- Scalapack and DPlasma cannot be used efficiently in the same run:
+  - Need mechanism to set BLAS number of threads (In development).
+
+- Parsec:
+  - Thread binding is wrong when multiple rank per node are used. (Parsec Issue #152)
+  - Change of the Parsec MPI Communicator sometimes hangs (Parsec Issue #135), therefore only row ordered 2D communicator grids can be used.
