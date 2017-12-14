@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <cstring>
 #include <map>
 #include <memory>
 #include <mpi.h>
@@ -100,7 +102,32 @@ namespace dla_interface {
               std::to_string(provided) + ")");
       }
 #ifdef DLA_HAVE_DPLASMA
-      parsec_handle_ = parsec_init(nr_cores, argc, argv);
+      if (argc == nullptr) {
+        parsec_handle_ = parsec_init(nr_cores, nullptr, nullptr);
+      }
+      else {
+        char** p_argv = std::find_if(*argv, (*argv) + (*argc),
+                                     [](const char* val) { return std::strcmp(val, "--") == 0; });
+        char* tmp = nullptr;
+        int p_argc = *argc - (p_argv - *argv);
+        if (p_argc > 0) {
+          // "--" found. Replace it with the application name and pass to parsec_init.
+          tmp = *p_argv;
+          *p_argv = (*argv)[0];
+        }
+        else {
+          // No arguments for parsec found, just pass to parsec_init the application name.
+          p_argv = *argv;
+          p_argc = 1;
+        }
+
+        parsec_handle_ = parsec_init(nr_cores, &p_argc, &p_argv);
+
+        // Restore the "--" argument if it was replaced.
+        if (tmp)
+          *p_argv = tmp;
+      }
+
 #endif
     }
 

@@ -176,7 +176,6 @@ TYPED_TEST(DLATypedTest, Gemm) {
                            std::invalid_argument);
             }
             else {
-              std::cout << trans_a << trans_b << std::endl;
               matrixMultiply(trans_a, trans_b, alpha, a, b, beta, c, solver);
 
               EXPECT_TRUE(checkNearDistributedMatrix(c, el_val_c_expected, k * this->epsilon()));

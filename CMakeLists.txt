@@ -14,7 +14,6 @@ endif(NOT CMAKE_BUILD_TYPE)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 include(dla_utils)
-include(dla_mpi)
 include(dla_lapack)
 include(dla_scalapack)
 include(dla_dplasma)
@@ -23,7 +22,7 @@ include(dla_dplasma)
 # ---------------------------------------------------------------------------
 find_package(Boost COMPONENTS program_options REQUIRED)
 
-dla_find_mpi()
+include(dla_mpi)
 
 dla_find_lapack()
 
@@ -38,6 +37,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${MPI_CXX_INCLUDE_PATH}
     ${DLA_DPLASMA_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
 )
 
 # ---------------------------------------------------------------------------
@@ -64,5 +64,6 @@ message(${DLA_LIBS})
 # ---------------------------------------------------------------------------
 # Add sub directories
 # ---------------------------------------------------------------------------
+add_subdirectory(miniapp)
 add_subdirectory(test)
 

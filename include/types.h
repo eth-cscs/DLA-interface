@@ -47,6 +47,8 @@ namespace dla_interface {
     using ElementType = float;
     using BaseType = float;
     using ComplexType = std::complex<float>;
+    static constexpr int ops_add = 1;
+    static constexpr int ops_mult = 1;
 #ifdef DLA_HAVE_DPLASMA
     static constexpr matrix_type dplasma_type = matrix_RealFloat;
 #endif
@@ -56,6 +58,8 @@ namespace dla_interface {
     using ElementType = double;
     using BaseType = double;
     using ComplexType = std::complex<double>;
+    static constexpr int ops_add = 1;
+    static constexpr int ops_mult = 1;
 #ifdef DLA_HAVE_DPLASMA
     static constexpr matrix_type dplasma_type = matrix_RealDouble;
 #endif
@@ -65,6 +69,8 @@ namespace dla_interface {
     using ElementType = std::complex<float>;
     using BaseType = float;
     using ComplexType = std::complex<float>;
+    static constexpr int ops_add = 2;
+    static constexpr int ops_mult = 6;
 #ifdef DLA_HAVE_DPLASMA
     static constexpr matrix_type dplasma_type = matrix_ComplexFloat;
 #endif
@@ -74,6 +80,8 @@ namespace dla_interface {
     using ElementType = std::complex<double>;
     using BaseType = double;
     using ComplexType = std::complex<double>;
+    static constexpr int ops_add = 2;
+    static constexpr int ops_mult = 6;
 #ifdef DLA_HAVE_DPLASMA
     static constexpr matrix_type dplasma_type = matrix_ComplexDouble;
 #endif
@@ -105,6 +113,15 @@ namespace dla_interface {
 #define DLA_D_ONE (&dla_interface::D_ONE)
 #define DLA_C_ONE (&dla_interface::C_ONE)
 #define DLA_Z_ONE (&dla_interface::Z_ONE)
+
+  namespace util {
+    // Returns the number of flop needed
+    // to perform 'add' additions and 'mul' multiplications of type T elements.
+    template <class T>
+    constexpr double nrOps(double add, double mul) {
+      return TypeInfo<T>::ops_add * add + TypeInfo<T>::ops_mult * mul;
+    }
+  }
 }
 
 #endif  // DLA_INTERFACE_TYPES_H
