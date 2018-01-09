@@ -16,7 +16,7 @@ namespace dla_interface {
     void errorMessageCont(std::stringstream& s, const T& value, const Args&... args);
 
     // Implementations
-    void errorMessageCont(std::stringstream& s) {}
+    inline void errorMessageCont(std::stringstream& s) {}
 
     template <class T, class... Args>
     void errorMessageCont(std::stringstream& s, const T& value, const Args&... args) {
