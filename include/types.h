@@ -2,6 +2,7 @@
 #define DLA_INTERFACE_TYPES_H
 
 #include <complex>
+#include <map>
 #include <mpi.h>
 #ifdef DLA_HAVE_DPLASMA
 #include "ordered_dplasma.h"
@@ -9,6 +10,8 @@
 
 namespace dla_interface {
   enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, Chameleon = 4 };
+  const std::map<SolverType, std::string> solverNames = {
+      {ScaLAPACK, "ScaLAPACK"}, {ELPA, "ELPA"}, {DPlasma, "DPLASMA"}, {Chameleon, "Chameleon"}};
 
   enum OpTrans { NoTrans = 'N', Trans = 'T', ConjTrans = 'C' };
   enum UpLo { Lower = 'L', Upper = 'U' };
@@ -113,15 +116,16 @@ namespace dla_interface {
 #define DLA_D_ONE (&dla_interface::D_ONE)
 #define DLA_C_ONE (&dla_interface::C_ONE)
 #define DLA_Z_ONE (&dla_interface::Z_ONE)
-
-  namespace util {
-    // Returns the number of flop needed
-    // to perform 'add' additions and 'mul' multiplications of type T elements.
-    template <class T>
-    constexpr double nrOps(double add, double mul) {
-      return TypeInfo<T>::ops_add * add + TypeInfo<T>::ops_mult * mul;
-    }
-  }
+  const int I_M_ONE = -1;
+  const float S_M_ONE = -1;
+  const double D_M_ONE = -1;
+  const std::complex<float> C_M_ONE(-1);
+  const std::complex<double> Z_M_ONE(-1);
+#define DLA_I_M_ONE (&dla_interface::I_M_ONE)
+#define DLA_S_M_ONE (&dla_interface::S_M_ONE)
+#define DLA_D_M_ONE (&dla_interface::D_M_ONE)
+#define DLA_C_M_ONE (&dla_interface::C_M_ONE)
+#define DLA_Z_M_ONE (&dla_interface::Z_M_ONE)
 }
 
 #endif  // DLA_INTERFACE_TYPES_H
