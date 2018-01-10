@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
   dlai_initialize_arg_(&nr_threads, &argc, &argv, &init_mpi);
   int ictxt = dlai_create_2d_grid_(&mpi_comm_f, &p, &q, "R");
 
-  dlai_set_print_timer_option_(1);
+  dlai_set_print_timer_option_(2);
   //////////////////////////////////////////////////////////////
 
   auto& comm_grid = comm::CommunicatorManager::getCommunicator2DGridFromBlacsContext(ictxt);
