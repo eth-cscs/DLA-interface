@@ -123,6 +123,65 @@ namespace dla_interface {
     // Postcondition: rhs is in a unspecified state.
     DistributedMatrix& operator=(DistributedMatrix&& rhs) noexcept;
 
+    // Returns a ptr to a new const distributed matrix which has the same size, block size and rank
+    // grid
+    // of the given DistributedMatrix distributed according distribution
+    // and which reference the same memory (See note (1)).
+    std::shared_ptr<const DistributedMatrix> convertConst(DistributionType distribution) const {
+      DistributedMatrix<ElementType>& tmp_mat = const_cast<DistributedMatrix<ElementType>&>(*this);
+      auto res = std::make_shared<DistributedMatrix<ElementType>>(distribution, tmp_mat);
+      res->remove_referenced();
+      return res;
+    }
+
+    // Returns a ptr to a new const (m x n) matrix (or a (0 x 0) matrix if m == 0 or n == 0),
+    // distributed on the rank grid described by comm according to the distribution
+    // current_distribution using the blocksize (mb x nb).
+    // This matrix uses the elements stored in the memory provided by ptr (of length len elements)
+    // with leading dimension ld, and leading number of blocks leading_nr_blocks and
+    // distributed according to original_distribution.
+    // See note (1).
+    // Throws a std::invalid_argument
+    //     - if m < 0, n < 0, mb < 1, nb < 1, or ld < 1
+    //     - if ld < local_m and n > 0 and distribution == scalapack_dist
+    //     - if ld < mb and distribution == tile_dist
+    //     - if leading_nr_blocks < ceil(local_m / mb) and distribution == tile_dist
+    // Note: if original_distribution == scalapack_dist leading_nr_blocks is ignored.
+    static std::shared_ptr<const DistributedMatrix> convertConst(
+        SizeType m, SizeType n, SizeType mb, SizeType nb, const comm::Communicator2DGrid& comm,
+        DistributionType new_distribution, const ElementType* ptr, std::size_t len, SizeType ld,
+        SizeType leading_nr_blocks, DistributionType original_distribution) {
+      ElementType* tmp_ptr = const_cast<ElementType*>(ptr);
+      auto res = std::make_shared<DistributedMatrix<ElementType>>(
+          m, n, mb, nb, comm, new_distribution, tmp_ptr, len, ld, leading_nr_blocks,
+          original_distribution);
+      res->remove_referenced();
+      return res;
+    }
+
+#ifdef DLA_HAVE_SCALAPACK
+    // Returns a ptr to a new const distributed matrix which has the same size, block size and rank
+    // grid
+    // of the given Scalapack matrix and which reference the same memory (See note (1)).
+    // Throws std::invalid_argument
+    //     - if the scalapack context was not created via the CommunicatorManager interface.
+    //     - if the scalapack descriptor does not describe a valid Scalapack matrix
+    //     - if the indices i < 1, j < 1,
+    //     - if the sizes m < 0, n < 0,
+    //     - if the indices i + m - 1, j + n - 1 are larger than the corresponding matrix global
+    //     sizes.
+    //     - if desc[6] (rsrc) != 0 or desc[7] (csrc) != 0.
+    static std::shared_ptr<const DistributedMatrix> convertConst(DistributionType distribution,
+                                                                 int m, int n, const ElementType* ptr,
+                                                                 ScalapackIndex i, ScalapackIndex j,
+                                                                 ScalapackDescriptor desc) {
+      ElementType* tmp_ptr = const_cast<ElementType*>(ptr);
+      auto res =
+          std::make_shared<DistributedMatrix<ElementType>>(distribution, m, n, tmp_ptr, i, j, desc);
+      res->remove_referenced();
+      return res;
+    }
+#endif
     // Copies the value of the elements of rhs.
     // Throws std::invalid_argument if *this and rhs do not have the same size.
     // If size() and rhs.size() != (0, 0):
@@ -330,12 +389,19 @@ namespace dla_interface {
     // ScaLAPACK calls.
     // Throws std::invalid_argument if the matrix is not distributed in the ScaLAPACK way.
     std::tuple<ElementType*, IndexType, IndexType, std::array<int, 9>> getScalapackDescription();
+    std::tuple<const ElementType*, IndexType, IndexType, std::array<int, 9>> getScalapackDescription() const;
 #endif
 #ifdef DLA_HAVE_DPLASMA
-    // Returns the DPLASMA descriptor.
+    private:
+    DPlasmaDescriptor getDPlasmaDescriptionInternal() const;
+
+    public:
+    // Returns a tuple containing the DPLASMA descriptor, the MPI comunicator
+    // and a flag to indicate if the matrix is const.
     // Throws - std::invalid_argument if the matrix is not tile distributed.
     //        - std::invalid_argument if leadingDimension() != blockSize().first.
     std::tuple<DPlasmaDescriptor, MPI_Comm> getDPlasmaDescription();
+    std::tuple<const DPlasmaDescriptor, MPI_Comm> getDPlasmaDescription() const;
 #endif
 
     template <class Out>
@@ -393,6 +459,9 @@ namespace dla_interface {
                                                 Global2DIndex index) const;
 
     void reset();
+
+    // Remove the copy-back step for const matrices.
+    void remove_referenced();
 
     std::shared_ptr<memory::MemoryAllocator<ElementType>> ptr_;
     std::pair<SizeType, SizeType> size_;

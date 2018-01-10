@@ -282,12 +282,37 @@ std::tuple<ElType*, IndexType, IndexType, std::array<int, 9>> DistributedMatrix<
         errorMessage("Internal error: Wrong argument in descriptor initialization: ", info));
   }
 
-  return std::make_tuple(ptr_->ptr(), i, j, desc);
+  return std::make_tuple(ptr_->ptr(), i, j, std::move(desc));
+}
+
+template <class ElType>
+std::tuple<const ElType*, IndexType, IndexType, std::array<int, 9>> DistributedMatrix<
+    ElType>::getScalapackDescription() const {
+  if (distribution_ != scalapack_dist) {
+    throw std::invalid_argument(errorMessage(
+        "Cannot return ScaLAPACK descriptor of this matrix. distribution() != scalapack_dist"));
+  }
+  int total_m = size_.first + base_index_.row;
+  int total_n = size_.second + base_index_.col;
+  int i = base_index_.row + 1;
+  int j = base_index_.col + 1;
+  auto ictxt = comm_grid_->blacsContext();
+  std::array<int, 9> desc;
+  int info;
+
+  scalapack::descinit_(&desc[0], &total_m, &total_n, &block_size_.first, &block_size_.second,
+                       DLA_I_ZERO, DLA_I_ZERO, &ictxt, &ld_, &info);
+  if (info != 0) {
+    throw std::runtime_error(
+        errorMessage("Internal error: Wrong argument in descriptor initialization: ", info));
+  }
+
+  return std::make_tuple(ptr_->ptr(), i, j, std::move(desc));
 }
 #endif
 #ifdef DLA_HAVE_DPLASMA
 template <class ElType>
-std::tuple<DPlasmaDescriptor, MPI_Comm> DistributedMatrix<ElType>::getDPlasmaDescription() {
+DPlasmaDescriptor DistributedMatrix<ElType>::getDPlasmaDescriptionInternal() const {
   if (distribution_ != tile_dist) {
     throw std::invalid_argument(errorMessage(
         "Cannot return DPlasma descriptor of this matrix. distribution() != tile_dist"));
@@ -304,8 +329,9 @@ std::tuple<DPlasmaDescriptor, MPI_Comm> DistributedMatrix<ElType>::getDPlasmaDes
   MPI_Comm_rank(row_ordered_comm, &rank);
   MPI_Comm_size(row_ordered_comm, &size);
 
-  // The following expression gives the right leading number of blocks (nb_elem_r)
-  // in DPlasma, but it is not consistent among the ranks.
+  // The value of the following expression is different among the ranks (!!!).
+  // However when used in DPlasma to compute the leading number of blocks (nb_elem_r) gives the
+  // expected result on each rank.
   int m_full_estimate = std::max(
       base_index_.row + size_.first,
       ((leading_nr_blocks_ - 1) * comm_grid_->size2D().first + comm_grid_->id2D().first + 1) *
@@ -315,6 +341,23 @@ std::tuple<DPlasmaDescriptor, MPI_Comm> DistributedMatrix<ElType>::getDPlasmaDes
                             block_size_.first, block_size_.second, m_full_estimate,
                             base_index_.col + size_.second, base_index_.row, base_index_.col,
                             size_.first, size_.second, 1, 1, comm_grid_->size2D().first);
+  return desc;
+}
+
+template <class ElType>
+std::tuple<DPlasmaDescriptor, MPI_Comm> DistributedMatrix<ElType>::getDPlasmaDescription() {
+  DPlasmaDescriptor desc = getDPlasmaDescriptionInternal();
+  MPI_Comm row_ordered_comm = comm_grid_->rowOrderedMPICommunicator();
+
+  desc.mat = ptr_->ptr();
+
+  return std::make_tuple(desc, row_ordered_comm);
+}
+
+template <class ElType>
+std::tuple<const DPlasmaDescriptor, MPI_Comm> DistributedMatrix<ElType>::getDPlasmaDescription() const {
+  DPlasmaDescriptor desc = getDPlasmaDescriptionInternal();
+  MPI_Comm row_ordered_comm = comm_grid_->rowOrderedMPICommunicator();
 
   desc.mat = ptr_->ptr();
 
@@ -699,12 +742,6 @@ DistributedMatrix<ElType>* DistributedMatrix<ElType>::subMatrixInternal(  //
                                             leading_nr_blocks_, distribution_);
 }
 
-// Creates a LocalMatrix which represent the (m, n) submatrix starting at position (i ,j),
-// and returns a shared_ptr to it.
-// Throws std::invalid_argument
-//     - if m, n, i, j < 0, i + m > size().first, j + n > size().second
-//     - if (baseIndex.first() + i) % mb + m > mb or (baseIndex.second() + j) % nb + n > nb.
-// See note (2).
 template <class ElType>
 LocalMatrix<ElType>* DistributedMatrix<ElType>::localSubMatrixInternal(  //
     const char* func, SizeType m, SizeType n, Global2DIndex index) const {
@@ -739,4 +776,12 @@ void DistributedMatrix<ElType>::reset() {
   leading_nr_blocks_ = 1;
   // distribution_ not changed
   // comm_grid not changed
+}
+
+template <class ElType>
+void DistributedMatrix<ElType>::remove_referenced() {
+  referenced_ptr_ = nullptr;
+  referenced_ld_ = {};
+  referenced_leading_nr_blocks_ = {};
+  referenced_distribution_ = {};
 }
