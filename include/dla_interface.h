@@ -17,11 +17,10 @@ namespace dla_interface {
   // print_timers >= 2: print convertion time and solver time as well.
   // Note: enabled timers add MPI barriers.
 
-  // TODO: Major change to matrix interface for change of distribution for const matrices.
   template <class ElType>
   void matrixMultiply(OpTrans trans_a, OpTrans trans_b, ElType alpha,
-                      /* const */ DistributedMatrix<ElType>& mat_a,
-                      /* const */ DistributedMatrix<ElType>& mat_b, ElType beta,
+                      const DistributedMatrix<ElType>& mat_a,
+                      const DistributedMatrix<ElType>& mat_b, ElType beta,
                       DistributedMatrix<ElType>& mat_c, SolverType solver, int print_timers = 0) {
     auto& comm_grid = mat_c.commGrid();
     util::Timer<> timer_full(comm_grid.rowOrderedMPICommunicator(), print_timers > 0);
@@ -41,33 +40,40 @@ namespace dla_interface {
     switch (solver) {
 #ifdef DLA_HAVE_SCALAPACK
       case ScaLAPACK: {
+        std::array<int, 6> timer_index;
         util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);
-        DistributedMatrix<ElType> mat_a_scalapack(scalapack_dist, mat_a);
-        int index1 = timer_part.save_time();
-        DistributedMatrix<ElType> mat_b_scalapack(scalapack_dist, mat_b);
-        int index2 = timer_part.save_time();
-        DistributedMatrix<ElType> mat_c_scalapack(scalapack_dist, mat_c);
-        int index3 = timer_part.save_time();
-        auto matrix_a_info = mat_a_scalapack.getScalapackDescription();
-        auto matrix_b_info = mat_b_scalapack.getScalapackDescription();
-        auto matrix_c_info = mat_c_scalapack.getScalapackDescription();
+        timer_index[0] = 0;
+        {
+          auto mat_a_scalapack_ptr = mat_a.convertConst(scalapack_dist);
+          timer_index[1] = timer_part.save_time();
+          auto mat_b_scalapack_ptr = mat_b.convertConst(scalapack_dist);
+          timer_index[2] = timer_part.save_time();
+          DistributedMatrix<ElType> mat_c_scalapack(scalapack_dist, mat_c);
+          timer_index[3] = timer_part.save_time();
+          auto matrix_a_info = mat_a_scalapack_ptr->getScalapackDescription();
+          auto matrix_b_info = mat_b_scalapack_ptr->getScalapackDescription();
+          auto matrix_c_info = mat_c_scalapack.getScalapackDescription();
 
-        scalapack_wrappers::pgemm(
-            trans_a, trans_b, m, n, k, alpha, std::get<0>(matrix_a_info),
-            std::get<1>(matrix_a_info), std::get<2>(matrix_a_info), &std::get<3>(matrix_a_info)[0],
-            std::get<0>(matrix_b_info), std::get<1>(matrix_b_info), std::get<2>(matrix_b_info),
-            &std::get<3>(matrix_b_info)[0], beta, std::get<0>(matrix_c_info),
-            std::get<1>(matrix_c_info), std::get<2>(matrix_c_info), &std::get<3>(matrix_c_info)[0]);
+          scalapack_wrappers::pgemm(trans_a, trans_b, m, n, k, alpha, std::get<0>(matrix_a_info),
+                                    std::get<1>(matrix_a_info), std::get<2>(matrix_a_info),
+                                    &std::get<3>(matrix_a_info)[0], std::get<0>(matrix_b_info),
+                                    std::get<1>(matrix_b_info), std::get<2>(matrix_b_info),
+                                    &std::get<3>(matrix_b_info)[0], beta,
+                                    std::get<0>(matrix_c_info), std::get<1>(matrix_c_info),
+                                    std::get<2>(matrix_c_info), &std::get<3>(matrix_c_info)[0]);
 
-        int index4 = timer_part.save_time();
+          timer_index[4] = timer_part.save_time();
+        }
+        timer_index[5] = timer_part.save_time();
         if (comm_grid.id2D() == std::make_pair(0, 0)) {
           double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
           double flop = util::nrOps<ElType>(mnk, mnk);
-          timer_part.print_elapsed(0, index1, "Conversion a: ");
-          timer_part.print_elapsed(index1, index2, "Conversion b: ");
-          timer_part.print_elapsed(index2, index3, "Conversion c: ");
-          timer_part.print_elapsed(index3, index4,
+          timer_part.print_elapsed(timer_index[0], timer_index[1], "Conversion a: ");
+          timer_part.print_elapsed(timer_index[1], timer_index[2], "Conversion b: ");
+          timer_part.print_elapsed(timer_index[2], timer_index[3], "Conversion c: ");
+          timer_part.print_elapsed(timer_index[3], timer_index[4],
                                    "Matrix Matrix Multiplication (ScaLAPACK) time: ", flop);
+          timer_part.print_elapsed(timer_index[4], timer_index[5], "Back conversion c: ");
         }
 
         break;
@@ -76,37 +82,43 @@ namespace dla_interface {
 
 #ifdef DLA_HAVE_DPLASMA
       case DPlasma: {
+        std::array<int, 6> timer_index;
         util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);
-        DistributedMatrix<ElType> mat_a_tile(tile_dist, mat_a);
-        int index1 = timer_part.save_time();
-        DistributedMatrix<ElType> mat_b_tile(tile_dist, mat_b);
-        int index2 = timer_part.save_time();
-        DistributedMatrix<ElType> mat_c_tile(tile_dist, mat_c);
-        int index3 = timer_part.save_time();
-        auto matrix_a_info = mat_a_tile.getDPlasmaDescription();
-        auto matrix_b_info = mat_b_tile.getDPlasmaDescription();
-        auto matrix_c_info = mat_c_tile.getDPlasmaDescription();
-        const parsec_tiled_matrix_dc_t* dp_mat_a =
-            reinterpret_cast<const parsec_tiled_matrix_dc_t*>(&std::get<0>(matrix_a_info));
-        const parsec_tiled_matrix_dc_t* dp_mat_b =
-            reinterpret_cast<const parsec_tiled_matrix_dc_t*>(&std::get<0>(matrix_b_info));
-        parsec_tiled_matrix_dc_t* dp_mat_c =
-            reinterpret_cast<parsec_tiled_matrix_dc_t*>(&std::get<0>(matrix_c_info));
+        timer_index[0] = 0;
+        {
+          auto mat_a_tile_ptr = mat_a.convertConst(tile_dist);
+          timer_index[1] = timer_part.save_time();
+          auto mat_b_tile_ptr = mat_b.convertConst(tile_dist);
+          timer_index[2] = timer_part.save_time();
+          DistributedMatrix<ElType> mat_c_tile(tile_dist, mat_c);
+          timer_index[3] = timer_part.save_time();
+          auto matrix_a_info = mat_a_tile_ptr->getDPlasmaDescription();
+          auto matrix_b_info = mat_b_tile_ptr->getDPlasmaDescription();
+          auto matrix_c_info = mat_c_tile.getDPlasmaDescription();
+          const parsec_tiled_matrix_dc_t* dp_mat_a =
+              reinterpret_cast<const parsec_tiled_matrix_dc_t*>(&std::get<0>(matrix_a_info));
+          const parsec_tiled_matrix_dc_t* dp_mat_b =
+              reinterpret_cast<const parsec_tiled_matrix_dc_t*>(&std::get<0>(matrix_b_info));
+          parsec_tiled_matrix_dc_t* dp_mat_c =
+              reinterpret_cast<parsec_tiled_matrix_dc_t*>(&std::get<0>(matrix_c_info));
 
-        dplasma_wrappers::dplasma_run<dplasma_wrappers::pgemm<ElType>>(
-            std::get<1>(matrix_c_info), dplasma_wrappers::plasmaTrans(trans_a),
-            dplasma_wrappers::plasmaTrans(trans_b), util::castToC(alpha), dp_mat_a, dp_mat_b,
-            util::castToC(beta), dp_mat_c);
+          dplasma_wrappers::dplasma_run<dplasma_wrappers::pgemm<ElType>>(
+              std::get<1>(matrix_c_info), dplasma_wrappers::plasmaTrans(trans_a),
+              dplasma_wrappers::plasmaTrans(trans_b), util::castToC(alpha), dp_mat_a, dp_mat_b,
+              util::castToC(beta), dp_mat_c);
 
-        int index4 = timer_part.save_time();
+          timer_index[4] = timer_part.save_time();
+        }
+        timer_index[5] = timer_part.save_time();
         if (comm_grid.id2D() == std::make_pair(0, 0)) {
           double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
           double flop = util::nrOps<ElType>(mnk, mnk);
-          timer_part.print_elapsed(0, index1, "Conversion a: ");
-          timer_part.print_elapsed(index1, index2, "Conversion b: ");
-          timer_part.print_elapsed(index2, index3, "Conversion c: ");
-          timer_part.print_elapsed(index3, index4, "Matrix Matrix Multiplication (DPlasma) time: ",
-                                   flop);
+          timer_part.print_elapsed(timer_index[0], timer_index[1], "Conversion a: ");
+          timer_part.print_elapsed(timer_index[1], timer_index[2], "Conversion b: ");
+          timer_part.print_elapsed(timer_index[2], timer_index[3], "Conversion c: ");
+          timer_part.print_elapsed(timer_index[3], timer_index[4],
+                                   "Matrix Matrix Multiplication (DPlasma) time: ", flop);
+          timer_part.print_elapsed(timer_index[4], timer_index[5], "Back conversion c: ");
         }
 
         break;
@@ -118,13 +130,14 @@ namespace dla_interface {
             errorMessage("Matrix multiplication is not available for solver ", solver));
     }
 
-    int index_end = timer_full.save_time();
+    int timer_index_end = timer_full.save_time();
     if (comm_grid.id2D() == std::make_pair(0, 0)) {
       double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
       double flop = util::nrOps<ElType>(mnk, mnk);
-      timer_full.print_elapsed(0, index_end, "DLA Matrix Matrix Multiplication time: ", flop);
+      timer_full.print_elapsed(0, timer_index_end, "DLA Matrix Matrix Multiplication time: ", flop);
     }
   }
+
   template <class ElType>
   void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType solver,
                              int print_timers = 0) {
