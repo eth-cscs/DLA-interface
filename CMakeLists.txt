@@ -17,6 +17,7 @@ include(dla_utils)
 include(dla_lapack)
 include(dla_scalapack)
 include(dla_dplasma)
+include(dla_hwloc)
 # ---------------------------------------------------------------------------
 # Boost
 # ---------------------------------------------------------------------------
@@ -31,6 +32,8 @@ dla_find_scalapack()
 
 dla_find_dplasma()
 
+dla_find_hwloc()
+
 include(CTest)
 enable_testing()
 setoption(DLA_ALL_TESTS_USE_RUNNER BOOL "OFF" "Specify if the single rank tests has to use the runner as well")
@@ -41,6 +44,7 @@ include_directories(
     ${DLA_DPLASMA_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${DLA_LAPACK_INCLUDE_PATH}
+    ${HWLOC_INCLUDE_DIRS}
 )
 
 # ---------------------------------------------------------------------------
@@ -57,9 +61,9 @@ set(DLA_LIBS
     ${Boost_LIBRARIES}
     ${MPI_CXX_LIBRARIES}
     ${DLA_DPLASMA_LIBS}
-    ${DLA_DPLASMA_LIBS}
     ${DLA_SCALAPACK_LIBRARY}
     ${DLA_LAPACK_LIBRARY}
+    ${DLA_HWLOC_LIBS}
 )
 
 message(${DLA_LIBS})
