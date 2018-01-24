@@ -22,6 +22,7 @@ include(dla_dplasma)
 # ---------------------------------------------------------------------------
 find_package(Boost COMPONENTS program_options REQUIRED)
 
+include(dla_openmp)
 include(dla_mpi)
 
 dla_find_lapack()
@@ -39,6 +40,7 @@ include_directories(
     ${MPI_CXX_INCLUDE_PATH}
     ${DLA_DPLASMA_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
+    ${DLA_LAPACK_INCLUDE_PATH}
 )
 
 # ---------------------------------------------------------------------------
