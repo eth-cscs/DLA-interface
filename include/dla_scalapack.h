@@ -3,6 +3,7 @@
 
 #include "scalapack.h"
 #include "error_message.h"
+#include "util_thread.h"
 
 #ifdef DLA_HAVE_SCALAPACK
 namespace dla_interface {
@@ -13,6 +14,8 @@ namespace dla_interface {
                       int* descb, float beta, float* c, int ic, int jc, int* descc) {
       const char char_trans_a = static_cast<char>(trans_a);
       const char char_trans_b = static_cast<char>(trans_b);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::psgemm_(&char_trans_a, &char_trans_b, &m, &n, &k, &alpha, a, &ia, &ja, desca, b,
                          &ib, &jb, descb, &beta, c, &ic, &jc, descc);
     }
@@ -21,6 +24,8 @@ namespace dla_interface {
                       int* descb, double beta, double* c, int ic, int jc, int* descc) {
       const char char_trans_a = static_cast<char>(trans_a);
       const char char_trans_b = static_cast<char>(trans_b);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::pdgemm_(&char_trans_a, &char_trans_b, &m, &n, &k, &alpha, a, &ia, &ja, desca, b,
                          &ib, &jb, descb, &beta, c, &ic, &jc, descc);
     }
@@ -30,6 +35,8 @@ namespace dla_interface {
                       std::complex<float> beta, std::complex<float>* c, int ic, int jc, int* descc) {
       const char char_trans_a = static_cast<char>(trans_a);
       const char char_trans_b = static_cast<char>(trans_b);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::pcgemm_(&char_trans_a, &char_trans_b, &m, &n, &k, &alpha, a, &ia, &ja, desca, b,
                          &ib, &jb, descb, &beta, c, &ic, &jc, descc);
     }
@@ -39,26 +46,36 @@ namespace dla_interface {
                       std::complex<double> beta, std::complex<double>* c, int ic, int jc, int* descc) {
       const char char_trans_a = static_cast<char>(trans_a);
       const char char_trans_b = static_cast<char>(trans_b);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::pzgemm_(&char_trans_a, &char_trans_b, &m, &n, &k, &alpha, a, &ia, &ja, desca, b,
                          &ib, &jb, descb, &beta, c, &ic, &jc, descc);
     }
 
     inline void ppotrf(UpLo uplo, int n, float* a, int ia, int ja, int* desca, int& info) {
       const char char_uplo = static_cast<char>(uplo);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::pspotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
     }
     inline void ppotrf(UpLo uplo, int n, double* a, int ia, int ja, int* desca, int& info) {
       const char char_uplo = static_cast<char>(uplo);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::pdpotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
     }
     inline void ppotrf(UpLo uplo, int n, std::complex<float>* a, int ia, int ja, int* desca,
                        int& info) {
       const char char_uplo = static_cast<char>(uplo);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::pcpotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
     }
     inline void ppotrf(UpLo uplo, int n, std::complex<double>* a, int ia, int ja, int* desca,
                        int& info) {
       const char char_uplo = static_cast<char>(uplo);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::pzpotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
     }
   }
