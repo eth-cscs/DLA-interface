@@ -32,6 +32,7 @@ dla_find_dplasma()
 
 include(CTest)
 enable_testing()
+setoption(DLA_ALL_TESTS_USE_RUNNER BOOL "OFF" "Specify if the single rank tests has to use the runner as well")
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
