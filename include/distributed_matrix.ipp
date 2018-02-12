@@ -138,6 +138,20 @@ DistributedMatrix<ElType>& DistributedMatrix<ElType>::operator=(DistributedMatri
 }
 
 template <class ElType>
+bool DistributedMatrix<ElType>::isSameMatrix(const DistributedMatrix& rhs) const {
+  if (this == &rhs)
+    return true;
+
+  if (ptr_->ptr() == rhs.ptr_->ptr() && size_ == rhs.size_ && block_size_ == rhs.block_size_ &&
+      base_index_ == rhs.base_index_ && ld_ == rhs.ld_ &&
+      leading_nr_blocks_ == rhs.leading_nr_blocks_ && distribution_ == rhs.distribution_ &&
+      comm_grid_ == rhs.comm_grid_)
+    return true;
+
+  return false;
+}
+
+template <class ElType>
 DistributedMatrix<ElType>& DistributedMatrix<ElType>::copy(const DistributedMatrix& rhs) {
   if (size_ != rhs.size_)
     throw std::invalid_argument(errorMessage("Sizes do not match: ", size_, " != ", rhs.size_));

@@ -46,7 +46,14 @@ namespace dla_interface {
         {
           auto mat_a_scalapack_ptr = mat_a.convertConst(scalapack_dist);
           timer_index[1] = timer_part.save_time();
-          auto mat_b_scalapack_ptr = mat_b.convertConst(scalapack_dist);
+          decltype(mat_a_scalapack_ptr) mat_b_scalapack_ptr;
+          // if mat_a and mat_b are the same matrix (same memory) only mat_a is converted,
+          // otherwise convert both matrices.
+          if (mat_a.isSameMatrix(mat_b))
+            mat_b_scalapack_ptr = mat_a_scalapack_ptr;
+          else
+            mat_b_scalapack_ptr = mat_b.convertConst(scalapack_dist);
+
           timer_index[2] = timer_part.save_time();
           DistributedMatrix<ElType> mat_c_scalapack(scalapack_dist, mat_c);
           timer_index[3] = timer_part.save_time();
@@ -88,7 +95,14 @@ namespace dla_interface {
         {
           auto mat_a_tile_ptr = mat_a.convertConst(tile_dist);
           timer_index[1] = timer_part.save_time();
-          auto mat_b_tile_ptr = mat_b.convertConst(tile_dist);
+          decltype(mat_a_tile_ptr) mat_b_tile_ptr;
+          // if mat_a and mat_b are the same matrix (same memory) only mat_a is converted,
+          // otherwise convert both matrices.
+          if (mat_a.isSameMatrix(mat_b))
+            mat_b_tile_ptr = mat_a_tile_ptr;
+          else
+            mat_b_tile_ptr = mat_b.convertConst(tile_dist);
+
           timer_index[2] = timer_part.save_time();
           DistributedMatrix<ElType> mat_c_tile(tile_dist, mat_c);
           timer_index[3] = timer_part.save_time();
