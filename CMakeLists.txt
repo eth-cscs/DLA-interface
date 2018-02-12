@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(cholesky CXX C)
+project(DLA_interface CXX C)
 
 set(CMAKE_CXX_STANDARD 14)
 
