@@ -117,7 +117,7 @@ namespace dla_interface {
 
       private:
       void printThreadBindingDebugInfo(const char* str) {
-#ifndef DLA_THREAD_DEBUG_INFO
+#ifdef DLA_THREAD_DEBUG_INFO
         auto tmp = getCpuBind();
         std::cout << str << " " << tmp.str() << std::endl;
 #endif

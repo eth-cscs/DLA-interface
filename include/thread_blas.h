@@ -51,7 +51,7 @@ namespace dla_interface {
     }
 
     inline void printOmpBlasThreadDebugInfo(const char* str) {
-#ifndef DLA_THREAD_DEBUG_INFO
+#ifdef DLA_THREAD_DEBUG_INFO
       auto tmp = getOmpBlasThreads();
       std::cout << str << " " << tmp.omp_num_threads
 #ifdef DLA_HAVE_MKL_NUM_THREADS_UTIL

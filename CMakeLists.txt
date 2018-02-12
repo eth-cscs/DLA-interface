@@ -34,6 +34,11 @@ dla_find_dplasma()
 
 dla_find_hwloc()
 
+setoption(DLA_PRINT_DEBUG_INFO BOOL "OFF" "Enables extra output for debugging purpose.")
+if(DLA_PRINT_DEBUG_INFO)
+  add_definitions("-DDLA_THREAD_DEBUG_INFO")
+endif()
+
 include(CTest)
 enable_testing()
 setoption(DLA_ALL_TESTS_USE_RUNNER BOOL "OFF" "Specify if the single rank tests has to use the runner as well")
