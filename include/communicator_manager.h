@@ -4,7 +4,10 @@
 #include <map>
 #include <memory>
 #include <mpi.h>
+#include <tuple>
 #include "communicator_grid.h"
+#include "thread_binding.h"
+#include "thread_blas.h"
 #include "types.h"
 
 namespace dla_interface {
@@ -55,6 +58,29 @@ namespace dla_interface {
       // Throws a std::invalid_argument exception if no Communicator2DGrid is found.
       static Communicator2DGrid& getCommunicator2DGridFromMPIComm(MPI_Comm comm);
 
+#ifdef DLA_HAVE_SCALAPACK
+      // Returns the number of threads and cpuset for Scalapack.
+      static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getScalapackConfigInfo() {
+        return std::make_tuple(std::cref(comm_manager_->scalapack_nr_threads),
+                               std::cref(comm_manager_->scalapack_cpuset));
+      }
+#endif
+#ifdef DLA_HAVE_DPLASMA
+      // Returns the number of threads and cpuset for DPlasma.
+      static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getDPlasmaConfigInfo() {
+        return std::make_tuple(std::cref(comm_manager_->dplasma_nr_threads),
+                               std::cref(comm_manager_->dplasma_cpuset));
+      }
+#endif
+
+      static thread::CpuSet getCpuBind() {
+        return comm_manager_->getCpuBindInternal();
+      }
+
+      static void setCpuBind(const thread::CpuSet& cpuset) {
+        comm_manager_->setCpuBindInternal(cpuset);
+      }
+
       protected:
       Communicator2DGrid& communicator2DGrid(MPI_Comm base_comm, int row_size, int col_size,
                                              Ordering comm_ordering);
@@ -62,6 +88,14 @@ namespace dla_interface {
 #ifdef DLA_HAVE_SCALAPACK
       Communicator2DGrid& communicator2DGridFromBlacsContext(BlacsContextType id) const;
 #endif
+
+      thread::CpuSet getCpuBindInternal() {
+        return topo_.getCpuBind();
+      }
+
+      void setCpuBindInternal(const thread::CpuSet& cpuset) {
+        topo_.setCpuBind(cpuset);
+      }
 
       private:
       CommunicatorManager(int nr_cores = -1, int* argc = nullptr, char*** argv = nullptr,
@@ -86,6 +120,16 @@ namespace dla_interface {
       std::map<MPI_Comm, std::shared_ptr<Communicator2DGrid>> comm_grid_map;
 #ifdef DLA_HAVE_SCALAPACK
       std::map<BlacsContextType, std::shared_ptr<Communicator2DGrid>> ictxt_grid_map;
+#endif
+
+      thread::SystemTopology topo_;
+#ifdef DLA_HAVE_SCALAPACK
+      thread::NumThreads scalapack_nr_threads;
+      thread::CpuSet scalapack_cpuset;
+#endif
+#ifdef DLA_HAVE_DPLASMA
+      thread::NumThreads dplasma_nr_threads;
+      thread::CpuSet dplasma_cpuset;
 #endif
     };
   }

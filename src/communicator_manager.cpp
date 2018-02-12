@@ -92,7 +92,7 @@ namespace dla_interface {
 
     CommunicatorManager::CommunicatorManager(int nr_cores, int* argc, char*** argv,
                                              bool initialize_mpi)
-     : init_mpi_(initialize_mpi) {
+     : init_mpi_(initialize_mpi), topo_() {
       if (init_mpi_) {
         int provided;
         MPI_Init_thread(argc, argv, MPI_THREAD_SERIALIZED, &provided);
@@ -101,6 +101,13 @@ namespace dla_interface {
               "MPI cannot be initializd with MPI_THREAD_SERIALIZED. (provided = " +
               std::to_string(provided) + ")");
       }
+
+      thread::CpuSet application_cpuset = topo_.getCpuBind();
+#ifdef DLA_HAVE_SCALAPACK
+      scalapack_cpuset = application_cpuset;
+      scalapack_nr_threads = thread::getOmpBlasThreads();
+#endif
+
 #ifdef DLA_HAVE_DPLASMA
       if (argc == nullptr) {
         parsec_handle_ = parsec_init(nr_cores, nullptr, nullptr);
@@ -128,7 +135,10 @@ namespace dla_interface {
           *p_argv = tmp;
       }
 
+      dplasma_cpuset = topo_.getCpuBind();
+      dplasma_nr_threads = thread::NumThreads(1);
 #endif
+      topo_.setCpuBind(application_cpuset);
     }
 
     CommunicatorManager::~CommunicatorManager() {

@@ -17,11 +17,13 @@ include(dla_utils)
 include(dla_lapack)
 include(dla_scalapack)
 include(dla_dplasma)
+include(dla_hwloc)
 # ---------------------------------------------------------------------------
 # Boost
 # ---------------------------------------------------------------------------
 find_package(Boost COMPONENTS program_options REQUIRED)
 
+include(dla_openmp)
 include(dla_mpi)
 
 dla_find_lapack()
@@ -30,14 +32,24 @@ dla_find_scalapack()
 
 dla_find_dplasma()
 
+dla_find_hwloc()
+
+setoption(DLA_PRINT_DEBUG_INFO BOOL "OFF" "Enables extra output for debugging purpose.")
+if(DLA_PRINT_DEBUG_INFO)
+  add_definitions("-DDLA_THREAD_DEBUG_INFO")
+endif()
+
 include(CTest)
 enable_testing()
+setoption(DLA_ALL_TESTS_USE_RUNNER BOOL "OFF" "Specify if the single rank tests has to use the runner as well")
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${MPI_CXX_INCLUDE_PATH}
     ${DLA_DPLASMA_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
+    ${DLA_LAPACK_INCLUDE_PATH}
+    ${HWLOC_INCLUDE_DIRS}
 )
 
 # ---------------------------------------------------------------------------
@@ -54,9 +66,9 @@ set(DLA_LIBS
     ${Boost_LIBRARIES}
     ${MPI_CXX_LIBRARIES}
     ${DLA_DPLASMA_LIBS}
-    ${DLA_DPLASMA_LIBS}
     ${DLA_SCALAPACK_LIBRARY}
     ${DLA_LAPACK_LIBRARY}
+    ${DLA_HWLOC_LIBS}
 )
 
 message(${DLA_LIBS})

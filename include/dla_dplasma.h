@@ -6,6 +6,7 @@
 #include <mpi.h>
 #include "communicator_manager.h"
 #include "ordered_dplasma.h"
+#include "util_thread.h"
 
 namespace dla_interface {
   namespace dplasma_wrappers {
@@ -37,6 +38,10 @@ namespace dla_interface {
       // TODO: uncomment this after parsec issue #135 is fixed
       //       and remove continue in test_dla_interface.cpp:66.
       // parsec_remote_dep_set_ctx(parsec, &comm);
+
+      // Set number of BLAS threads and CPU binding. (Reset on object destruction)
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getDPlasmaConfigInfo());
+
       // Creates and schedules the operation
       parsec_taskpool_t* taskpool = Routine::create(args...);
       parsec_enqueue(parsec, taskpool);
