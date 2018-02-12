@@ -1419,6 +1419,103 @@ TEST(DistributedMatrixTest, LocalSubMatrix) {
   EXPECT_TRUE(checkLocalMatrix(*psubmat3, el_val));
 }
 
+TEST(DistributedMatrixTest, isSameMatrix) {
+  using Type = double;
+
+  auto& comm1 = *comms[0];
+  auto& comm2 = *comms[1];
+
+  int m = 17;
+  int n = 13;
+  int mb = 2;
+  int nb = 3;
+  int ld = 32;
+
+  for (auto dist1 : {scalapack_dist, tile_dist}) {
+    DistributedMatrix<Type> mat1(m, n, mb, nb, comm1, dist1);
+    EXPECT_TRUE(mat1.isSameMatrix(mat1));
+
+    // different memory
+    DistributedMatrix<Type> mat2(m, n, mb, nb, comm1, dist1);
+    EXPECT_FALSE(mat1.isSameMatrix(mat2));
+
+    DistributedMatrix<Type> mat3(m, n, mb, nb, comm1, mat1.distribution(), mat1.ptr(),
+                                 mat1.localStorageSize(), mat1.leadingDimension(),
+                                 mat1.leadingNumberOfBlocks(), mat1.distribution());
+    EXPECT_TRUE(mat1.isSameMatrix(mat3));
+
+    // different size
+    DistributedMatrix<Type> mat4(m - 1, n, mb, nb, comm1, mat1.distribution(), mat1.ptr(),
+                                 mat1.localStorageSize(), mat1.leadingDimension(),
+                                 mat1.leadingNumberOfBlocks(), mat1.distribution());
+    EXPECT_FALSE(mat1.isSameMatrix(mat4));
+
+    // different size
+    DistributedMatrix<Type> mat5(m, n - 1, mb, nb, comm1, mat1.distribution(), mat1.ptr(),
+                                 mat1.localStorageSize(), mat1.leadingDimension(),
+                                 mat1.leadingNumberOfBlocks(), mat1.distribution());
+    EXPECT_FALSE(mat1.isSameMatrix(mat5));
+  }
+
+  std::size_t len = (4 * (mb + 1) + ld) * (n + nb + 1);
+  std::vector<Type> buf1(len);
+  std::vector<Type> buf2(len);
+  for (auto dist1 : {scalapack_dist, tile_dist}) {
+    int ld1 = dist1 == scalapack_dist ? ld : mb + 1;
+    int ld_nr_blocks1 = dist1 == scalapack_dist ? 1 : m / mb + 1;
+    DistributedMatrix<Type> mat1(m, n, mb, nb, comm1, dist1, &buf1[0], len, ld1, ld_nr_blocks1,
+                                 dist1);
+
+    DistributedMatrix<Type> mat2(m, n, mb, nb, comm1, dist1, &buf1[0], len, ld1, ld_nr_blocks1,
+                                 dist1);
+    EXPECT_TRUE(mat1.isSameMatrix(mat2));
+
+    // different block size
+    int ld_nr_blocks = dist1 == scalapack_dist ? 1 : m / (mb + 1) + 1;
+    DistributedMatrix<Type> mat3(m, n, mb + 1, nb, comm1, dist1, &buf1[0], len, ld1, ld_nr_blocks,
+                                 dist1);
+    EXPECT_FALSE(mat1.isSameMatrix(mat3));
+
+    // different block size
+    DistributedMatrix<Type> mat4(m, n, mb, nb + 1, comm1, dist1, &buf1[0], len, ld1, ld_nr_blocks1,
+                                 dist1);
+    EXPECT_FALSE(mat1.isSameMatrix(mat4));
+
+    // different communicator
+    DistributedMatrix<Type> mat5(m, n, mb, nb, comm2, mat1.distribution(), mat1.ptr(),
+                                 mat1.localStorageSize(), mat1.leadingDimension(),
+                                 mat1.leadingNumberOfBlocks(), mat1.distribution());
+    EXPECT_FALSE(mat1.isSameMatrix(mat5));
+
+    // different distribution
+    for (auto dist2 : {scalapack_dist, tile_dist}) {
+      int ld2 = dist2 == scalapack_dist ? ld : mb + 1;
+      int ld_nr_blocks2 = dist2 == scalapack_dist ? 1 : m / mb + 1;
+      DistributedMatrix<Type> mat(m, n, mb, nb, comm1, dist2, &buf1[0], len, ld2, ld_nr_blocks2,
+                                  dist2);
+      if (dist1 == dist2)
+        EXPECT_TRUE(mat1.isSameMatrix(mat));
+      else
+        EXPECT_FALSE(mat1.isSameMatrix(mat));
+    }
+
+    // different memory
+    DistributedMatrix<Type> mat6(m, n, mb, nb + 1, comm1, dist1, &buf2[0], len, ld1, ld_nr_blocks1,
+                                 dist1);
+    EXPECT_FALSE(mat1.isSameMatrix(mat6));
+
+    // different leading dimension
+    DistributedMatrix<Type> mat7(m, n, mb, nb, comm1, dist1, &buf2[0], len, ld1 + 1, ld_nr_blocks1,
+                                 dist1);
+    EXPECT_FALSE(mat1.isSameMatrix(mat7));
+
+    // different leading number of blocks
+    DistributedMatrix<Type> mat8(m, n, mb, nb, comm1, dist1, &buf2[0], len, ld1, ld_nr_blocks1 + 1,
+                                 dist1);
+    EXPECT_FALSE(mat1.isSameMatrix(mat8));
+  }
+}
+
 TEST(DistributedMatrixTest, Copy) {
   // This test handle the case when the distribution is the same and when is different.
   using Type = double;
