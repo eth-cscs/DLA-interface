@@ -182,6 +182,12 @@ namespace dla_interface {
       return res;
     }
 #endif
+    // Returns true if this and are the same matrix, i.e.
+    // - *this and rhs have the same shape,
+    // - *this and rhs are distributed in the same way,
+    // - *this and rhs reference the same memory.
+    bool isSameMatrix(const DistributedMatrix& rhs) const;
+
     // Copies the value of the elements of rhs.
     // Throws std::invalid_argument if *this and rhs do not have the same size.
     // If size() and rhs.size() != (0, 0):
