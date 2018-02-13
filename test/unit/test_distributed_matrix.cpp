@@ -860,6 +860,7 @@ TEST(DistributedMatrixTest, ElementAndPointer) {
     for (auto dist : {scalapack_dist, tile_dist}) {
       vmat.emplace_back(17, 13, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(13, 7, 3, 3, 16, *comm_ptr, dist);
+      vmat.emplace_back(5, 2, 4, 4, *comm_ptr, dist);
       vmat.emplace_back(0, 7, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(7, 0, 2, 2, 2, *comm_ptr, dist);
       vmat.emplace_back();
@@ -977,6 +978,7 @@ TEST(DistributedMatrixTest, CopyConstructor) {
     for (auto dist : {scalapack_dist, tile_dist}) {
       vmat.emplace_back(17, 13, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(13, 7, 3, 3, 16, *comm_ptr, dist);
+      vmat.emplace_back(5, 2, 4, 4, *comm_ptr, dist);
       vmat.emplace_back(0, 7, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(7, 0, 2, 2, 2, *comm_ptr, dist);
     }
@@ -1029,6 +1031,7 @@ TEST(DistributedMatrixTest, AssignementOperator) {
     for (auto dist : {scalapack_dist, tile_dist}) {
       vmat.emplace_back(17, 13, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(13, 7, 3, 3, 16, *comm_ptr, dist);
+      vmat.emplace_back(5, 2, 4, 4, *comm_ptr, dist);
       vmat.emplace_back(0, 7, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(7, 0, 2, 2, 2, *comm_ptr, dist);
     }
@@ -1094,6 +1097,7 @@ TEST(DistributedMatrixTest, MoveConstructor) {
     for (auto dist : {scalapack_dist, tile_dist}) {
       vmat.emplace_back(17, 13, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(13, 7, 3, 3, 16, *comm_ptr, dist);
+      vmat.emplace_back(5, 2, 4, 4, *comm_ptr, dist);
       vmat.emplace_back(0, 7, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(7, 0, 2, 2, 2, *comm_ptr, dist);
     }
@@ -1136,6 +1140,7 @@ TEST(DistributedMatrixTest, MoveAssignementOperator) {
     for (auto dist : {scalapack_dist, tile_dist}) {
       vmat.emplace_back(17, 13, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(13, 7, 3, 3, 16, *comm_ptr, dist);
+      vmat.emplace_back(5, 2, 4, 4, *comm_ptr, dist);
       vmat.emplace_back(0, 7, 2, 2, *comm_ptr, dist);
       vmat.emplace_back(7, 0, 2, 2, 2, *comm_ptr, dist);
     }
@@ -1188,6 +1193,7 @@ TEST(DistributedMatrixTest, SubMatrix) {
     for (auto dist : {scalapack_dist, tile_dist}) {
       vmat.emplace_back(13, 8, 2, 3, *comm_ptr, dist);
       vmat.emplace_back(11, 7, 3, 2, 16, *comm_ptr, dist);
+      vmat.emplace_back(5, 2, 4, 4, *comm_ptr, dist);
       vmat.emplace_back(7, 0, 2, 2, 2, *comm_ptr, dist);
     }
   }
@@ -1317,6 +1323,7 @@ TEST(DistributedMatrixTest, LocalSubMatrix) {
     for (auto dist : {scalapack_dist, tile_dist}) {
       vmat.emplace_back(13, 8, 2, 3, *comm_ptr, dist);
       vmat.emplace_back(11, 7, 3, 2, 16, *comm_ptr, dist);
+      vmat.emplace_back(5, 2, 4, 4, *comm_ptr, dist);
       vmat.emplace_back(7, 0, 2, 2, 2, *comm_ptr, dist);
     }
   }
