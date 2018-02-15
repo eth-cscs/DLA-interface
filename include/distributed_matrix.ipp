@@ -162,21 +162,16 @@ DistributedMatrix<ElType>& DistributedMatrix<ElType>::copy(const DistributedMatr
   if (block_size_ != rhs.block_size_)
     throw std::invalid_argument(
         errorMessage("Block sizes do not match: ", block_size_, " != ", rhs.block_size_));
-  if (local_size_ != rhs.local_size_)
-    throw std::invalid_argument(
-        errorMessage("Local sizes do not match: ", block_size_, " != ", rhs.block_size_));
   if (getRankId2D(0, 0) != rhs.getRankId2D(0, 0))
     throw std::invalid_argument(errorMessage("Element (0, 0) is on different ranks: ",
                                              getRankId2D(0, 0), " != ", rhs.getRankId2D(0, 0)));
-  if (getGlobal2DIndex(Local2DIndex(0, 0)) != rhs.getGlobal2DIndex(Local2DIndex(0, 0)))
-    throw std::invalid_argument(errorMessage(
-        "Elements are on different nodes: Global index of ", Local2DIndex(0, 0), " are different: ",
-        getGlobal2DIndex(Local2DIndex(0, 0)), " != ", rhs.getGlobal2DIndex(Local2DIndex(0, 0))));
-  if (local_base_index_.row % block_size_.first != rhs.local_base_index_.row % rhs.block_size_.first ||
-      local_base_index_.col % block_size_.second != rhs.local_base_index_.col % rhs.block_size_.second)
+  if (base_index_.row % block_size_.first != rhs.base_index_.row % rhs.block_size_.first ||
+      base_index_.col % block_size_.second != rhs.base_index_.col % rhs.block_size_.second)
     throw std::invalid_argument(
-        errorMessage("Elements are on different nodes: Local base index are: ", local_base_index_,
-                     " and ", rhs.local_base_index_));
+        errorMessage("Elements are on different nodes: Global base index are: ", base_index_,
+                     " and ", rhs.base_index_));
+  if (local_size_ == std::make_pair(0, 0))
+    return *this;
 
   if (distribution_ == scalapack_dist && rhs.distribution_ == scalapack_dist)
     util::memory::copy2D(local_size_, rhs.ptr(), rhs.ld_, ptr(), ld_);
