@@ -40,7 +40,7 @@ namespace dla_interface {
         return *this;
       }
 
-      // Use the memory pointed by ptr and cretes an object.
+      // Use the memory pointed by ptr and creates an object.
       // Precondition: ptr[i] is valid for i < size.
       MemoryAllocator(ElementType* ptr, size_t size) : ptr_(ptr), size_(size), allocated_(false) {
         if (size > 0 && ptr == nullptr)
