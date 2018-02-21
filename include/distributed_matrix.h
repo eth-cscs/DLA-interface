@@ -72,7 +72,7 @@ namespace dla_interface {
     //     sizes.
     //     - if desc[6] (rsrc) != 0 or desc[7] (csrc) != 0.
     DistributedMatrix(DistributionType distribution, int m, int n, ElementType* ptr,
-                      ScalapackIndex i, ScalapackIndex j, ScalapackDescriptor desc);
+                      ScalapackIndex i, ScalapackIndex j, constScalapackDescriptor desc);
 #endif
 #ifdef DLA_HAVE_DPLASMA
 // TODO: check this and test it.
@@ -174,7 +174,7 @@ namespace dla_interface {
     static std::shared_ptr<const DistributedMatrix> convertConst(DistributionType distribution,
                                                                  int m, int n, const ElementType* ptr,
                                                                  ScalapackIndex i, ScalapackIndex j,
-                                                                 ScalapackDescriptor desc) {
+                                                                 constScalapackDescriptor desc) {
       ElementType* tmp_ptr = const_cast<ElementType*>(ptr);
       auto res =
           std::make_shared<DistributedMatrix<ElementType>>(distribution, m, n, tmp_ptr, i, j, desc);
