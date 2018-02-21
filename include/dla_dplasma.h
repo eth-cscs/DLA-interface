@@ -97,6 +97,41 @@ namespace dla_interface {
     };
 
     template <class ElType>
+    struct pgetrf {};
+
+    template <>
+    struct pgetrf<float> {
+      template <class... Args>
+      static auto create(Args... args) {
+        return dplasma_sgetrf_New(args...);
+      }
+    };
+
+    template <>
+    struct pgetrf<double> {
+      template <class... Args>
+      static auto create(Args... args) {
+        return dplasma_dgetrf_New(args...);
+      }
+    };
+
+    template <>
+    struct pgetrf<std::complex<float>> {
+      template <class... Args>
+      static auto create(Args... args) {
+        return dplasma_cgetrf_New(args...);
+      }
+    };
+
+    template <>
+    struct pgetrf<std::complex<double>> {
+      template <class... Args>
+      static auto create(Args... args) {
+        return dplasma_zgetrf_New(args...);
+      }
+    };
+
+    template <class ElType>
     struct ppotrf {};
 
     template <>

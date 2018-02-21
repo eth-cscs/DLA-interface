@@ -2,6 +2,7 @@
 #define DLA_INTERFACE_DLA_INTERFACE_H
 
 #include <stdexcept>
+#include <vector>
 #include "distributed_matrix.h"
 #include "dla_scalapack.h"
 #include "dla_dplasma.h"
@@ -29,7 +30,16 @@ namespace dla_interface {
   void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType solver,
                              int print_timers = 0);
 
+  template <class ElType>
+  void LUFactorization(DistributedMatrix<ElType>& mat, std::vector<int>& ipiv, SolverType solver,
+                       int print_timers = 0);
+
+  template <class ElType>
+  void LUFactorization(DistributedMatrix<ElType>& mat, int* ipiv, SolverType solver,
+                       int print_timers = 0);
+
 #include "dla_interface/cholesky_factorization.ipp"
+#include "dla_interface/lu_factorization.ipp"
 #include "dla_interface/matrix_multiplication.ipp"
 }
 

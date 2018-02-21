@@ -33,6 +33,15 @@ namespace scalapack {
                const int* jb, const int* descb, const std::complex<double>* beta,
                std::complex<double>* c, const int* ic, const int* jc, const int* descc);
 
+  void psgetrf_(const int* m, const int* n, float* a, const int* ia, const int* ja,
+                const int* desca, int* ipiv, int* info);
+  void pdgetrf_(const int* m, const int* n, double* a, const int* ia, const int* ja,
+                const int* desca, int* ipiv, int* info);
+  void pcgetrf_(const int* m, const int* n, std::complex<float>* a, const int* ia, const int* ja,
+                const int* desca, int* ipiv, int* info);
+  void pzgetrf_(const int* m, const int* n, std::complex<double>* a, const int* ia, const int* ja,
+                const int* desca, int* ipiv, int* info);
+
   void pspotrf_(const char* uplo, const int* n, float* a, const int* ia, const int* ja,
                 const int* desca, int* info);
   void pdpotrf_(const char* uplo, const int* n, double* a, const int* ia, const int* ja,

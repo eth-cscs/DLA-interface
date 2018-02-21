@@ -47,6 +47,13 @@ namespace dla_interface {
   struct TypeInfo {};
 
   template <>
+  struct TypeInfo<int> {
+    using ElementType = int;
+#ifdef DLA_HAVE_DPLASMA
+    static constexpr matrix_type dplasma_type = matrix_Integer;
+#endif
+  };
+  template <>
   struct TypeInfo<float> {
     using ElementType = float;
     using BaseType = float;
