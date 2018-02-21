@@ -37,6 +37,8 @@ namespace dla_interface {
                                                " != ", m2, " || ", n, " != ", n2, " || ", k, " != ",
                                                k2));
 
+    double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
+    double flop = util::nrOps<ElType>(mnk, mnk);
     switch (solver) {
 #ifdef DLA_HAVE_SCALAPACK
       case ScaLAPACK: {
@@ -73,8 +75,6 @@ namespace dla_interface {
         }
         timer_index[5] = timer_part.save_time();
         if (comm_grid.id2D() == std::make_pair(0, 0)) {
-          double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
-          double flop = util::nrOps<ElType>(mnk, mnk);
           timer_part.print_elapsed(timer_index[0], timer_index[1], "Conversion a: ");
           timer_part.print_elapsed(timer_index[1], timer_index[2], "Conversion b: ");
           timer_part.print_elapsed(timer_index[2], timer_index[3], "Conversion c: ");
@@ -125,8 +125,6 @@ namespace dla_interface {
         }
         timer_index[5] = timer_part.save_time();
         if (comm_grid.id2D() == std::make_pair(0, 0)) {
-          double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
-          double flop = util::nrOps<ElType>(mnk, mnk);
           timer_part.print_elapsed(timer_index[0], timer_index[1], "Conversion a: ");
           timer_part.print_elapsed(timer_index[1], timer_index[2], "Conversion b: ");
           timer_part.print_elapsed(timer_index[2], timer_index[3], "Conversion c: ");
@@ -146,8 +144,6 @@ namespace dla_interface {
 
     int timer_index_end = timer_full.save_time();
     if (comm_grid.id2D() == std::make_pair(0, 0)) {
-      double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
-      double flop = util::nrOps<ElType>(mnk, mnk);
       timer_full.print_elapsed(0, timer_index_end, "DLA Matrix Matrix Multiplication time: ", flop);
     }
   }
@@ -159,6 +155,10 @@ namespace dla_interface {
     util::Timer<> timer_full(comm_grid.rowOrderedMPICommunicator(), print_timers > 0);
 
     // TODO: check size (square), blocksize?
+
+    double n = mat.size().first;
+    double n3 = n * n * n;
+    double flop = util::nrOps<ElType>(n3 / 6, n3 / 6);
     switch (solver) {
 #ifdef DLA_HAVE_SCALAPACK
       case ScaLAPACK: {
@@ -179,9 +179,6 @@ namespace dla_interface {
         }
         timer_index[3] = timer_part.save_time();
         if (comm_grid.id2D() == std::make_pair(0, 0)) {
-          double n = mat.size().first;
-          double n3 = n * n * n;
-          double flop = util::nrOps<ElType>(n3 / 6, n3 / 6);
           timer_part.print_elapsed(timer_index[0], timer_index[1], "Conversion a: ");
 
           timer_part.print_elapsed(timer_index[1], timer_index[2],
@@ -219,9 +216,6 @@ namespace dla_interface {
         }
         timer_index[3] = timer_part.save_time();
         if (comm_grid.id2D() == std::make_pair(0, 0)) {
-          double n = mat.size().first;
-          double n3 = n * n * n;
-          double flop = util::nrOps<ElType>(n3 / 6, n3 / 6);
           timer_part.print_elapsed(timer_index[0], timer_index[1], "Conversion a: ");
 
           timer_part.print_elapsed(timer_index[1], timer_index[2],
@@ -241,9 +235,6 @@ namespace dla_interface {
     }
     int index_end = timer_full.save_time();
     if (comm_grid.id2D() == std::make_pair(0, 0)) {
-      double n = mat.size().first;
-      double n3 = n * n * n;
-      double flop = util::nrOps<ElType>(n3 / 6, n3 / 6);
       timer_full.print_elapsed(0, index_end, "DLA Cholesky Factorization time: ", flop);
     }
   }
