@@ -59,7 +59,7 @@ DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_d_cholesky_factorization_, double, double
 DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization_, float, std::complex<float>)
 DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization_, double, std::complex<double>)
 
-#define DLA_DEFINE_MATRIX_MULTIPLY(function_name, CType, CppType)                                  \
+#define DLA_DEFINE_MATRIX_MULTIPLICATION(function_name, CType, CppType)                            \
   extern "C" int function_name(                                                                    \
       const char* trans_a, const char* trans_b, const int* m, const int* n, const int* k,          \
       const CType* alpha, const CType* a, const int* ia, const int* ja, const int* desca,          \
@@ -83,8 +83,8 @@ DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization_, double, std::c
     DistributedMatrix<CppType> mat_c(scalapack_dist, *m, *n, c_, *ic, *jc, descc);                 \
     SolverType solver_ = util::getSolverType(solver);                                              \
     try {                                                                                          \
-      matrixMultiply(trans_a_, trans_b_, *alpha_, *mat_a_ptr, *mat_b_ptr, *beta_, mat_c, solver_,  \
-                     dlai_print_timer_value);                                                      \
+      matrixMultiplication(trans_a_, trans_b_, *alpha_, *mat_a_ptr, *mat_b_ptr, *beta_, mat_c,     \
+                           solver_, dlai_print_timer_value);                                       \
     }                                                                                              \
     catch (std::invalid_argument & exc) {                                                          \
       return -1;                                                                                   \
@@ -92,7 +92,7 @@ DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization_, double, std::c
     return 0;                                                                                      \
   }
 
-DLA_DEFINE_MATRIX_MULTIPLY(dlai_s_matrix_multiply_, float, float)
-DLA_DEFINE_MATRIX_MULTIPLY(dlai_d_matrix_multiply_, double, double)
-DLA_DEFINE_MATRIX_MULTIPLY(dlai_c_matrix_multiply_, float, std::complex<float>)
-DLA_DEFINE_MATRIX_MULTIPLY(dlai_z_matrix_multiply_, double, std::complex<double>)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_s_matrix_multiplication_, float, float)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_d_matrix_multiplication_, double, double)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_c_matrix_multiplication_, float, std::complex<float>)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_z_matrix_multiplication_, double, std::complex<double>)

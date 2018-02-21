@@ -29,17 +29,17 @@ DLA_DECLARE_CHOLESKY_FACTORIZATION(dlai_d_cholesky_factorization_, double);
 DLA_DECLARE_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization_, float);
 DLA_DECLARE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization_, double);
 
-#define DLA_DECLARE_MATRIX_MULTIPLY(function_name, Type)                                          \
+#define DLA_DECLARE_MATRIX_MULTIPLICATION(function_name, Type)                                    \
   int function_name(const char* transa, const char* transb, const int* m, const int* n,           \
                     const int* k, const Type* alpha, const Type* a, const int* ia, const int* ja, \
                     const int* desca, const Type* b, const int* ib, const int* jb,                \
                     const int* descb, const Type* beta, Type* c, const int* ic, const int* jc,    \
                     const int* descc, const char* solver)
 
-DLA_DECLARE_MATRIX_MULTIPLY(dlai_s_matrix_multiply_, float);
-DLA_DECLARE_MATRIX_MULTIPLY(dlai_d_matrix_multiply_, double);
-DLA_DECLARE_MATRIX_MULTIPLY(dlai_c_matrix_multiply_, float);
-DLA_DECLARE_MATRIX_MULTIPLY(dlai_z_matrix_multiply_, double);
+DLA_DECLARE_MATRIX_MULTIPLICATION(dlai_s_matrix_multiplication_, float);
+DLA_DECLARE_MATRIX_MULTIPLICATION(dlai_d_matrix_multiplication_, double);
+DLA_DECLARE_MATRIX_MULTIPLICATION(dlai_c_matrix_multiplication_, float);
+DLA_DECLARE_MATRIX_MULTIPLICATION(dlai_z_matrix_multiplication_, double);
 
 #ifdef __cplusplus
 }

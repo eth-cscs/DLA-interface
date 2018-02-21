@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
           }
         }
 
-        matrixMultiply(NoTrans, Trans, -1., mat, mat, 1., *mat_copy, solver, 2);
+        matrixMultiplication(NoTrans, Trans, -1., mat, mat, 1., *mat_copy, solver, 2);
       }
       else {
         for (int j = 0; j < mat.localSize().second; ++j) {
@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
           }
         }
 
-        matrixMultiply(Trans, NoTrans, -1., mat, mat, 1., *mat_copy, solver, 2);
+        matrixMultiplication(Trans, NoTrans, -1., mat, mat, 1., *mat_copy, solver, 2);
       }
 
       for (int j = 0; j < mat_copy->localSize().second; ++j) {
