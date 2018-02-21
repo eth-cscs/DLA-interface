@@ -34,6 +34,15 @@ DLA_DECLARE_CHOLESKY_FACTORIZATION(dlai_d_cholesky_factorization, double);
 DLA_DECLARE_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization, float);
 DLA_DECLARE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, double);
 
+#define DLA_DECLARE_LU_FACTORIZATION(function_name, Type)                              \
+  int function_name(const int* m, const int* n, Type* a, const int* ia, const int* ja, \
+                    const int* desca, int* ipiv, const char* solver)
+
+DLA_DECLARE_LU_FACTORIZATION(dlai_s_lu_factorization, float);
+DLA_DECLARE_LU_FACTORIZATION(dlai_d_lu_factorization, double);
+DLA_DECLARE_LU_FACTORIZATION(dlai_c_lu_factorization, float);
+DLA_DECLARE_LU_FACTORIZATION(dlai_z_lu_factorization, double);
+
 #define DLA_DECLARE_MATRIX_MULTIPLICATION(function_name, Type)                                    \
   int function_name(const char* transa, const char* transb, const int* m, const int* n,           \
                     const int* k, const Type* alpha, const Type* a, const int* ia, const int* ja, \
