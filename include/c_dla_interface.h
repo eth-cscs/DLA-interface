@@ -17,6 +17,11 @@ void dlai_finalize_();
 int dlai_create_2d_grid_(const MPI_Fint* base_comm, const int* row_size, const int* col_size,
                          const char* ordering);
 
+int dlai_create_2d_grid_blacs_(int* blacs_handle, const int* row_size, const int* col_size,
+                               const char* ordering);
+
+void dlai_free_2d_grid_blacs_(int* blacs_context);
+
 int dlai_get_print_timer_option_();
 void dlai_set_print_timer_option_(int print_timer);
 

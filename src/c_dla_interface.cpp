@@ -30,6 +30,17 @@ extern "C" int dlai_create_2d_grid_(const MPI_Fint* base_comm, const int* row_si
       .blacsContext();
 }
 
+extern "C" int dlai_create_2d_grid_blacs_(int* blacs_handle, const int* row_size,
+                                          const int* col_size, const char* ordering) {
+  return comm::CommunicatorManager::createCommunicator2DGridBlacs(
+             *blacs_handle, *row_size, *col_size, util::getOrdering(*ordering))
+      .blacsContext();
+}
+
+extern "C" void dlai_free_2d_grid_blacs_(int* blacs_context) {
+  return comm::CommunicatorManager::free2DGridFromBlacsContext(*blacs_context);
+}
+
 extern "C" int dlai_get_print_timer_option_() {
   return dlai_print_timer_value;
 }

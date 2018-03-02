@@ -2,6 +2,7 @@
 
 #include <mpi.h>
 #include <stdexcept>
+#include <vector>
 #include "blacs.h"
 #include "gtest/gtest.h"
 #include "util_mpi.h"

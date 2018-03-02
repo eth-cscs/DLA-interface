@@ -1,14 +1,16 @@
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 #include <map>
 #include <memory>
 #include <mpi.h>
 #include <stdexcept>
 #include <string>
-#include "types.h"
+#include "blacs.h"
 #include "communicator_grid.h"
 #include "communicator_manager.h"
 #include "internal_error.h"
+#include "types.h"
 
 namespace dla_interface {
   namespace comm {
@@ -44,14 +46,34 @@ namespace dla_interface {
     }
 
 #ifdef DLA_HAVE_SCALAPACK
-    Communicator2DGrid& CommunicatorManager::getCommunicator2DGridFromBlacsContext(BlacsContextType id) {
-      return comm_manager_->communicator2DGridFromBlacsContext(id);
+    Communicator2DGrid& CommunicatorManager::createCommunicator2DGridBlacs(  //
+        int blacs_handle, int nr_rows, int nr_cols, Ordering comm_ordering) {
+      return comm_manager_->communicator2DGrid(blacs::Cblacs2sys_handle(blacs_handle), nr_rows,
+                                               nr_cols, comm_ordering);
     }
 #endif
 
     Communicator2DGrid& CommunicatorManager::getCommunicator2DGridFromMPIComm(MPI_Comm comm) {
       return comm_manager_->communicator2DGridFromMPIComm(comm);
     }
+
+#ifdef DLA_HAVE_SCALAPACK
+    Communicator2DGrid& CommunicatorManager::getCommunicator2DGridFromBlacsContext(BlacsContextType id) {
+      return comm_manager_->communicator2DGridFromBlacsContext(id);
+    }
+#endif
+
+    void CommunicatorManager::free2DGrid(Communicator2DGrid& grid) {
+      return comm_manager_->destroy2DGrid(grid);
+    }
+    void CommunicatorManager::free2DGridFromMPIComm(MPI_Comm comm) {
+      free2DGrid(getCommunicator2DGridFromMPIComm(comm));
+    }
+#ifdef DLA_HAVE_SCALAPACK
+    void CommunicatorManager::free2DGridFromBlacsContext(BlacsContextType id) {
+      free2DGrid(getCommunicator2DGridFromBlacsContext(id));
+    }
+#endif
 
     // non-static members:
     Communicator2DGrid& CommunicatorManager::communicator2DGrid(MPI_Comm base_comm, int row_size,
@@ -89,6 +111,21 @@ namespace dla_interface {
       }
     }
 #endif
+
+    void CommunicatorManager::destroy2DGrid(Communicator2DGrid& grid) {
+#ifdef DLA_HAVE_SCALAPACK
+      // Internal Check of the number of shared pointer
+      assert(comm_grid_map.at(grid.rowOrderedMPICommunicator()).use_count() == 4);
+      ictxt_grid_map.erase(grid.blacsContext());
+#endif
+      // Internal Check of the number of shared pointer
+      assert(comm_grid_map.at(grid.rowOrderedMPICommunicator()).use_count() == 3);
+      comm_grid_map.erase(grid.rowMPICommunicator());
+      comm_grid_map.erase(grid.colMPICommunicator());
+      // Internal Check of the number of shared pointer (only one remaining)
+      assert(comm_grid_map.at(grid.rowOrderedMPICommunicator()).use_count() == 1);
+      comm_grid_map.erase(grid.rowOrderedMPICommunicator());
+    }
 
     CommunicatorManager::CommunicatorManager(int nr_cores, int* argc, char*** argv,
                                              bool initialize_mpi)

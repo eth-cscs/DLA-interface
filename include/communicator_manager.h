@@ -47,16 +47,37 @@ namespace dla_interface {
                                                           int nr_cols, Ordering comm_ordering);
 
 #ifdef DLA_HAVE_SCALAPACK
-      // Returns a reference of the Communicator2DGrid created with createCommunicator2DGrid
-      // whose BLACS context index is id.
-      // Throws a std::invalid_argument exception if no Communicator2DGrid is found.
-      static Communicator2DGrid& getCommunicator2DGridFromBlacsContext(BlacsContextType id);
+      // Creates a 2D grid based on the MPI communicator base_comm =
+      // Cblacs2sys_handle(blacs_handle), with nr_rows rows
+      // and nr_cols columns, where the ranks are ordered in comm_ordering order.
+      // The created Communicator2DGrid object is stored and a reference to it is returned.
+      // Throws a std::invalid_argument exception
+      // if the number of ranks in base_comm is different from nr_rows * nr_cols.
+      // Precondition: initialize must have been called before and
+      //               finalize must have not been called before.
+      // Calls createCommunicator2DGrid with base_comm = Cblacs2sys_handle(blacs_handle).
+      static Communicator2DGrid& createCommunicator2DGridBlacs(int blacs_handle, int nr_rows,
+                                                               int nr_cols, Ordering comm_ordering);
 #endif
 
       // Returns a reference of the Communicator2DGrid created with createCommunicator2DGrid
       // whose row, col or row_ordered (TODO: or col_ordered) communicator is comm.
       // Throws a std::invalid_argument exception if no Communicator2DGrid is found.
       static Communicator2DGrid& getCommunicator2DGridFromMPIComm(MPI_Comm comm);
+
+#ifdef DLA_HAVE_SCALAPACK
+      // Returns a reference of the Communicator2DGrid created with createCommunicator2DGrid
+      // whose BLACS context index is id.
+      // Throws a std::invalid_argument exception if no Communicator2DGrid is found.
+      static Communicator2DGrid& getCommunicator2DGridFromBlacsContext(BlacsContextType id);
+#endif
+
+      // Free the Communicator2DGrid object and the related MPI communicators and BLACS grids.
+      static void free2DGrid(Communicator2DGrid& grid);
+      static void free2DGridFromMPIComm(MPI_Comm comm);
+#ifdef DLA_HAVE_SCALAPACK
+      static void free2DGridFromBlacsContext(BlacsContextType id);
+#endif
 
 #ifdef DLA_HAVE_SCALAPACK
       // Returns the number of threads and cpuset for Scalapack.
@@ -88,6 +109,7 @@ namespace dla_interface {
 #ifdef DLA_HAVE_SCALAPACK
       Communicator2DGrid& communicator2DGridFromBlacsContext(BlacsContextType id) const;
 #endif
+      void destroy2DGrid(Communicator2DGrid& grid);
 
       thread::CpuSet getCpuBindInternal() {
         return topo_.getCpuBind();
