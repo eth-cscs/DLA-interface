@@ -38,6 +38,16 @@ namespace dla_interface {
       // TODO: uncomment this after parsec issue #135 is fixed
       //       and remove continue in test_dla_interface.cpp:66.
       // parsec_remote_dep_set_ctx(parsec, &comm);
+      // Abort if the communicator is not equivalent to MPI_COMM_WORLD
+      int size1, size2, rank1, rank2;
+      MPI_Comm_size(MPI_COMM_WORLD, &size1);
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank1);
+      MPI_Comm_size(comm, &size2);
+      MPI_Comm_rank(comm, &rank2);
+      if (size1 != size2 || rank1 != rank2) {
+        std::cerr << "Unsupported communicator for DPlasma" << std::endl;
+        MPI_Abort(MPI_COMM_WORLD, 10000);
+      }
 
       // Set number of BLAS threads and CPU binding. (Reset on object destruction)
       util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getDPlasmaConfigInfo());
