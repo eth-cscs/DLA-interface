@@ -93,7 +93,7 @@ TYPED_TEST(DLATypedTest, CholeskyFactorization) {
   }
 }
 
-bool matrixMultiplyTestThrows(SolverType solver) {
+bool matrixMultiplicationTestThrows(SolverType solver) {
 #ifdef DLA_HAVE_SCALAPACK
   if (solver == ScaLAPACK)
     return false;
@@ -171,12 +171,12 @@ TYPED_TEST(DLATypedTest, Gemm) {
             fillDistributedMatrix(b, el_val_b);
             fillDistributedMatrix(c, el_val_c);
 
-            if (matrixMultiplyTestThrows(solver)) {
-              EXPECT_THROW(matrixMultiply(trans_a, trans_b, alpha, a, b, beta, c, solver),
+            if (matrixMultiplicationTestThrows(solver)) {
+              EXPECT_THROW(matrixMultiplication(trans_a, trans_b, alpha, a, b, beta, c, solver),
                            std::invalid_argument);
             }
             else {
-              matrixMultiply(trans_a, trans_b, alpha, a, b, beta, c, solver);
+              matrixMultiplication(trans_a, trans_b, alpha, a, b, beta, c, solver);
 
               EXPECT_TRUE(checkNearDistributedMatrix(c, el_val_c_expected, k * this->epsilon()));
             }

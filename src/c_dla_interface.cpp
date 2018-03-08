@@ -51,7 +51,7 @@ extern "C" void dlai_set_print_timer_option_(int print_timer) {
 
 #define DLA_DEFINE_CHOLESKY_FACTORIZATION(function_name, CType, CppType)                \
   extern "C" int function_name(const char* uplo, const int* n, CType* a, const int* ia, \
-                               const int* ja, int* desca, const char* solver) {         \
+                               const int* ja, const int* desca, const char* solver) {   \
     CppType* a_ = reinterpret_cast<CppType*>(a);                                        \
     UpLo uplo_ = util::getUpLo(*uplo);                                                  \
     DistributedMatrix<CppType> mat_a(scalapack_dist, *n, *n, a_, *ia, *ja, desca);      \
@@ -70,40 +70,40 @@ DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_d_cholesky_factorization_, double, double
 DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization_, float, std::complex<float>)
 DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization_, double, std::complex<double>)
 
-#define DLA_DEFINE_MATRIX_MULTIPLY(function_name, CType, CppType)                                 \
-  extern "C" int function_name(                                                                   \
-      const char* trans_a, const char* trans_b, const int* m, const int* n, const int* k,         \
-      const CType* alpha, const CType* a, const int* ia, const int* ja, int* desca,               \
-      const CType* b, const int* ib, const int* jb, int* descb, const CType* beta, CType* c,      \
-      const int* ic, const int* jc, int* descc, const char* solver) {                             \
-    const CppType* alpha_ = reinterpret_cast<const CppType*>(alpha);                              \
-    const CppType* beta_ = reinterpret_cast<const CppType*>(beta);                                \
-    const CppType* a_ = reinterpret_cast<const CppType*>(a);                                      \
-    const CppType* b_ = reinterpret_cast<const CppType*>(b);                                      \
-    CppType* c_ = reinterpret_cast<CppType*>(c);                                                  \
-    OpTrans trans_a_ = util::getOpTrans(*trans_a);                                                \
-    OpTrans trans_b_ = util::getOpTrans(*trans_b);                                                \
-    int m_a = trans_a_ == NoTrans ? *m : *k;                                                      \
-    int n_a = trans_a_ == NoTrans ? *k : *m;                                                      \
-    int m_b = trans_b_ == NoTrans ? *k : *n;                                                      \
-    int n_b = trans_b_ == NoTrans ? *n : *k;                                                      \
-    auto mat_a_ptr =                                                                              \
-        DistributedMatrix<CppType>::convertConst(scalapack_dist, m_a, n_a, a_, *ia, *ja, desca);  \
-    auto mat_b_ptr =                                                                              \
-        DistributedMatrix<CppType>::convertConst(scalapack_dist, m_b, n_b, b_, *ib, *jb, descb);  \
-    DistributedMatrix<CppType> mat_c(scalapack_dist, *m, *n, c_, *ic, *jc, descc);                \
-    SolverType solver_ = util::getSolverType(solver);                                             \
-    try {                                                                                         \
-      matrixMultiply(trans_a_, trans_b_, *alpha_, *mat_a_ptr, *mat_b_ptr, *beta_, mat_c, solver_, \
-                     dlai_print_timer_value);                                                     \
-    }                                                                                             \
-    catch (std::invalid_argument & exc) {                                                         \
-      return -1;                                                                                  \
-    }                                                                                             \
-    return 0;                                                                                     \
+#define DLA_DEFINE_MATRIX_MULTIPLICATION(function_name, CType, CppType)                            \
+  extern "C" int function_name(                                                                    \
+      const char* trans_a, const char* trans_b, const int* m, const int* n, const int* k,          \
+      const CType* alpha, const CType* a, const int* ia, const int* ja, const int* desca,          \
+      const CType* b, const int* ib, const int* jb, const int* descb, const CType* beta, CType* c, \
+      const int* ic, const int* jc, const int* descc, const char* solver) {                        \
+    const CppType* alpha_ = reinterpret_cast<const CppType*>(alpha);                               \
+    const CppType* beta_ = reinterpret_cast<const CppType*>(beta);                                 \
+    const CppType* a_ = reinterpret_cast<const CppType*>(a);                                       \
+    const CppType* b_ = reinterpret_cast<const CppType*>(b);                                       \
+    CppType* c_ = reinterpret_cast<CppType*>(c);                                                   \
+    OpTrans trans_a_ = util::getOpTrans(*trans_a);                                                 \
+    OpTrans trans_b_ = util::getOpTrans(*trans_b);                                                 \
+    int m_a = trans_a_ == NoTrans ? *m : *k;                                                       \
+    int n_a = trans_a_ == NoTrans ? *k : *m;                                                       \
+    int m_b = trans_b_ == NoTrans ? *k : *n;                                                       \
+    int n_b = trans_b_ == NoTrans ? *n : *k;                                                       \
+    auto mat_a_ptr =                                                                               \
+        DistributedMatrix<CppType>::convertConst(scalapack_dist, m_a, n_a, a_, *ia, *ja, desca);   \
+    auto mat_b_ptr =                                                                               \
+        DistributedMatrix<CppType>::convertConst(scalapack_dist, m_b, n_b, b_, *ib, *jb, descb);   \
+    DistributedMatrix<CppType> mat_c(scalapack_dist, *m, *n, c_, *ic, *jc, descc);                 \
+    SolverType solver_ = util::getSolverType(solver);                                              \
+    try {                                                                                          \
+      matrixMultiplication(trans_a_, trans_b_, *alpha_, *mat_a_ptr, *mat_b_ptr, *beta_, mat_c,     \
+                           solver_, dlai_print_timer_value);                                       \
+    }                                                                                              \
+    catch (std::invalid_argument & exc) {                                                          \
+      return -1;                                                                                   \
+    }                                                                                              \
+    return 0;                                                                                      \
   }
 
-DLA_DEFINE_MATRIX_MULTIPLY(dlai_s_matrix_multiply_, float, float)
-DLA_DEFINE_MATRIX_MULTIPLY(dlai_d_matrix_multiply_, double, double)
-DLA_DEFINE_MATRIX_MULTIPLY(dlai_c_matrix_multiply_, float, std::complex<float>)
-DLA_DEFINE_MATRIX_MULTIPLY(dlai_z_matrix_multiply_, double, std::complex<double>)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_s_matrix_multiplication_, float, float)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_d_matrix_multiplication_, double, double)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_c_matrix_multiplication_, float, std::complex<float>)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_z_matrix_multiplication_, double, std::complex<double>)

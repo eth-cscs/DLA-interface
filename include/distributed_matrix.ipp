@@ -41,7 +41,7 @@ DistributedMatrix<ElType>::DistributedMatrix(DistributionType distribution, Dist
 template <class ElType>
 DistributedMatrix<ElType>::DistributedMatrix(DistributionType distribution, int m, int n,
                                              ElementType* ptr, ScalapackIndex i, ScalapackIndex j,
-                                             ScalapackDescriptor desc)
+                                             constScalapackDescriptor desc)
     // use comma operator to check {index, size and total size}, rsrc and csrc.
     : DistributedMatrix(
           (({

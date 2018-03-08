@@ -26,6 +26,7 @@ namespace dla_interface {
 #ifdef DLA_HAVE_SCALAPACK
   using ScalapackIndex = int;  // Base 1 indeces.
   using ScalapackDescriptor = int*;
+  using constScalapackDescriptor = const int*;
   using BlacsContextType = int;
 #endif
 #ifdef DLA_HAVE_DPLASMA

@@ -147,8 +147,9 @@ int main(int argc, char** argv) {
         //////////////////////////////////////////////////////////////
         // C interface
         //////////////////////////////////////////////////////////////
-        dlai_d_matrix_multiply_("N", "T", &n, &n, &n, DLA_D_M_ONE, a_ptr, &ia, &ja, desca, a_ptr,
-                                &ia, &ja, desca, DLA_D_ONE, c_ptr, &ic, &jc, descc, solver_c);
+        dlai_d_matrix_multiplication_("N", "T", &n, &n, &n, DLA_D_M_ONE, a_ptr, &ia, &ja, desca,
+                                      a_ptr, &ia, &ja, desca, DLA_D_ONE, c_ptr, &ic, &jc, descc,
+                                      solver_c);
         //////////////////////////////////////////////////////////////
       }
       else {
@@ -164,8 +165,9 @@ int main(int argc, char** argv) {
         //////////////////////////////////////////////////////////////
         // C interface
         //////////////////////////////////////////////////////////////
-        dlai_d_matrix_multiply_("T", "N", &n, &n, &n, DLA_D_M_ONE, a_ptr, &ia, &ja, desca, a_ptr,
-                                &ia, &ja, desca, DLA_D_ONE, c_ptr, &ic, &jc, descc, solver_c);
+        dlai_d_matrix_multiplication_("T", "N", &n, &n, &n, DLA_D_M_ONE, a_ptr, &ia, &ja, desca,
+                                      a_ptr, &ia, &ja, desca, DLA_D_ONE, c_ptr, &ic, &jc, descc,
+                                      solver_c);
         //////////////////////////////////////////////////////////////
       }
 
