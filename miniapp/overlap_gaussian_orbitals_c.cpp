@@ -75,10 +75,11 @@ int main(int argc, char** argv) {
   //////////////////////////////////////////////////////////////
   // C interface
   //////////////////////////////////////////////////////////////
-  dlai_initialize_arg_(&nr_threads, &argc, &argv, &init_mpi);
-  int ictxt = dlai_create_2d_grid_(&mpi_comm_f, &p, &q, "R");
+  dlai_initialize_arg(&nr_threads, &argc, &argv, &init_mpi);
+  int ictxt = dlai_create_2d_grid(&mpi_comm_f, &p, &q, "R");
 
-  dlai_set_print_timer_option_(2);
+  int timer_opt = 2;
+  dlai_set_print_timer_option(&timer_opt);
   //////////////////////////////////////////////////////////////
 
   auto& comm_grid = comm::CommunicatorManager::getCommunicator2DGridFromBlacsContext(ictxt);
@@ -123,7 +124,7 @@ int main(int argc, char** argv) {
     //////////////////////////////////////////////////////////////
     // C interface
     //////////////////////////////////////////////////////////////
-    dlai_d_cholesky_factorization_(&uplo_c, &n, a_ptr, &ia, &ja, desca, solver_c);
+    dlai_d_cholesky_factorization(&uplo_c, &n, a_ptr, &ia, &ja, desca, solver_c);
     //////////////////////////////////////////////////////////////
 
     if (check) {
@@ -147,9 +148,9 @@ int main(int argc, char** argv) {
         //////////////////////////////////////////////////////////////
         // C interface
         //////////////////////////////////////////////////////////////
-        dlai_d_matrix_multiplication_("N", "T", &n, &n, &n, DLA_D_M_ONE, a_ptr, &ia, &ja, desca,
-                                      a_ptr, &ia, &ja, desca, DLA_D_ONE, c_ptr, &ic, &jc, descc,
-                                      solver_c);
+        dlai_d_matrix_multiplication("N", "T", &n, &n, &n, DLA_D_M_ONE, a_ptr, &ia, &ja, desca,
+                                     a_ptr, &ia, &ja, desca, DLA_D_ONE, c_ptr, &ic, &jc, descc,
+                                     solver_c);
         //////////////////////////////////////////////////////////////
       }
       else {
@@ -165,9 +166,9 @@ int main(int argc, char** argv) {
         //////////////////////////////////////////////////////////////
         // C interface
         //////////////////////////////////////////////////////////////
-        dlai_d_matrix_multiplication_("T", "N", &n, &n, &n, DLA_D_M_ONE, a_ptr, &ia, &ja, desca,
-                                      a_ptr, &ia, &ja, desca, DLA_D_ONE, c_ptr, &ic, &jc, descc,
-                                      solver_c);
+        dlai_d_matrix_multiplication("T", "N", &n, &n, &n, DLA_D_M_ONE, a_ptr, &ia, &ja, desca,
+                                     a_ptr, &ia, &ja, desca, DLA_D_ONE, c_ptr, &ic, &jc, descc,
+                                     solver_c);
         //////////////////////////////////////////////////////////////
       }
 
@@ -189,7 +190,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  dlai_finalize_();
+  dlai_finalize();
 
   return 0;
 }
