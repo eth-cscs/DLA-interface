@@ -11,42 +11,42 @@ using namespace dla_interface;
 
 int dlai_print_timer_value = 0;
 
-extern "C" void dlai_initialize_(const int* nr_cores, const int* initialize_mpi) {
-  dlai_initialize_arg_(nr_cores, nullptr, nullptr, initialize_mpi);
+extern "C" void dlai_initialize(const int* nr_cores, const int* initialize_mpi) {
+  dlai_initialize_arg(nr_cores, nullptr, nullptr, initialize_mpi);
 }
-extern "C" void dlai_initialize_arg_(const int* nr_cores, int* argc, char*** argv,
+extern "C" void dlai_initialize_arg(const int* nr_cores, int* argc, char*** argv,
                                      const int* initialize_mpi) {
   comm::CommunicatorManager::initialize(*nr_cores, argc, argv, *initialize_mpi);
 }
 
-extern "C" void dlai_finalize_() {
+extern "C" void dlai_finalize() {
   comm::CommunicatorManager::finalize();
 }
 
-extern "C" int dlai_create_2d_grid_(const MPI_Fint* base_comm, const int* row_size,
+extern "C" int dlai_create_2d_grid(const MPI_Fint* base_comm, const int* row_size,
                                     const int* col_size, const char* ordering) {
   return comm::CommunicatorManager::createCommunicator2DGrid(
              MPI_Comm_f2c(*base_comm), *row_size, *col_size, util::getOrdering(*ordering))
       .blacsContext();
 }
 
-extern "C" int dlai_create_2d_grid_blacs_(int* blacs_handle, const int* row_size,
+extern "C" int dlai_create_2d_grid_blacs(int* blacs_handle, const int* row_size,
                                           const int* col_size, const char* ordering) {
   return comm::CommunicatorManager::createCommunicator2DGridBlacs(
              *blacs_handle, *row_size, *col_size, util::getOrdering(*ordering))
       .blacsContext();
 }
 
-extern "C" void dlai_free_2d_grid_blacs_(int* blacs_context) {
+extern "C" void dlai_free_2d_grid_blacs(int* blacs_context) {
   return comm::CommunicatorManager::free2DGridFromBlacsContext(*blacs_context);
 }
 
-extern "C" int dlai_get_print_timer_option_() {
+extern "C" int dlai_get_print_timer_option() {
   return dlai_print_timer_value;
 }
 
-extern "C" void dlai_set_print_timer_option_(int print_timer) {
-  dlai_print_timer_value = print_timer;
+extern "C" void dlai_set_print_timer_option(const int* print_timer) {
+  dlai_print_timer_value = *print_timer;
 }
 
 #define DLA_DEFINE_CHOLESKY_FACTORIZATION(function_name, CType, CppType)                \
@@ -65,10 +65,10 @@ extern "C" void dlai_set_print_timer_option_(int print_timer) {
     return 0;                                                                           \
   }
 
-DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_s_cholesky_factorization_, float, float)
-DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_d_cholesky_factorization_, double, double)
-DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization_, float, std::complex<float>)
-DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization_, double, std::complex<double>)
+DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_s_cholesky_factorization, float, float)
+DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_d_cholesky_factorization, double, double)
+DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization, float, std::complex<float>)
+DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, double, std::complex<double>)
 
 #define DLA_DEFINE_MATRIX_MULTIPLICATION(function_name, CType, CppType)                            \
   extern "C" int function_name(                                                                    \
@@ -103,7 +103,7 @@ DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization_, double, std::c
     return 0;                                                                                      \
   }
 
-DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_s_matrix_multiplication_, float, float)
-DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_d_matrix_multiplication_, double, double)
-DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_c_matrix_multiplication_, float, std::complex<float>)
-DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_z_matrix_multiplication_, double, std::complex<double>)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_s_matrix_multiplication, float, float)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_d_matrix_multiplication, double, double)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_c_matrix_multiplication, float, std::complex<float>)
+DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_z_matrix_multiplication, double, std::complex<double>)

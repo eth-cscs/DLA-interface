@@ -34,6 +34,21 @@ dla_find_dplasma()
 
 dla_find_hwloc()
 
+if (${DLA_HAVE_SCALAPACK})
+  setoption(DLA_WITH_FORTRAN BOOL ON "Build fortran binding")
+else()
+  setoption(DLA_WITH_FORTRAN BOOL OFF "Build fortran binding")
+endif()
+
+if (${DLA_WITH_FORTRAN})
+  if (${DLA_HAVE_SCALAPACK})
+    enable_language(Fortran)
+  else()
+    message(WARNING "Cannot build Fortran bindings without Scalapack. Settinf DLA_WITH_FORTRAN to OFF")
+    set(${DLA_WITH_FORTRAN} OFF FORCE)
+  endif()
+endif()
+
 setoption(DLA_PRINT_DEBUG_INFO BOOL "OFF" "Enables extra output for debugging purpose.")
 if(DLA_PRINT_DEBUG_INFO)
   add_definitions("-DDLA_THREAD_DEBUG_INFO")
@@ -55,7 +70,8 @@ include_directories(
 # ---------------------------------------------------------------------------
 # extra options
 # ---------------------------------------------------------------------------
-add_compile_options(-Wall -Wno-missing-braces)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-missing-braces")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -ffree-line-length-0")
 
 # ---------------------------------------------------------------------------
 # setup libraries
