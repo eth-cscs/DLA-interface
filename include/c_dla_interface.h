@@ -15,10 +15,10 @@ void dlai_initialize_arg(const int* nr_cores, int* argc, char*** argv, const int
 void dlai_finalize();
 
 int dlai_create_2d_grid(const MPI_Fint* base_comm, const int* row_size, const int* col_size,
-                         const char* ordering);
+                        const char* ordering);
 
 int dlai_create_2d_grid_blacs(int* blacs_handle, const int* row_size, const int* col_size,
-                               const char* ordering);
+                              const char* ordering);
 
 void dlai_free_2d_grid_blacs(int* blacs_context);
 
