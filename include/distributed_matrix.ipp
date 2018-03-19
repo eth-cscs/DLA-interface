@@ -376,7 +376,7 @@ std::tuple<const DPlasmaDescriptor, MPI_Comm> DistributedMatrix<ElType>::getDPla
 
 template <class ElType>
 template <class Out>
-void DistributedMatrix<ElType>::debugDump(Out& out) {
+void DistributedMatrix<ElType>::debugDump(Out& out) const {
   for (int j = 0; j < local_size_.second; ++j) {
     for (int i = 0; i < local_size_.first; ++i) {
       Local2DIndex ind(i, j);
@@ -386,6 +386,13 @@ void DistributedMatrix<ElType>::debugDump(Out& out) {
     }
   }
   out << "\n";
+}
+
+template <class ElType>
+template <class Out>
+void DistributedMatrix<ElType>::debugInfo(Out& out) const {
+  out << "Matrix(" << size_ << ", " << block_size_ << ", " << base_index_ << ", "
+      << comm_grid_->id2D() << "/" << comm_grid_->size2D() << ")";
 }
 // private interface
 

@@ -3,6 +3,7 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
                           const DistributedMatrix<ElType>& mat_a,
                           const DistributedMatrix<ElType>& mat_b, ElType beta,
                           DistributedMatrix<ElType>& mat_c, SolverType solver, int print_timers) {
+  dlai__util__debug_print_call_param(trans_a, trans_b, alpha, mat_a, mat_b, beta, mat_c, solver);
   auto& comm_grid = mat_c.commGrid();
   util::Timer<> timer_full(comm_grid.rowOrderedMPICommunicator(), print_timers > 0);
 

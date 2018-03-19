@@ -53,6 +53,10 @@ setoption(DLA_PRINT_DEBUG_INFO BOOL "OFF" "Enables extra output for debugging pu
 if(DLA_PRINT_DEBUG_INFO)
   add_definitions("-DDLA_THREAD_DEBUG_INFO")
 endif()
+setoption(DLA_PRINT_DEBUG_CALL_PARAM BOOL "OFF" "Enables call parameters output for debugging purpose.")
+if(DLA_PRINT_DEBUG_CALL_PARAM)
+  add_definitions("-DDLA_PRINT_DEBUG_CALL_PARAM")
+endif()
 
 include(CTest)
 enable_testing()

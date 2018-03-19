@@ -1,6 +1,7 @@
 template <class ElType>
 void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType solver,
                            int print_timers) {
+  dlai__util__debug_print_call_param(uplo, mat, solver);
   auto& comm_grid = mat.commGrid();
   util::Timer<> timer_full(comm_grid.rowOrderedMPICommunicator(), print_timers > 0);
 

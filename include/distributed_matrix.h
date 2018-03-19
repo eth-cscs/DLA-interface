@@ -411,7 +411,10 @@ namespace dla_interface {
 #endif
 
     template <class Out>
-    void debugDump(Out& out);
+    void debugDump(Out& out) const;
+
+    template <class Out>
+    void debugInfo(Out& out) const;
 
     private:
     // new storage
@@ -486,6 +489,16 @@ namespace dla_interface {
   };
 
 #include "distributed_matrix.ipp"
+
+  namespace util {
+    template <class ElType>
+    std::ostream& operator<<(std::ostream& out, const DistributedMatrix<ElType>& mat) {
+      mat.debugInfo(out);
+      return out;
+    }
+  }
 }
+
+using dla_interface::util::operator<<;
 
 #endif  // DLA_INTERFACE_DISTRIBUTED_MATRIX_H
