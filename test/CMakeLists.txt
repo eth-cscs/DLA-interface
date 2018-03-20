@@ -10,3 +10,4 @@ target_include_directories(test_tools PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_S
 include(dla_test)
 
 add_subdirectory(unit)
+add_subdirectory(extra)

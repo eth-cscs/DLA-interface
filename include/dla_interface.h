@@ -7,6 +7,7 @@
 #include "dla_dplasma.h"
 #include "error_message.h"
 #include "util_cast.h"
+#include "util_debug_output.h"
 #include "util_types.h"
 #include "timer.h"
 

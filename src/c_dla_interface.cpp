@@ -15,7 +15,7 @@ extern "C" void dlai_initialize(const int* nr_cores, const int* initialize_mpi) 
   dlai_initialize_arg(nr_cores, nullptr, nullptr, initialize_mpi);
 }
 extern "C" void dlai_initialize_arg(const int* nr_cores, int* argc, char*** argv,
-                                     const int* initialize_mpi) {
+                                    const int* initialize_mpi) {
   comm::CommunicatorManager::initialize(*nr_cores, argc, argv, *initialize_mpi);
 }
 
@@ -24,14 +24,14 @@ extern "C" void dlai_finalize() {
 }
 
 extern "C" int dlai_create_2d_grid(const MPI_Fint* base_comm, const int* row_size,
-                                    const int* col_size, const char* ordering) {
+                                   const int* col_size, const char* ordering) {
   return comm::CommunicatorManager::createCommunicator2DGrid(
              MPI_Comm_f2c(*base_comm), *row_size, *col_size, util::getOrdering(*ordering))
       .blacsContext();
 }
 
 extern "C" int dlai_create_2d_grid_blacs(int* blacs_handle, const int* row_size,
-                                          const int* col_size, const char* ordering) {
+                                         const int* col_size, const char* ordering) {
   return comm::CommunicatorManager::createCommunicator2DGridBlacs(
              *blacs_handle, *row_size, *col_size, util::getOrdering(*ordering))
       .blacsContext();

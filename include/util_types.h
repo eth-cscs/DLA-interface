@@ -77,7 +77,30 @@ namespace dla_interface {
       static std::map<std::string, SolverType> inv_map = internal::get_inverse_solver_map();
       return inv_map.at(str);
     }
+
+    inline std::ostream& operator<<(std::ostream& out, SolverType solver) {
+      return out << getSolverString(solver);
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, OpTrans trans) {
+      return out << (char)trans;
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, UpLo uplo) {
+      return out << (char)uplo;
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, Ordering ordering) {
+      return out << (char)ordering;
+    }
+
+    template <class T>
+    void debug_print(std::ostream& out, T obj) {
+      out << obj;
+    }
   }
 }
+
+using dla_interface::util::operator<<;
 
 #endif  // DLA_INTERFACE_UTIL_TYPES_H
