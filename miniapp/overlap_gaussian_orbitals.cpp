@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
-#include <boost/program_options.hpp>
+#include "cxxopts/cxxopts.hpp"
 #include "distributed_matrix.h"
 #include "dla_interface.h"
 
@@ -22,30 +22,28 @@ using namespace dla_interface;
 
 int main(int argc, char** argv) {
   // clang-format off
-  boost::program_options::options_description desc("Allowed options");
+  cxxopts::Options desc(argv[0], "Allowed Options");
   desc.add_options()
       ("help", "produce help message")
-      ("size,n", boost::program_options::value<int>()->default_value(1024), "The size of the square matrix. (Default = 1024)")
-      ("nb", boost::program_options::value<int>()->default_value(128), "The block size for the block cyclic distribution. (Default = 128)")
-      ("alpha", boost::program_options::value<double>()->default_value(.5), "(Default = .5)")
-      ("a", boost::program_options::value<double>()->default_value(20), "(Default = 20.)")
-      ("seed", boost::program_options::value<unsigned int>()->default_value(2017), "Seed for random number generator. (Default = 2017)")
-      ("upper,U", "Use upper triangular part of the matrix. (If not specified the lower triangular part is used.)")
+      ("n,size", "The size of the square matrix.", cxxopts::value<int>()->default_value("1024"))
+      ("nb", "The block size for the block cyclic distribution. ", cxxopts::value<int>()->default_value("128"))
+      ("alpha", "", cxxopts::value<double>()->default_value(".5"))
+      ("a", "", cxxopts::value<double>()->default_value("20"))
+      ("seed", "Seed for random number generator.", cxxopts::value<unsigned int>()->default_value("2017"))
+      ("U,upper", "Use upper triangular part of the matrix. (If not specified the lower triangular part is used.)")
       ("scalapack", "Run test with ScaLAPACK.")
       ("dplasma", "Run test with DPlasma.")
-      ("row_procs,p", boost::program_options::value<int>()->default_value(1), "The number of rows in the 2D communicator. (Default = 1)")
-      ("col_procs,q", boost::program_options::value<int>()->default_value(1), "The number of cols in the 2D communicator. (Default = 1)")
-      ("nr_threads", boost::program_options::value<int>()->default_value(1), "The number of threads per rank. (Default 1)")
+      ("p,row_procs", "The number of rows in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
+      ("q,col_procs", "The number of cols in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
+      ("nr_threads", "The number of threads per rank.", cxxopts::value<int>()->default_value("1"))
       ("no_check", "Disable correctness checking.")
       ;
   // clang-format on
 
-  boost::program_options::variables_map vm;
-  boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-  boost::program_options::notify(vm);
+  auto vm = desc.parse(argc, argv);
 
   if (vm.count("help")) {
-    std::cout << desc << std::endl;
+    std::cout << desc.help() << std::endl;
     return 1;
   }
 

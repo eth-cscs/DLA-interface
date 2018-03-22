@@ -18,10 +18,6 @@ include(dla_lapack)
 include(dla_scalapack)
 include(dla_dplasma)
 include(dla_hwloc)
-# ---------------------------------------------------------------------------
-# Boost
-# ---------------------------------------------------------------------------
-find_package(Boost COMPONENTS program_options REQUIRED)
 
 include(dla_openmp)
 include(dla_mpi)
@@ -64,9 +60,9 @@ setoption(DLA_ALL_TESTS_USE_RUNNER BOOL "OFF" "Specify if the single rank tests 
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/libs
     ${MPI_CXX_INCLUDE_PATH}
     ${DLA_DPLASMA_INCLUDE_DIRS}
-    ${Boost_INCLUDE_DIRS}
     ${DLA_LAPACK_INCLUDE_PATH}
     ${HWLOC_INCLUDE_DIRS}
 )
@@ -83,7 +79,6 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -ffree-line-length-0")
 add_subdirectory(src)
 set(DLA_LIBS
     dla_interface
-    ${Boost_LIBRARIES}
     ${MPI_CXX_LIBRARIES}
     ${DLA_DPLASMA_LIBS}
     ${DLA_SCALAPACK_LIBRARY}
