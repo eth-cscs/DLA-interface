@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdexcept>
 #include "gtest/gtest.h"
+#include "null_stream.h"
 #include "util_local_matrix.h"
 
 using namespace dla_interface;
@@ -446,4 +447,24 @@ TEST(LocalMatrixTest, SubMatrix) {
     EXPECT_TRUE(checkLocalMatrix(*psubmat3, el_val));
   }
   EXPECT_TRUE(checkLocalMatrix(*psubmat3, el_val));
+}
+
+TEST(LocalMatrixTest, TestUtilities) {
+  using Type = double;
+  auto el_val = [](int i, int j) { return j + .001 * i; };
+
+  LocalMatrix<Type> mat(8, 5);
+  fillLocalMatrix(mat, el_val);
+  for (int j = 0; j < mat.size().second; ++j)
+    for (int i = 0; i < mat.size().first; ++i)
+      EXPECT_EQ(mat(i, j), el_val(i, j));
+
+  NullStream nullout;
+  for (int j = 0; j < mat.size().second; ++j)
+    for (int i = 0; i < mat.size().first; ++i) {
+      fillLocalMatrix(mat, el_val);
+      EXPECT_TRUE(checkLocalMatrix(mat, el_val));
+      mat(i, j) += 1;
+      EXPECT_FALSE(checkLocalMatrix(mat, el_val, nullout));
+    }
 }

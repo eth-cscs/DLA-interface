@@ -6,6 +6,7 @@
 #include "communicator_manager.h"
 #include "local_matrix.h"
 #include "gtest/gtest.h"
+#include "null_stream.h"
 #include "util_local_matrix.h"
 #include "util_distributed_matrix.h"
 #include "ref_scalapack_tools.h"
@@ -1248,10 +1249,10 @@ TEST(DistributedMatrixTest, SubMatrix) {
             EXPECT_EQ(local_size, pconst_submat->localSize());
             EXPECT_EQ(local_base_index, psubmat->localBaseIndex());
             EXPECT_EQ(local_base_index, pconst_submat->localBaseIndex());
-            EXPECT_TRUE(checkDistributedSubMatrixSame(mat, size, std::make_pair(si, sj), *psubmat));
+            EXPECT_TRUE(checkIfDistributedSubMatrix(mat, size, std::make_pair(si, sj), *psubmat));
             EXPECT_EQ(mat.distribution(), psubmat->distribution());
             EXPECT_TRUE(
-                checkDistributedSubMatrixSame(mat, size, std::make_pair(si, sj), *pconst_submat));
+                checkIfDistributedSubMatrix(mat, size, std::make_pair(si, sj), *pconst_submat));
             EXPECT_EQ(mat.distribution(), pconst_submat->distribution());
             auto sub_el_val = [&el_val, si, sj](int i, int j) { return el_val(i + si, j + sj); };
             EXPECT_TRUE(checkDistributedMatrix(*psubmat, sub_el_val));
@@ -1265,7 +1266,7 @@ TEST(DistributedMatrixTest, SubMatrix) {
         }
       }
     }
-    return;
+
     EXPECT_THROW(mat.subMatrix(m + 1, n, 0, 0), std::invalid_argument);
     EXPECT_THROW(mat.subMatrix(-1, n, 1, 0), std::invalid_argument);
     EXPECT_THROW(mat.subMatrix(2, n, m - 1, 0), std::invalid_argument);
@@ -1275,14 +1276,31 @@ TEST(DistributedMatrixTest, SubMatrix) {
     EXPECT_THROW(mat.subMatrix(m, 2, 0, n - 1), std::invalid_argument);
     EXPECT_THROW(mat.subMatrix(m, 1, 0, -1), std::invalid_argument);
   }
+  vmat.clear();
+
+  auto& comm_grid = *(comms[0]);
+  auto comm_size = comm_grid.size2D();
+  int mb = 2;
+  int nb = 3;
+  NullStream nullout;
+
+  int sm = mb * comm_size.first;
+  int sn = nb * comm_size.second;
+  // 4 block per rank.
+  DistributedMatrix<Type> mat(2 * sm, 2 * sn, mb, nb, comm_grid, scalapack_dist);
+  // 1 block per rank.
+  auto psubmat = mat.subMatrix(sm, sn, 0, 0);
+  EXPECT_TRUE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn), std::make_pair(0, 0), *psubmat));
+  // Wrong size.
+  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm-1, sn), std::make_pair(0, 0), *psubmat, nullout));
+  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn-1), std::make_pair(0, 0), *psubmat, nullout));
+  // Wrong position.
+  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn), std::make_pair(mb, nb), *psubmat, nullout));
+  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn), std::make_pair(sm, sn), *psubmat, nullout));
 
   // Check that the submatrix doesn't change if the original matrix is re-assigned.
   int m = 17;
   int n = 13;
-  int mb = 2;
-  int nb = 3;
-  auto& comm_grid = *(comms[0]);
-
   DistributedMatrix<Type> mat1(m, n, mb, nb, comm_grid, scalapack_dist);
   fillDistributedMatrix(mat1, el_val);
   auto psubmat1 = mat1.subMatrix(m - 2, n - 2, 0, 0);
@@ -1830,6 +1848,58 @@ TEST(DistributedMatrixTest, DPlasmaDescriptor) {
   }
 }
 #endif
+
+TEST(DistributedMatrixTest, TestUtilities) {
+  using Type = double;
+  auto el_val = [](int i, int j) { return j + .001 * i + 1e-4; };
+
+  DistributedMatrix<Type> mat1(19, 21, 3, 2, *comms[0], scalapack_dist);
+  DistributedMatrix<Type> mat2(19, 21, 3, 2, *comms[0], tile_dist);
+  fillDistributedMatrix(mat1, el_val);
+  fillDistributedMatrix(mat2, el_val);
+
+  auto size = mat1.size();
+  EXPECT_EQ(size, mat2.size());
+  for (int j = 0; j < size.second; ++j)
+    for (int i = 0; i < size.first; ++i)
+      if (comms[0]->id2D() == mat1.getRankId2D(i, j)) {
+        EXPECT_EQ(mat1(i, j), el_val(i, j));
+        EXPECT_EQ(mat2(i, j), el_val(i, j));
+      }
+      else {
+        EXPECT_THROW(mat1(i, j), std::invalid_argument);
+        EXPECT_THROW(mat2(i, j), std::invalid_argument);
+      }
+
+  NullStream nullout;
+  for (int j = 0; j < size.second; ++j)
+    for (int i = 0; i < size.first; ++i) {
+      if (comms[0]->id2D() == mat1.getRankId2D(i, j)) {
+        fillDistributedMatrix(mat1, el_val);
+        fillDistributedMatrix(mat2, el_val);
+        EXPECT_TRUE(checkDistributedMatrix(mat1, el_val));
+        EXPECT_TRUE(checkDistributedMatrix(mat2, el_val));
+        EXPECT_TRUE(checkDistributedMatrixSame(mat1, mat2));
+        mat1(i, j) *= (1 - 1e-4);
+        EXPECT_TRUE(checkNearDistributedMatrix(mat1, el_val, 1.01e-4, el_val(i, j) / 10));
+        EXPECT_TRUE(checkNearDistributedMatrix(mat1, el_val, 1.01e-5, 10 * el_val(i, j)));
+        EXPECT_FALSE(checkNearDistributedMatrix(mat1, el_val, .99e-4, el_val(i, j) / 10, nullout));
+        EXPECT_FALSE(checkNearDistributedMatrix(mat1, el_val, .99e-5, 10 * el_val(i, j), nullout));
+        EXPECT_FALSE(checkDistributedMatrix(mat1, el_val, nullout));
+        EXPECT_FALSE(checkDistributedMatrixSame(mat1, mat2, nullout));
+        mat2(i, j) *= (1 - 1e-4);
+        EXPECT_TRUE(checkNearDistributedMatrix(mat2, el_val, 1.01e-4, el_val(i, j) / 10));
+        EXPECT_TRUE(checkNearDistributedMatrix(mat2, el_val, 1.01e-5, 10 * el_val(i, j)));
+        EXPECT_FALSE(checkNearDistributedMatrix(mat2, el_val, .99e-4, el_val(i, j) / 10, nullout));
+        EXPECT_FALSE(checkNearDistributedMatrix(mat2, el_val, .99e-5, 10 * el_val(i, j), nullout));
+        EXPECT_FALSE(checkDistributedMatrix(mat2, el_val, nullout));
+      }
+    }
+  DistributedMatrix<Type> mat3(20, 21, 3, 2, *comms[0], tile_dist);
+  EXPECT_FALSE(checkDistributedMatrixSame(mat1, mat3, nullout));
+  DistributedMatrix<Type> mat4(19, 21, 2, 2, *comms[0], tile_dist);
+  EXPECT_FALSE(checkDistributedMatrixSame(mat1, mat4, nullout));
+}
 
 int main(int argc, char** argv) {
   comm::CommunicatorManager::initialize(true);
