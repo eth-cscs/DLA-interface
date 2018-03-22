@@ -135,7 +135,7 @@ OPT_CMAKE=(\
   -DHWLOC_ROOT=$EBROOTHWLOC \
   ..)
 echo -n "executing cmake with options: ${OPT_CMAKE[@]}"
-CC=cc CXX=CC FTN=ftn cmake "${OPT_CMAKE[@]}"
+CC=cc CXX=CC FC=ftn cmake "${OPT_CMAKE[@]}"
 ret=$?
 
 if [ $ret -ne 0 ]; then
