@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
-#include <boost/program_options.hpp>
+#include "cxxopts/cxxopts.hpp"
 #include "distributed_matrix.h"
 #include "dla_interface.h"
 #include "types.h"
@@ -19,36 +19,34 @@ using namespace testing;
 
 int main(int argc, char** argv) {
   // clang-format off
-  boost::program_options::options_description desc("Allowed options");
+  cxxopts::Options desc(argv[0], "Allowed Options");
   desc.add_options()
       ("help", "produce help message")
-      ("m,m", boost::program_options::value<int>()->default_value(1024), "Size m")
-      ("n,n", boost::program_options::value<int>()->default_value(1024), "Size n")
-      ("k,k", boost::program_options::value<int>()->default_value(1024), "Size k")
-      ("def_nb", boost::program_options::value<int>()->default_value(128), "The default block size for the block cyclic distribution. (Default = 128)")
-      ("a_mb", boost::program_options::value<int>()->default_value(-1), "The row block size of a for the block cyclic distribution. If <= 0 def_nb is used. (Default = -1 i.e. def_nb)")
-      ("a_nb", boost::program_options::value<int>()->default_value(-1), "The column block size of a for the block cyclic distribution. If <= 0 def_nb is used. (Default = -1 i.e. def_nb)")
-      ("b_mb", boost::program_options::value<int>()->default_value(-1), "The row block size of b for the block cyclic distribution. If <= 0 def_nb is used. (Default = -1 i.e. def_nb)")
-      ("b_nb", boost::program_options::value<int>()->default_value(-1), "The column block size of b for the block cyclic distribution. If <= 0 def_nb is used. (Default = -1 i.e. def_nb)")
-      ("c_mb", boost::program_options::value<int>()->default_value(-1), "The row block size of c for the block cyclic distribution. If <= 0 def_nb is used. (Default = -1 i.e. def_nb)")
-      ("c_nb", boost::program_options::value<int>()->default_value(-1), "The column block size of c for the block cyclic distribution. If <= 0 def_nb is used. (Default = -1 i.e. def_nb)")
-      ("seed", boost::program_options::value<unsigned int>()->default_value(2017), "Seed for random number generator. (Default = 2017)")
+      ("m,m", "Size m", cxxopts::value<int>()->default_value("1024"))
+      ("n,n", "Size n", cxxopts::value<int>()->default_value("1024"))
+      ("k,k", "Size k", cxxopts::value<int>()->default_value("1024"))
+      ("def_nb", "The default block size for the block cyclic distribution.", cxxopts::value<int>()->default_value("128"))
+      ("a_mb", "The row block size of a for the block cyclic distribution. If <= 0 def_nb is used.", cxxopts::value<int>()->default_value("-1"))
+      ("a_nb", "The column block size of a for the block cyclic distribution. If <= 0 def_nb is used.", cxxopts::value<int>()->default_value("-1"))
+      ("b_mb", "The row block size of b for the block cyclic distribution. If <= 0 def_nb is used.", cxxopts::value<int>()->default_value("-1"))
+      ("b_nb", "The column block size of b for the block cyclic distribution. If <= 0 def_nb is used.", cxxopts::value<int>()->default_value("-1"))
+      ("c_mb", "The row block size of c for the block cyclic distribution. If <= 0 def_nb is used.", cxxopts::value<int>()->default_value("-1"))
+      ("c_nb", "The column block size of c for the block cyclic distribution. If <= 0 def_nb is used.", cxxopts::value<int>()->default_value("-1"))
+      ("seed", "Seed for random number generator.", cxxopts::value<unsigned int>()->default_value("2017"))
       ("transa", "a is stored transposed.")
       ("transb", "b is stored transposed.")
       ("scalapack", "Run test with ScaLAPACK.")
       ("dplasma", "Run test with DPlasma.")
-      ("row_procs,p", boost::program_options::value<int>()->default_value(1), "The number of rows in the 2D communicator. (Default = 1)")
-      ("col_procs,q", boost::program_options::value<int>()->default_value(1), "The number of cols in the 2D communicator. (Default = 1)")
-      ("nr_threads", boost::program_options::value<int>()->default_value(1), "The number of threads per rank. (Default 1)")
+      ("p,row_procs", "The number of rows in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
+      ("q,col_procs", "The number of cols in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
+      ("nr_threads", "The number of threads per rank.", cxxopts::value<int>()->default_value("1"))
       ;
   // clang-format on
 
-  boost::program_options::variables_map vm;
-  boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
-  boost::program_options::notify(vm);
+  auto vm = desc.parse(argc, argv);
 
   if (vm.count("help")) {
-    std::cout << desc << std::endl;
+    std::cout << desc.help() << std::endl;
     return 1;
   }
 
