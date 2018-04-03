@@ -48,7 +48,7 @@ For more information of which routine of each package is supported see [the list
 
 The routines which will be available are (including the ScaLAPACK corresponding name):
 - Matrix-matrix multiplication (p\*gemm)
-- Matrix-vector multiplication (p\*gemm)
+- Matrix-vector multiplication (p\*gemv)
 - Cholesky factorization (p\*potrf)
 - LU factorization (p\*getrf)
 - Upper/lower triangular matrix inversion (p\*trtri)
@@ -59,13 +59,14 @@ The routines which will be available are (including the ScaLAPACK corresponding 
 # Documentation
 
 - [Install](INSTALL.md)
-- [Example (C++)](miniapp/overlap_gaussian_orbitals.cpp)
-- Example (Fortran) (Available when Fortran Interface is ready)
+- Cholesky Decomposition:
+  - [Example (C++)](miniapp/overlap_gaussian_orbitals.cpp)
+  - [Example (C interface)](miniapp/overlap_gaussian_orbitals_c.cpp)
+  - Example (Fortran interface) (Not yet available)
+- Matrix Multiplication:
+  - [Example (C++)](test/extra/matrix_multiplication.cpp)
 
 # Known current limitations
-
-- Scalapack and DPlasma cannot be used efficiently in the same run:
-  - Need mechanism to set BLAS number of threads (In development).
 
 - Parsec:
   - Thread binding is wrong when multiple rank per node are used. (Parsec Issue #152)
