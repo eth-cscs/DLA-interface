@@ -53,6 +53,32 @@ setoption(DLA_PRINT_DEBUG_CALL_PARAM BOOL "OFF" "Enables call parameters output 
 if(DLA_PRINT_DEBUG_CALL_PARAM)
   add_definitions("-DDLA_PRINT_DEBUG_CALL_PARAM")
 endif()
+setoption(DLA_COVERAGE_TEST BOOL "OFF" "Enables coverage test.")
+if(DLA_COVERAGE_TEST)
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+    set(CMAKE_LD_FLAGS "${CMAKE_LD_FLAGS} --coverage")
+
+    set(DLA_COVERAGE_SRC_DIRS
+        ${CMAKE_SOURCE_DIR}/include/*
+        ${CMAKE_SOURCE_DIR}/include/*/*
+        ${CMAKE_SOURCE_DIR}/src/*
+        ${CMAKE_SOURCE_DIR}/test/include/*
+        ${CMAKE_SOURCE_DIR}/test/src/*
+        ${CMAKE_SOURCE_DIR}/test/unit/*
+        )
+
+    add_custom_target("coverage"
+      COMMAND lcov --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
+      COMMAND lcov --extract coverage.info ${DLA_COVERAGE_SRC_DIRS} --output-file coverage-filt.info
+      COMMAND genhtml coverage-filt.info --output-directory ${CMAKE_BINARY_DIR}/coverage
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+  else ()
+    message(WARNING "Coverage test can be used only with GCC.")
+    set(DLA_COVERAGE_TEST "OFF" FORCE)
+  endif()
+endif()
 
 include(CTest)
 enable_testing()

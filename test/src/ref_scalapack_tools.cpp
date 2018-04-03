@@ -116,46 +116,4 @@ namespace reference_scalapack_tools {
     return;
   }
 
-  int indxl2g(int indxloc, int nb, int iproc, int isrcproc, int nprocs) {
-    // -- ScaLAPACK tools routine (version 1.7) --
-    //    University of Tennessee, Knoxville, Oak Ridge National Laboratory,
-    //    and University of California, Berkeley.
-    //    May 1, 1997
-    //
-    //    .. Scalar Arguments ..
-    //    ..
-    //
-    // Purpose
-    // =======
-    //
-    // INDXL2G computes the global index of a distributed matrix entry
-    // pointed to by the local index INDXLOC of the process indicated by
-    // IPROC.
-    //
-    // Arguments
-    // =========
-    //
-    // INDXLOC   (global input) INTEGER
-    //           The local index of the distributed matrix entry.
-    //
-    // NB        (global input) INTEGER
-    //           Block size, size of the blocks the distributed matrix is
-    //           split into.
-    //
-    // IPROC     (local input) INTEGER
-    //           The coordinate of the process whose local array row or
-    //           column is to be determined.
-    //
-    // ISRCPROC  (global input) INTEGER
-    //           The coordinate of the process that possesses the first
-    //           row/column of the distributed matrix.
-    //
-    // NPROCS    (global input) INTEGER
-    //           The total number processes over which the distributed
-    //           matrix is distributed.
-
-    return nprocs * nb * ((indxloc - 1) / nb) + (indxloc - 1) % nb +
-           (nprocs + iproc - isrcproc) % nprocs * nb + 1;
-  }
-
 }  // namespace reference_scalapack
