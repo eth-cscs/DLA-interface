@@ -43,6 +43,7 @@ For more information of which routine of each package is supported see [the list
 ## List of supported routines
 - Matrix-matrix multiplication (p\*gemm) (ScaLAPACK, DPlasma)
 - Cholesky factorization (p\*potrf) (ScaLAPACK, DPlasma)
+- LU factorization (p\*getrf) (ScaLAPACK, DPlasma)
 
 ## List of routines with planned support
 
@@ -68,6 +69,11 @@ The routines which will be available are (including the ScaLAPACK corresponding 
 
 # Known current limitations
 
+- MKL:
+  - The pivot array returned by MKL may be wrong for submatrices (when ia or ja are not 0). [Fixed in `MKL-2018u2`.]
 - Parsec:
   - Thread binding is wrong when multiple rank per node are used. (Parsec Issue #152)
   - Change of the Parsec MPI Communicator sometimes hangs (Parsec Issue #135), therefore only row ordered 2D communicator grids can be used.
+- DPLASMA:
+  - Matrix multiplication requires consistent block sizes (I.e. A_mb == C_mb, B_nb == C_nb, A_nb == B_mb).
+  - LU decomposition requires a (1xq) communicator grid.
