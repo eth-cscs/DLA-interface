@@ -70,6 +70,26 @@ DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_d_cholesky_factorization, double, double)
 DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization, float, std::complex<float>)
 DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, double, std::complex<double>)
 
+#define DLA_DEFINE_LU_FACTORIZATION(function_name, CType, CppType)                                 \
+  extern "C" int function_name(const int* m, const int* n, CType* a, const int* ia, const int* ja, \
+                               const int* desca, int* ipiv, const char* solver) {                  \
+    CppType* a_ = reinterpret_cast<CppType*>(a);                                                   \
+    DistributedMatrix<CppType> mat_a(scalapack_dist, *n, *n, a_, *ia, *ja, desca);                 \
+    SolverType solver_ = util::getSolverType(solver);                                              \
+    try {                                                                                          \
+      LUFactorization(mat_a, ipiv, solver_, dlai_print_timer_value);                               \
+    }                                                                                              \
+    catch (std::invalid_argument & exc) {                                                          \
+      return -1;                                                                                   \
+    }                                                                                              \
+    return 0;                                                                                      \
+  }
+
+DLA_DEFINE_LU_FACTORIZATION(dlai_s_lu_factorization, float, float)
+DLA_DEFINE_LU_FACTORIZATION(dlai_d_lu_factorization, double, double)
+DLA_DEFINE_LU_FACTORIZATION(dlai_c_lu_factorization, float, std::complex<float>)
+DLA_DEFINE_LU_FACTORIZATION(dlai_z_lu_factorization, double, std::complex<double>)
+
 #define DLA_DEFINE_MATRIX_MULTIPLICATION(function_name, CType, CppType)                            \
   extern "C" int function_name(                                                                    \
       const char* trans_a, const char* trans_b, const int* m, const int* n, const int* k,          \

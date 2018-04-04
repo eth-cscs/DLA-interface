@@ -52,6 +52,25 @@ namespace dla_interface {
                          &ib, &jb, descb, &beta, c, &ic, &jc, descc);
     }
 
+    inline void pgetrf(int m, int n, float* a, int ia, int ja, int* desca, int* ipiv, int& info) {
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::psgetrf_(&m, &n, a, &ia, &ja, desca, ipiv, &info);
+    }
+    inline void pgetrf(int m, int n, double* a, int ia, int ja, int* desca, int* ipiv, int& info) {
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pdgetrf_(&m, &n, a, &ia, &ja, desca, ipiv, &info);
+    }
+    inline void pgetrf(int m, int n, std::complex<float>* a, int ia, int ja, int* desca, int* ipiv,
+                       int& info) {
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pcgetrf_(&m, &n, a, &ia, &ja, desca, ipiv, &info);
+    }
+    inline void pgetrf(int m, int n, std::complex<double>* a, int ia, int ja, int* desca, int* ipiv,
+                       int& info) {
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pzgetrf_(&m, &n, a, &ia, &ja, desca, ipiv, &info);
+    }
+
     inline void ppotrf(UpLo uplo, int n, float* a, int ia, int ja, int* desca, int& info) {
       const char char_uplo = static_cast<char>(uplo);
 

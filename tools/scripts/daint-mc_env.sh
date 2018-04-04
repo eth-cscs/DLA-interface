@@ -8,3 +8,6 @@ module load hwloc
 module load Boost
 
 export CRAYPE_LINK_TYPE=dynamic
+
+# Use MKL 2018u2 (Fix LU bug)
+source /apps/daint/UES/sandbox/rasolca/intel/mkl/bin/mklvars.sh intel64

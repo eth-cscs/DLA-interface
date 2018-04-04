@@ -104,6 +104,40 @@ module dla_interface
     DLA_FTN_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization, dlai_c_cholesky_factorization_internal, complex(4), complex(C_FLOAT_COMPLEX))
     DLA_FTN_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, dlai_z_cholesky_factorization_internal, complex(8), complex(C_DOUBLE_COMPLEX))
 
+#define DLA_FTN_LU_FACTORIZATION(function_name, function_name_aux, FtnType, CType) \
+    subroutine function_name(m, n, a, ia, ja, desca, solver, ipiv, info)                ;\
+      use, intrinsic :: ISO_C_BINDING                                                   ;\
+      implicit none                                                                     ;\
+      integer, intent(in) :: m                                                          ;\
+      integer, intent(in) :: n                                                          ;\
+      FtnType, dimension(:,:), intent(inout) :: a                                       ;\
+      integer, intent(in) :: ia, ja                                                     ;\
+      integer, dimension(*), intent(in) :: desca                                        ;\
+      integer, dimension(:), intent(in) :: ipiv                                         ;\
+      character(len=*), intent(in) :: solver                                            ;\
+      integer, intent(out) :: info                                                      ;\
+      interface                                                                         ;\
+        integer(C_INT) function function_name_aux(m, n, a, ia, ja, desca, ipiv, solver)  \
+            bind(C, name="function_name")                                               ;\
+          use, intrinsic :: ISO_C_BINDING                                               ;\
+          implicit none                                                                 ;\
+          integer(C_INT), intent(in) :: m                                               ;\
+          integer(C_INT), intent(in) :: n                                               ;\
+          CType, intent(inout) :: a                                                     ;\
+          integer(C_INT), intent(in) :: ia, ja                                          ;\
+          integer(C_INT), intent(in) :: desca                                           ;\
+          integer(C_INT), intent(in) :: ipiv                                            ;\
+          character(len=1, kind=C_CHAR), dimension(*), intent(in) :: solver             ;\
+        end function                                                                    ;\
+      end interface                                                                     ;\
+      info = function_name_aux(m, n, a(1, 1), ia, ja, desca(1), ipiv(1), c_str(solver)) ;\
+    end subroutine
+
+    DLA_FTN_LU_FACTORIZATION(dlai_s_lu_factorization, dlai_s_lu_factorization_internal, real(4), real(C_FLOAT))
+    DLA_FTN_LU_FACTORIZATION(dlai_d_lu_factorization, dlai_d_lu_factorization_internal, real(8), real(C_DOUBLE))
+    DLA_FTN_LU_FACTORIZATION(dlai_c_lu_factorization, dlai_c_lu_factorization_internal, complex(4), complex(C_FLOAT_COMPLEX))
+    DLA_FTN_LU_FACTORIZATION(dlai_z_lu_factorization, dlai_z_lu_factorization_internal, complex(8), complex(C_DOUBLE_COMPLEX))
+
 #define DLA_FTN_MATRIX_MULTIPLICATION(function_name, function_name_aux, FtnType, CType)  \
     subroutine function_name(trans_a, trans_b, m, n, k, alpha, a, ia, ja, desca,         \
         b, ib, jb, descb, beta, c, ic, jc, descc, solver)                               ;\
