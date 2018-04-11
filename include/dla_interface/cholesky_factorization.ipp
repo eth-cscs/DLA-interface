@@ -5,7 +5,9 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
   auto& comm_grid = mat.commGrid();
   util::Timer<> timer_full(comm_grid.rowOrderedMPICommunicator(), print_timers > 0);
 
-  // TODO: check size (square), blocksize?
+  dlai__util__checkIsSquare(mat);
+  dlai__util__checkBlocksAreSquare(mat);
+  dlai__util__checkBaseIndexAtBlock(mat);
 
   double n = mat.size().first;
   double n3 = n * n * n;
