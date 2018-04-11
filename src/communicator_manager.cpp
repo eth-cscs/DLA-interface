@@ -78,24 +78,24 @@ namespace dla_interface {
     // non-static members:
     Communicator2DGrid& CommunicatorManager::communicator2DGrid(MPI_Comm base_comm, int row_size,
                                                                 int col_size, Ordering comm_ordering) {
-      std::shared_ptr<Communicator2DGrid> comm_grid_(
+      std::shared_ptr<Communicator2DGrid> comm_grid(
           new Communicator2DGrid(base_comm, row_size, col_size, comm_ordering));
 
-      if (!comm_grid_map.insert(std::make_pair(comm_grid_->rowMPICommunicator(), comm_grid_)).second)
+      if (!comm_grid_map_.insert(std::make_pair(comm_grid->rowMPICommunicator(), comm_grid)).second)
         throw error::InternalError("Cannot insert row commmunicator in the map");
-      if (!comm_grid_map.insert(std::make_pair(comm_grid_->colMPICommunicator(), comm_grid_)).second)
+      if (!comm_grid_map_.insert(std::make_pair(comm_grid->colMPICommunicator(), comm_grid)).second)
         throw error::InternalError("Cannot insert column commmunicator in the map");
-      if (!comm_grid_map.insert(std::make_pair(comm_grid_->rowOrderedMPICommunicator(), comm_grid_)).second)
+      if (!comm_grid_map_.insert(std::make_pair(comm_grid->rowOrderedMPICommunicator(), comm_grid)).second)
         throw error::InternalError("Cannot insert row ordered commmunicator in the map");
 #ifdef DLA_HAVE_SCALAPACK
-      if (!ictxt_grid_map.insert(std::make_pair(comm_grid_->blacsContext(), comm_grid_)).second)
+      if (!ictxt_grid_map_.insert(std::make_pair(comm_grid->blacsContext(), comm_grid)).second)
         throw error::InternalError("Cannot insert BLACS context id in the map");
 #endif
-      return *comm_grid_;
+      return *comm_grid;
     }
     Communicator2DGrid& CommunicatorManager::communicator2DGridFromMPIComm(MPI_Comm comm) const {
       try {
-        return *comm_grid_map.at(comm);
+        return *comm_grid_map_.at(comm);
       }
       catch (std::out_of_range) {
         throw std::invalid_argument("No communicator2DGrid found with the given MPI_Comm");
@@ -104,7 +104,7 @@ namespace dla_interface {
 #ifdef DLA_HAVE_SCALAPACK
     Communicator2DGrid& CommunicatorManager::communicator2DGridFromBlacsContext(BlacsContextType id) const {
       try {
-        return *ictxt_grid_map.at(id);
+        return *ictxt_grid_map_.at(id);
       }
       catch (std::out_of_range) {
         throw std::invalid_argument("No communicator2DGrid found with the given BLACS context id");
@@ -115,16 +115,16 @@ namespace dla_interface {
     void CommunicatorManager::destroy2DGrid(Communicator2DGrid& grid) {
 #ifdef DLA_HAVE_SCALAPACK
       // Internal Check of the number of shared pointer
-      assert(comm_grid_map.at(grid.rowOrderedMPICommunicator()).use_count() == 4);
-      ictxt_grid_map.erase(grid.blacsContext());
+      assert(comm_grid_map_.at(grid.rowOrderedMPICommunicator()).use_count() == 4);
+      ictxt_grid_map_.erase(grid.blacsContext());
 #endif
       // Internal Check of the number of shared pointer
-      assert(comm_grid_map.at(grid.rowOrderedMPICommunicator()).use_count() == 3);
-      comm_grid_map.erase(grid.rowMPICommunicator());
-      comm_grid_map.erase(grid.colMPICommunicator());
+      assert(comm_grid_map_.at(grid.rowOrderedMPICommunicator()).use_count() == 3);
+      comm_grid_map_.erase(grid.rowMPICommunicator());
+      comm_grid_map_.erase(grid.colMPICommunicator());
       // Internal Check of the number of shared pointer (only one remaining)
-      assert(comm_grid_map.at(grid.rowOrderedMPICommunicator()).use_count() == 1);
-      comm_grid_map.erase(grid.rowOrderedMPICommunicator());
+      assert(comm_grid_map_.at(grid.rowOrderedMPICommunicator()).use_count() == 1);
+      comm_grid_map_.erase(grid.rowOrderedMPICommunicator());
     }
 
     CommunicatorManager::CommunicatorManager(int nr_cores, int* argc, char*** argv,
@@ -141,8 +141,8 @@ namespace dla_interface {
 
       thread::CpuSet application_cpuset = topo_.getCpuBind();
 #ifdef DLA_HAVE_SCALAPACK
-      scalapack_cpuset = application_cpuset;
-      scalapack_nr_threads = thread::getOmpBlasThreads();
+      scalapack_cpuset_ = application_cpuset;
+      scalapack_nr_threads_ = thread::getOmpBlasThreads();
 #endif
 
 #ifdef DLA_HAVE_DPLASMA
@@ -172,17 +172,23 @@ namespace dla_interface {
           *p_argv = tmp;
       }
 
-      dplasma_cpuset = topo_.getCpuBind();
-      dplasma_nr_threads = thread::NumThreads(1);
+      dplasma_cpuset_ = topo_.getCpuBind();
+      dplasma_nr_threads_ = thread::NumThreads(1);
 #endif
       topo_.setCpuBind(application_cpuset);
     }
 
     CommunicatorManager::~CommunicatorManager() {
       // Make sure that the grids are destroyed before calling MPI_Finalize
-      comm_grid_map.clear();
+      int rank;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      std::stringstream s;
+      fall_back_info_.finalReport(rank, s);
+      std::cerr << s.str() << std::endl;
+
+      comm_grid_map_.clear();
 #ifdef DLA_HAVE_SCALAPACK
-      ictxt_grid_map.clear();
+      ictxt_grid_map_.clear();
 #endif
 #ifdef DLA_HAVE_DPLASMA
       parsec_fini(&parsec_handle_);

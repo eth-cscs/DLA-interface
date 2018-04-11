@@ -127,8 +127,7 @@ namespace testing {
         }
         if (mat.commGrid().id2D() == submat.getRankId2D(i, j)) {
           if (mat.ptr(subindex.first + i, subindex.second + j) != submat.ptr(i, j)) {
-            out << "Pointers of element (" << i << ", " << j << ") are not the same."
-                      << std::endl;
+            out << "Pointers of element (" << i << ", " << j << ") are not the same." << std::endl;
             return false;
           }
         }

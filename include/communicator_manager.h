@@ -82,15 +82,15 @@ namespace dla_interface {
 #ifdef DLA_HAVE_SCALAPACK
       // Returns the number of threads and cpuset for Scalapack.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getScalapackConfigInfo() {
-        return std::make_tuple(std::cref(comm_manager_->scalapack_nr_threads),
-                               std::cref(comm_manager_->scalapack_cpuset));
+        return std::make_tuple(std::cref(comm_manager_->scalapack_nr_threads_),
+                               std::cref(comm_manager_->scalapack_cpuset_));
       }
 #endif
 #ifdef DLA_HAVE_DPLASMA
       // Returns the number of threads and cpuset for DPlasma.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getDPlasmaConfigInfo() {
-        return std::make_tuple(std::cref(comm_manager_->dplasma_nr_threads),
-                               std::cref(comm_manager_->dplasma_cpuset));
+        return std::make_tuple(std::cref(comm_manager_->dplasma_nr_threads_),
+                               std::cref(comm_manager_->dplasma_cpuset_));
       }
 #endif
 
@@ -139,19 +139,19 @@ namespace dla_interface {
       ParsecContext parsec_handle_;
 #endif
 
-      std::map<MPI_Comm, std::shared_ptr<Communicator2DGrid>> comm_grid_map;
+      std::map<MPI_Comm, std::shared_ptr<Communicator2DGrid>> comm_grid_map_;
 #ifdef DLA_HAVE_SCALAPACK
-      std::map<BlacsContextType, std::shared_ptr<Communicator2DGrid>> ictxt_grid_map;
+      std::map<BlacsContextType, std::shared_ptr<Communicator2DGrid>> ictxt_grid_map_;
 #endif
 
       thread::SystemTopology topo_;
 #ifdef DLA_HAVE_SCALAPACK
-      thread::NumThreads scalapack_nr_threads;
-      thread::CpuSet scalapack_cpuset;
+      thread::NumThreads scalapack_nr_threads_;
+      thread::CpuSet scalapack_cpuset_;
 #endif
 #ifdef DLA_HAVE_DPLASMA
-      thread::NumThreads dplasma_nr_threads;
-      thread::CpuSet dplasma_cpuset;
+      thread::NumThreads dplasma_nr_threads_;
+      thread::CpuSet dplasma_cpuset_;
 #endif
     };
   }
