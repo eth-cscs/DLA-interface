@@ -43,7 +43,7 @@ print_help()
 
   # --scalapack
   printf "  %-35s %s\n" \
-    "-s, --scalapack [No|MKL]" \
+    "-s, --scalapack [MKL]" \
     "Scalapack type [default: ${scalapack}]."
   
   # --dplasma
@@ -86,7 +86,6 @@ case $lapack in
 esac
 
 case $scalapack in
-  No|no) OPT_SCALAPACK=() ;;
   MKL)   OPT_SCALAPACK=(-DDLA_SCALAPACK_TYPE=MKL) ;;
   *) echo "Wrong --scalapack option: $scalapack" ; print_help ; exit 1 ;;
 esac
