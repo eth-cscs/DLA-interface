@@ -218,10 +218,6 @@ TYPED_TEST(DLATypedTest, Gemm) {
             // TODO: See dla_dplasma.h:28
             if (solver == DPlasma && (comm_ptr->rankOrder() == ColMajor || comm_ptr->size() != 6))
               continue;
-            // DPlasma doesn't support trans = 'C' for real cases.
-            if (std::is_same<ElType, BaseType<ElType>>::value && solver == DPlasma &&
-                (trans_a == ConjTrans || trans_b == ConjTrans))
-              continue;
             auto a_ptr = DistributedMatrix<ElType>(a_m + nb, a_n + nb, nb, nb, *comm_ptr, dist)
                              .subMatrix(a_m, a_n, nb, nb);
             auto b_ptr = DistributedMatrix<ElType>(b_m + 2 * nb, b_n, nb, nb, *comm_ptr, dist)
