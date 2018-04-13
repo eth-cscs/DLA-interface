@@ -9,6 +9,8 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
   dlai__util__checkBlocksAreSquare(mat);
   dlai__util__checkBaseIndexAtBlock(mat);
 
+  solver = dlai__util__fallbackCommunicator(comm_grid, solver);
+
   double n = mat.size().first;
   double n3 = n * n * n;
   double flop = util::nrOps<ElType>(n3 / 6, n3 / 6);

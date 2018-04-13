@@ -14,6 +14,8 @@ void LUFactorization(DistributedMatrix<ElType>& mat, int* ipiv, SolverType solve
   dlai__util__checkBlocksAreSquare(mat);
   dlai__util__checkBaseIndexAtBlock(mat);
 
+  solver = dlai__util__fallbackCommunicator(comm_grid, solver);
+
   double x = std::min(mat.size().first, mat.size().second);
   double d = std::max(mat.size().first, mat.size().second) - x;
   double ops = x * x * (x / 3 + d / 2);

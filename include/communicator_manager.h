@@ -6,6 +6,7 @@
 #include <mpi.h>
 #include <tuple>
 #include "communicator_grid.h"
+#include "fallback_info.h"
 #include "thread_binding.h"
 #include "thread_blas.h"
 #include "types.h"
@@ -102,6 +103,10 @@ namespace dla_interface {
         comm_manager_->setCpuBindInternal(cpuset);
       }
 
+      static FallbackInfo& getFallbackInfo() {
+        return comm_manager_->fall_back_info_;
+      }
+
       protected:
       Communicator2DGrid& communicator2DGrid(MPI_Comm base_comm, int row_size, int col_size,
                                              Ordering comm_ordering);
@@ -153,6 +158,7 @@ namespace dla_interface {
       thread::NumThreads dplasma_nr_threads_;
       thread::CpuSet dplasma_cpuset_;
 #endif
+      FallbackInfo fall_back_info_;
     };
   }
 }

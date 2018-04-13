@@ -10,6 +10,7 @@
 #include "util_cast.h"
 #include "util_check.h"
 #include "util_debug_output.h"
+#include "util_fallback.h"
 #include "util_types.h"
 #include "timer.h"
 
