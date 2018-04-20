@@ -98,6 +98,13 @@ namespace dla_interface {
     void debug_print(std::ostream& out, T obj) {
       out << obj;
     }
+
+    template <class ElType>
+    OpTrans RemoveConjOpTypeIfReal(OpTrans trans) {
+      if (std::is_same<ElType, BaseType<ElType>>::value && trans == ConjTrans)
+        return Trans;
+      return trans;
+    }
   }
 }
 

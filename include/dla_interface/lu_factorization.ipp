@@ -11,7 +11,10 @@ void LUFactorization(DistributedMatrix<ElType>& mat, int* ipiv, SolverType solve
   auto& comm_grid = mat.commGrid();
   util::Timer<> timer_full(comm_grid.rowOrderedMPICommunicator(), print_timers > 0);
 
-  // TODO: check size, blocksize?
+  dlai__util__checkBlocksAreSquare(mat);
+  dlai__util__checkBaseIndexAtBlock(mat);
+
+  solver = dlai__util__fallbackCommunicator(comm_grid, solver);
 
   double x = std::min(mat.size().first, mat.size().second);
   double d = std::max(mat.size().first, mat.size().second) - x;

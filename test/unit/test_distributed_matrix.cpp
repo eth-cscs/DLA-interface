@@ -1290,13 +1290,18 @@ TEST(DistributedMatrixTest, SubMatrix) {
   DistributedMatrix<Type> mat(2 * sm, 2 * sn, mb, nb, comm_grid, scalapack_dist);
   // 1 block per rank.
   auto psubmat = mat.subMatrix(sm, sn, 0, 0);
-  EXPECT_TRUE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn), std::make_pair(0, 0), *psubmat));
+  EXPECT_TRUE(
+      checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn), std::make_pair(0, 0), *psubmat));
   // Wrong size.
-  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm-1, sn), std::make_pair(0, 0), *psubmat, nullout));
-  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn-1), std::make_pair(0, 0), *psubmat, nullout));
+  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm - 1, sn), std::make_pair(0, 0),
+                                           *psubmat, nullout));
+  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn - 1), std::make_pair(0, 0),
+                                           *psubmat, nullout));
   // Wrong position.
-  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn), std::make_pair(mb, nb), *psubmat, nullout));
-  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn), std::make_pair(sm, sn), *psubmat, nullout));
+  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn), std::make_pair(mb, nb),
+                                           *psubmat, nullout));
+  EXPECT_FALSE(checkIfDistributedSubMatrix(mat, std::make_pair(sm, sn), std::make_pair(sm, sn),
+                                           *psubmat, nullout));
 
   // Check that the submatrix doesn't change if the original matrix is re-assigned.
   int m = 17;

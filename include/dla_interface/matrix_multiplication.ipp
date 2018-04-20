@@ -7,7 +7,13 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
   auto& comm_grid = mat_c.commGrid();
   util::Timer<> timer_full(comm_grid.rowOrderedMPICommunicator(), print_timers > 0);
 
-  // TODO: check blocksize, communicator?
+  solver = dlai__util__fallbackCommunicator(comm_grid, solver);
+
+  // For real Types OpTrans 'C' and 'T' are equivalent.
+  // Since DPlasma doesn't support 'C' for real types replace 'C' with 'T' for reals.
+  trans_a = util::RemoveConjOpTypeIfReal<ElType>(trans_a);
+  trans_b = util::RemoveConjOpTypeIfReal<ElType>(trans_b);
+
   int m = mat_c.size().first;
   int n = mat_c.size().second;
   int m2 = trans_a == NoTrans ? mat_a.size().first : mat_a.size().second;

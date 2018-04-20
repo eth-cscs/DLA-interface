@@ -2,8 +2,7 @@
 
 - BLAS/LAPACK
 - MPI
-- Boost: program options library
-- ScaLAPACK (Optional)
+- ScaLAPACK
 - Parsec/DPlasma (Optional)
 
 # Cmake options:
@@ -37,15 +36,9 @@ Otherwise `FindMPI` is used to finde the MPI libraries, and the following defaul
 - `TEST_RUNNER = ${MPIEXEC}`
 - `TEST_RUNNER_NP_OPT = ${MPIEXEC_NUMPROC_FLAG}`
 
-## Boost program options
-
-`find_package(Boost)` is used.
-`BOOST_ROOT` can be used to specify the Boost directory.
-
 ## Scalapack
 
-BLAS and LAPACK can be configured in 3 ways setting `DLA_LAPACK_TYPE`
-- `"None"`: ScaLAPACK is disabled.
+ScaLAPACK can be configured in 3 ways setting `DLA_SCALAPACK_TYPE`
 - `"Compiler"`: The compiler already link with the correct libraries
 - `"MKL"`: MKL ScaLAPACK is used (Only if `DLA_LAPACK_TYPE="MKL"` as well).
 - `"Custom"`: Link the libraries specified by `DLA_SCALAPACK_LIB`
