@@ -10,7 +10,7 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
   solver = dlai__util__fallbackCommunicator(comm_grid, solver);
 
   // For real Types OpTrans 'C' and 'T' are equivalent.
-  // Since DPlasma doesn't support 'C' for real types rreplace 'C' with 'T' for reals.
+  // Since DPlasma doesn't support 'C' for real types replace 'C' with 'T' for reals.
   trans_a = util::RemoveConjOpTypeIfReal<ElType>(trans_a);
   trans_b = util::RemoveConjOpTypeIfReal<ElType>(trans_b);
 
