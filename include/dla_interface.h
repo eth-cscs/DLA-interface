@@ -6,6 +6,7 @@
 #include "distributed_matrix.h"
 #include "dla_scalapack.h"
 #include "dla_dplasma.h"
+#include "dla_hpx_linalg.h"
 #include "error_message.h"
 #include "util_cast.h"
 #include "util_check.h"

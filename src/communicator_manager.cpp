@@ -12,6 +12,8 @@
 #include "internal_error.h"
 #include "types.h"
 
+#include "hpx_linalg/hpx_linalg.h"
+
 namespace dla_interface {
   namespace comm {
     // static members:
@@ -175,6 +177,21 @@ namespace dla_interface {
       dplasma_cpuset_ = topo_.getCpuBind();
       dplasma_nr_threads_ = thread::NumThreads(1);
 #endif
+
+#ifdef DLA_HAVE_HPX_LINALG
+      if (argc == nullptr || argv == nullptr)
+      {
+        char name[] = "dla_interface_hpx_linalg";
+        char* argv_hpx_linalg[] = { name, nullptr };
+        int argc_hpx_linalg = 1;
+        hpx_linalg::start(argc_hpx_linalg, argv_hpx_linalg);
+      }
+      else
+      {
+        hpx_linalg::start(*argc, *argv);
+      }
+#endif
+
       topo_.setCpuBind(application_cpuset);
     }
 
@@ -192,6 +209,9 @@ namespace dla_interface {
 #endif
 #ifdef DLA_HAVE_DPLASMA
       parsec_fini(&parsec_handle_);
+#endif
+#ifdef DLA_HAVE_HPX_LINALG
+      hpx_linalg::stop();
 #endif
 
       if (init_mpi_) {
