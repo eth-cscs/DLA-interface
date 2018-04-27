@@ -5,9 +5,9 @@
 #include "cxxopts/cxxopts.hpp"
 #include "distributed_matrix.h"
 #include "dla_interface.h"
+#include "matrix_index.h"
 #include "types.h"
-#include "util_local_matrix.h"
-#include "util_distributed_matrix.h"
+#include "util_types.h"
 
 extern "C" void dgemm_(const char* transa, const char* transb, const int* m, const int* n,
                        const int* k, const double* alpha, const double* a, const int* lda,
@@ -15,7 +15,18 @@ extern "C" void dgemm_(const char* transa, const char* transb, const int* m, con
                        const int* ldc);
 
 using namespace dla_interface;
-using namespace testing;
+
+template <class T, class F_T>
+void fill_random(DistributedMatrix<T>& mat, F_T random) {
+  int m = mat.localSize().first;
+  int n = mat.localSize().second;
+
+  for (int j = 0; j < n; ++j) {
+    for (int i = 0; i < m; ++i) {
+      mat(Local2DIndex(i, j)) = random();
+    }
+  }
+}
 
 int main(int argc, char** argv) {
   // clang-format off
@@ -40,6 +51,7 @@ int main(int argc, char** argv) {
       ("p,row_procs", "The number of rows in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
       ("q,col_procs", "The number of cols in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
       ("nr_threads", "The number of threads per rank.", cxxopts::value<int>()->default_value("1"))
+      ("r,repetitions", "The number of time to repeat the multiplication.", cxxopts::value<int>()->default_value("1"))
       ;
   // clang-format on
 
@@ -65,6 +77,7 @@ int main(int argc, char** argv) {
   const int p = vm["row_procs"].as<int>();
   const int q = vm["col_procs"].as<int>();
   const int nr_threads = vm["nr_threads"].as<int>();
+  const int rep = std::max(1, vm["repetitions"].as<int>());
 
   const OpTrans transa = vm.count("transa") ? Trans : NoTrans;
   const OpTrans transb = vm.count("transb") ? Trans : NoTrans;
@@ -87,49 +100,37 @@ int main(int argc, char** argv) {
 
   std::mt19937_64 rng(seed);
   std::uniform_real_distribution<double> dist(-1, 1);
-  auto random = [&dist, &rng](int, int) { return dist(rng); };
+  auto random = [&dist, &rng]() { return dist(rng); };
 
   double alpha = dist(rng);
   double beta = dist(rng);
-  LocalMatrix<double> full_mat_a(a_m, a_n);
-  fillLocalMatrix(full_mat_a, random);
-  LocalMatrix<double> full_mat_b(b_m, b_n);
-  fillLocalMatrix(full_mat_b, random);
-  LocalMatrix<double> full_mat_c(m, n);
-  fillLocalMatrix(full_mat_c, random);
-  LocalMatrix<double> full_mat_c_res(full_mat_c);
-
-  int lda = full_mat_a.leadingDimension();
-  int ldb = full_mat_b.leadingDimension();
-  int ldc = full_mat_c_res.leadingDimension();
-
-  dgemm_((char*)&transa, (char*)&transb, &m, &n, &k, &alpha, full_mat_a.ptr(), &lda,
-         full_mat_b.ptr(), &ldb, &beta, full_mat_c_res.ptr(), &ldc);
 
   DistributedMatrix<double> mat_a(a_m, a_n, a_mb, a_nb, comm_grid, scalapack_dist);
   DistributedMatrix<double> mat_b(b_m, b_n, b_mb, b_nb, comm_grid, scalapack_dist);
-  DistributedMatrix<double> mat_c(m, n, c_mb, c_nb, comm_grid, scalapack_dist);
 
-  auto val_a = [&full_mat_a](int i, int j) { return full_mat_a(i, j); };
-  auto val_b = [&full_mat_b](int i, int j) { return full_mat_b(i, j); };
-  auto val_c = [&full_mat_c](int i, int j) { return full_mat_c(i, j); };
-  auto val_c_res = [&full_mat_c_res](int i, int j) { return full_mat_c_res(i, j); };
-
-  fillDistributedMatrix(mat_a, val_a);
-  fillDistributedMatrix(mat_b, val_b);
-
-  bool status_all = true;
+  fill_random(mat_a, random);
+  fill_random(mat_b, random);
 
   for (auto solver : solvers) {
-    fillDistributedMatrix(mat_c, val_c);
+    double min_elapsed = 3e9;  // ~100 years
 
-    matrixMultiplication(transa, transb, alpha, mat_a, mat_b, beta, mat_c, solver, 2);
+    for (int id_rep = 0; id_rep < rep; ++id_rep) {
+      DistributedMatrix<double> mat_c(m, n, c_mb, c_nb, comm_grid, scalapack_dist);
 
-    auto status = checkNearDistributedMatrix(mat_c, val_c_res, 1e-10, 1e-2);
-    if (not status) {
-      std::cout << "***" << util::getSolverString(solver) << " Failed! ***" << std::endl;
+      fill_random(mat_c, random);
+
+      util::Timer<> timer(comm_grid.rowOrderedMPICommunicator());
+
+      matrixMultiplication(transa, transb, alpha, mat_a, mat_b, beta, mat_c, solver, 2);
+      auto elapsed = timer.elapsed(0, timer.save_time());
+      min_elapsed = std::min(min_elapsed, elapsed);
     }
-    status_all = status_all && status;
+    if (comm_grid.id2D() == std::make_pair(0, 0)) {
+      double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
+      std::cout << util::getSolverString(solver) << ": Best " << min_elapsed << " s ,"
+                << util::nrOps<double>(mnk, mnk) / min_elapsed / 1e9 << " GFlop/s" << std::endl;
+    }
   }
-  return status_all ? 0 : 1;
+
+  return 0;
 }
