@@ -83,6 +83,60 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
     }
 #endif
 
+#ifdef DLA_HAVE_HPX_LINALG
+    case HPX_LINALG: {
+      std::array<int, 4> timer_index;
+      util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);
+      timer_index[0] = 0;
+      int info = 0;
+      {
+        DistributedMatrix<ElType> mat_scalapack(scalapack_dist, mat);
+
+        Global2DIndex baseIndex = mat_scalapack.baseIndex();
+        if (Global2DIndex(0, 0) != baseIndex)
+        {
+          std::string message =
+            "HPX_LINALG Cholesky requires baseIndex == (0, 0) for the input matrix, (" +
+            std::to_string(baseIndex.row) + ", " +
+            std::to_string(baseIndex.col) + ") given";
+          throw std::invalid_argument(
+              errorMessage(message));
+        }
+        timer_index[1] = timer_part.save_time();
+
+        auto& commGrid = mat_scalapack.commGrid();
+        auto order = static_cast<hpx_linalg::Order>(commGrid.rankOrder());
+        hpx_linalg::Communicator2D comm_hpx_linalg(commGrid.id2D(),
+          commGrid.size2D(), commGrid.rowOrderedMPICommunicator(),
+          commGrid.rowMPICommunicator(), commGrid.colMPICommunicator(),
+          order);
+
+        auto size = mat_scalapack.size();
+        auto blockSize = mat_scalapack.blockSize();
+        hpx_linalg::MatrixDist<ElType> mat_hpx_linalg(std::get<0>(size),
+          std::get<1>(size), std::get<0>(blockSize), std::get<1>(blockSize),
+          mat_scalapack.ptr(), mat_scalapack.leadingDimension(),
+          comm_hpx_linalg);
+
+        hpx_linalg::cholesky_external<ElType>(mat_hpx_linalg);
+
+        timer_index[2] = timer_part.save_time();
+      }
+      timer_index[3] = timer_part.save_time();
+      if (comm_grid.id2D() == std::make_pair(0, 0)) {
+        timer_part.print_elapsed(timer_index[0], timer_index[1], "Conversion a: ");
+
+        timer_part.print_elapsed(timer_index[1], timer_index[2],
+                                 "Cholesky Factorization (HPX_LINALG) time: ", flop);
+        timer_part.print_elapsed(timer_index[2], timer_index[3], "Back conversion a: ");
+      }
+      if (info != 0) {
+        throw std::invalid_argument(errorMessage("Matrix is not positive definite (", info, ")"));
+      }
+      break;
+    }
+#endif
+
     default:
       throw std::invalid_argument(
           errorMessage("Cholesky factorization is not available for solver ", solver));

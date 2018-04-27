@@ -9,7 +9,7 @@
 #endif
 
 namespace dla_interface {
-  enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, Chameleon = 4 };
+  enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, Chameleon = 4, HPX_LINALG = 5 };
   const std::map<SolverType, std::string> solverNames = {
       {ScaLAPACK, "ScaLAPACK"}, {ELPA, "ELPA"}, {DPlasma, "DPLASMA"}, {Chameleon, "Chameleon"}};
 
