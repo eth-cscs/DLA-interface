@@ -1,7 +1,7 @@
 OPTIONS=dfo:v
 LONGOPTIONS=debug,force,output:,verbose
 
-OPTIONS=`getopt -o h::t:b:p:l:s:d: -l help::,tag:,build-type,partition:,lapack:,scalapack:,dplasma: --name "$0" -- "$@"`
+OPTIONS=`getopt -o h::t:b:p:l:s:d: -l help::,tag:,build-type,partition:,lapack:,scalapack:,dplasma:,hpx_linalg: --name "$0" -- "$@"`
 ret=$?
 if [ $ret -ne 0 ]; then
     exit 1
@@ -14,6 +14,7 @@ partition="mc"
 lapack="MKLst"
 scalapack="MKL"
 dplasma="Yes"
+hpx_linalg="Yes"
 
 # Print help statement and exit.
 print_help()
@@ -45,12 +46,17 @@ print_help()
   printf "  %-35s %s\n" \
     "-s, --scalapack [MKL]" \
     "Scalapack type [default: ${scalapack}]."
-  
+
   # --dplasma
   printf "  %-35s %s\n" \
     "-d, --dplasma [No|Yes]" \
     "Build with DPlasma [default: ${dplasma}]."
-  
+
+  # --hpx_linalg
+  printf "  %-35s %s\n" \
+         "-x, --hpx_linalg [No|Yes]" \
+         "Build with HPX_LINALG [default: ${hpx_linalg}]."
+
   # --help
   printf "  %-35s %s\n" \
     "-h, --help" \
@@ -69,6 +75,7 @@ while true; do
     -l|--lapack)     lapack="$2"     ; shift 2 ;;
     -s|--scalapack)  scalapack="$2"  ; shift 2 ;;
     -d|--dplasma)    dplasma="$2"    ; shift 2 ;;
+    -x|--hpx_linalg) hpx_linalg="$2" ; shift 2 ;;
     --) shift ; break ;;
     *) echo "Options internal error. $1" ; exit 1 ;;
   esac
@@ -98,13 +105,22 @@ case $dplasma in
   *)  echo "Wrong --dplasma option: $dplasma" ; print_help ; exit 1 ;;
 esac
 
+HPX_LINALG_DIR=/apps/daint/UES/simbergm/jenkins/DLA-interface/hpx_linalg/lib/cmake/HPX_LINALG/
+
+case $dplasma in
+    No|no)   OPT_HPX_LINALG=() ;;
+    Yes|yes) OPT_HPX_LINALG=(-DHPX_LINALG_DIR="${HPX_LINALG_DIR}") ;;
+    *)  echo "Wrong --hpx_linalg option: $hpx_linalg" ; print_help ; exit 1 ;;
+esac
+
 echo -n "Running with options:"
 echo -n " tag: ${tag},"
 echo -n " build_type: ${build_type},"
 echo -n " partition: ${partition},"
 echo -n " lapack: ${lapack},"
 echo -n " scalapack: ${scalapack},"
-echo    " dplasma: ${dplasma}"
+echo -n " dplasma: ${dplasma}"
+echo    " hpx_linalg: ${hpx_linalg}"
 
 if [ "`hostname | grep daint`" == "" ]; then
   echo "Wrong system: `hostname`"
@@ -131,6 +147,7 @@ OPT_CMAKE=(\
   "${OPT_LAPACK[@]}" \
   "${OPT_SCALAPACK[@]}" \
   "${OPT_DPLASMA[@]}" \
+  "${OPT_HPX_LINALG[@]}" \
   -DHWLOC_ROOT=$EBROOTHWLOC \
   ..)
 echo -n "executing cmake with options: ${OPT_CMAKE[@]}"
@@ -165,7 +182,7 @@ status=""
 
 # sacct output may be empty until the job shows up.
 while [ "$status" == "PENDING" -o "$status" == "RUNNING" -o "$status" == "" ]; do
-  status=`sacct -j ${jobid} -o State -n -P | head -n 1` 
+  status=`sacct -j ${jobid} -o State -n -P | head -n 1`
   echo "Status $status"
   sleep 5
 done
