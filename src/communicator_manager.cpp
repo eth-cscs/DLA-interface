@@ -184,7 +184,8 @@ namespace dla_interface {
       MPI_Comm_rank(MPI_COMM_WORLD, &rank);
       std::stringstream s;
       fall_back_info_.finalReport(rank, s);
-      std::cerr << s.str() << std::endl;
+      if (s.str().length() > 0)
+        std::cerr << s.str() << std::endl;
 
       comm_grid_map_.clear();
 #ifdef DLA_HAVE_SCALAPACK
