@@ -92,31 +92,25 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
       {
         DistributedMatrix<ElType> mat_scalapack(scalapack_dist, mat);
 
-        Global2DIndex baseIndex = mat_scalapack.baseIndex();
-        if (Global2DIndex(0, 0) != baseIndex)
-        {
-          std::string message =
-            "HPX_LINALG Cholesky requires baseIndex == (0, 0) for the input matrix, (" +
-            std::to_string(baseIndex.row) + ", " +
-            std::to_string(baseIndex.col) + ") given";
-          throw std::invalid_argument(
-              errorMessage(message));
+        Global2DIndex base_index = mat_scalapack.baseIndex();
+        if (Global2DIndex(0, 0) != base_index) {
+          throw std::invalid_argument(errorMessage(
+              "HPX_LINALG Cholesky requires baseIndex == (0, 0) for the input matrix, ", base_index,
+              " given"));
         }
         timer_index[1] = timer_part.save_time();
 
-        auto& commGrid = mat_scalapack.commGrid();
-        auto order = static_cast<hpx_linalg::Order>(commGrid.rankOrder());
-        hpx_linalg::Communicator2D comm_hpx_linalg(commGrid.id2D(),
-          commGrid.size2D(), commGrid.rowOrderedMPICommunicator(),
-          commGrid.rowMPICommunicator(), commGrid.colMPICommunicator(),
-          order);
+        auto& comm_grid = mat_scalapack.commGrid();
+        auto order = static_cast<hpx_linalg::Order>(comm_grid.rankOrder());
+        hpx_linalg::Communicator2D comm_hpx_linalg(
+            comm_grid.id2D(), comm_grid.size2D(), comm_grid.rowOrderedMPICommunicator(),
+            comm_grid.rowMPICommunicator(), comm_grid.colMPICommunicator(), order);
 
         auto size = mat_scalapack.size();
-        auto blockSize = mat_scalapack.blockSize();
-        hpx_linalg::MatrixDist<ElType> mat_hpx_linalg(std::get<0>(size),
-          std::get<1>(size), std::get<0>(blockSize), std::get<1>(blockSize),
-          mat_scalapack.ptr(), mat_scalapack.leadingDimension(),
-          comm_hpx_linalg);
+        auto block_size = mat_scalapack.blockSize();
+        hpx_linalg::MatrixDist<ElType> mat_hpx_linalg(
+            std::get<0>(size), std::get<1>(size), std::get<0>(block_size), std::get<1>(block_size),
+            mat_scalapack.ptr(), mat_scalapack.leadingDimension(), comm_hpx_linalg);
 
         hpx_linalg::cholesky_external<ElType>(mat_hpx_linalg);
 

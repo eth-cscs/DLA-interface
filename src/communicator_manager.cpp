@@ -179,15 +179,13 @@ namespace dla_interface {
 #endif
 
 #ifdef DLA_HAVE_HPX_LINALG
-      if (argc == nullptr || argv == nullptr)
-      {
+      if (argc == nullptr || argv == nullptr) {
         char name[] = "dla_interface_hpx_linalg";
-        char* argv_hpx_linalg[] = { name, nullptr };
+        char* argv_hpx_linalg[] = {name, nullptr};
         int argc_hpx_linalg = 1;
         hpx_linalg::start(argc_hpx_linalg, argv_hpx_linalg);
       }
-      else
-      {
+      else {
         hpx_linalg::start(*argc, *argv);
       }
 #endif
