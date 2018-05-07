@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 
     auto status = checkNearDistributedMatrix(mat_c, val_c_res, 1e-10, 1e-2);
     if (not status) {
-      std::cout << "***" << dla_interface::util::getSolverString(solver) << " Failed! ***" << std::endl;
+      std::cout << "***" << util::getSolverString(solver) << " Failed! ***" << std::endl;
     }
     status_all = status_all && status;
   }
