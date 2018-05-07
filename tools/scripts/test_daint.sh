@@ -1,7 +1,7 @@
 OPTIONS=dfo:v
 LONGOPTIONS=debug,force,output:,verbose
 
-OPTIONS=`getopt -o h::t:b:p:l:s:d: -l help::,tag:,build-type,partition:,lapack:,scalapack:,dplasma:,hpx_linalg: --name "$0" -- "$@"`
+OPTIONS=`getopt -o h::t:b:p:l:s:d:x: -l help::,tag:,build-type,partition:,lapack:,scalapack:,dplasma:,hpx_linalg: --name "$0" -- "$@"`
 ret=$?
 if [ $ret -ne 0 ]; then
     exit 1
