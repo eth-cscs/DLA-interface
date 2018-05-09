@@ -5404,5 +5404,7 @@ std::string TempDir() {
   return "/tmp/";
 #endif  // GTEST_OS_WINDOWS_MOBILE
 }
-
 }  // namespace testing
+
+// result printer that avoids multiple ranks to print to stdout.
+#include "gtest/pretty_mpi_unit_test_result_printer.ipp"

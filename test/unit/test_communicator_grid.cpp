@@ -5,6 +5,7 @@
 #include <vector>
 #include "blacs.h"
 #include "gtest/gtest.h"
+#include "mpi_listener.h"
 #include "util_mpi.h"
 
 // This tests have to be execuuted using 6 MPI ranks.
@@ -216,6 +217,9 @@ int main(int argc, char** argv) {
   mpi_comms.push_back(tmp);
 
   ::testing::InitGoogleTest(&argc, argv);
+
+  // set up a custom listener that prints messages in an MPI-friendly way
+  ::testing::setMPIListener("results_test_communicator_grid");
 
   auto ret = RUN_ALL_TESTS();
 

@@ -1,5 +1,6 @@
 add_library(gtest gtest/src/gtest-all.cpp)
 target_include_directories(gtest PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gtest>)
+target_link_libraries(gtest ${MPI_CXX_LIBRARIES})
 
 add_library(gtest_main gtest/src/gtest_main.cpp)
 target_include_directories(gtest_main PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gtest>)
