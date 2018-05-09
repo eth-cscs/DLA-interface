@@ -127,10 +127,6 @@ TYPED_TEST(DLATypedTest, LUFactorization) {
     for (auto comm_ptr : comms) {
       for (auto dist : dists) {
         for (auto solver : solvers) {
-          // DPlasma supports only 1D communicators for LU.
-          if (solver == DPlasma && comm_ptr->size2D().first != 1)
-            continue;
-
           auto A1 = std::make_shared<DistributedMatrix<ElType>>(m, n, nb, nb, *comm_ptr, dist);
           auto A2 = DistributedMatrix<ElType>(m + nb, n + 2 * nb, nb, nb, *comm_ptr, dist)
                         .subMatrix(m, n, nb, 2 * nb);

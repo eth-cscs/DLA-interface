@@ -15,6 +15,13 @@ void LUFactorization(DistributedMatrix<ElType>& mat, int* ipiv, SolverType solve
   dlai__util__checkBaseIndexAtBlock(mat);
 
   solver = dlai__util__fallbackCommunicator(comm_grid, solver);
+#ifdef DLA_HAVE_DPLASMA
+  if (solver == DPlasma) {
+    solver =
+        dlai__util__fallbackScaLAPACKCondition(comm_grid.size2D().first != 1, comm_grid, solver,
+                                               "DPlasma LU supports only (1 x P) process grids.");
+  }
+#endif
 
   double x = std::min(mat.size().first, mat.size().second);
   double d = std::max(mat.size().first, mat.size().second) - x;
