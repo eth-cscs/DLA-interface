@@ -112,6 +112,7 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
             std::get<0>(size), std::get<1>(size), std::get<0>(block_size), std::get<1>(block_size),
             mat_scalapack.ptr(), mat_scalapack.leadingDimension(), comm_hpx_linalg);
 
+        util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getHPXLinalgConfigInfo());
         hpx_linalg::cholesky_external<ElType>(mat_hpx_linalg);
 
         timer_index[2] = timer_part.save_time();

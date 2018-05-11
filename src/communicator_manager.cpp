@@ -179,15 +179,24 @@ namespace dla_interface {
 #endif
 
 #ifdef DLA_HAVE_HPX_LINALG
+      std::vector<std::string> cfg = {"hpx.commandline.allow_unknown=1",
+                                      "hpx.commandline.aliasing=0"};
+      if (nr_cores > 0) {
+        cfg.push_back("hpx.os_threads=" + std::to_string(nr_cores));
+      }
+
       if (argc == nullptr || argv == nullptr) {
         char name[] = "dla_interface_hpx_linalg";
         char* argv_hpx_linalg[] = {name, nullptr};
         int argc_hpx_linalg = 1;
-        hpx_linalg::start(argc_hpx_linalg, argv_hpx_linalg);
+        hpx_linalg::start(argc_hpx_linalg, argv_hpx_linalg, cfg);
       }
       else {
-        hpx_linalg::start(*argc, *argv);
+        hpx_linalg::start(*argc, *argv, cfg);
       }
+
+      hpx_linalg_cpuset_ = application_cpuset;
+      hpx_linalg_nr_threads_ = thread::NumThreads(1);
 #endif
 
       topo_.setCpuBind(application_cpuset);
