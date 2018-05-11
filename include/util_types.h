@@ -58,13 +58,19 @@ namespace dla_interface {
 
     // Return a string with the name of the solver.
     inline std::string getSolverString(SolverType solver) {
-      return solverNames.at(solver);
+      return solver_names.at(solver);
+    }
+
+    // Return a string with the name of the distribution.
+    inline std::string getDistributionString(DistributionType dist) {
+      return dist_names.at(dist);
     }
 
     namespace internal {
-      inline std::map<std::string, SolverType> get_inverse_solver_map() {
-        std::map<std::string, SolverType> inv_map;
-        for (auto& el : solverNames) {
+      template <class T, class U>
+      inline std::map<T, U> get_inverse_map(const std::map<U, T>& map) {
+        std::map<T, U> inv_map;
+        for (auto& el : map) {
           inv_map[el.second] = el.first;
         }
         return inv_map;
@@ -74,12 +80,23 @@ namespace dla_interface {
     // Return the solver which has name str.
     // Throws if str do not correspond to any solver.
     inline SolverType getSolverType(std::string str) {
-      static std::map<std::string, SolverType> inv_map = internal::get_inverse_solver_map();
+      static std::map<std::string, SolverType> inv_map = internal::get_inverse_map(solver_names);
+      return inv_map.at(str);
+    }
+
+    // Return the distribution which has name str.
+    // Throws if str do not correspond to any distribution.
+    inline DistributionType getDistributionType(std::string str) {
+      static std::map<std::string, DistributionType> inv_map = internal::get_inverse_map(dist_names);
       return inv_map.at(str);
     }
 
     inline std::ostream& operator<<(std::ostream& out, SolverType solver) {
       return out << getSolverString(solver);
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, DistributionType dist) {
+      return out << getDistributionString(dist);
     }
 
     inline std::ostream& operator<<(std::ostream& out, OpTrans trans) {
