@@ -27,10 +27,23 @@ namespace dla_interface {
 #endif
       return solver;
     }
+
+    inline SolverType fallbackScaLAPACKCondition(const char* func, bool condition,
+                                                 const comm::Communicator2DGrid& comm,
+                                                 SolverType solver, std::string message) {
+      if (condition) {
+        if (comm.id2D() == std::make_pair(0, 0))
+          comm::CommunicatorManager::getFallbackInfo().report(func, solver, ScaLAPACK, message);
+        return ScaLAPACK;
+      }
+      return solver;
+    }
   }
 }
 
 #define dlai__util__fallbackCommunicator(comm, solver) \
   dla_interface::util::fallbackCommunicator(__func__, comm, solver)
+#define dlai__util__fallbackScaLAPACKCondition(condition, comm, solver, message) \
+  dla_interface::util::fallbackScaLAPACKCondition(__func__, condition, comm, solver, message)
 
 #endif  // DLA_INTERFACE_UTIL_FALLBACK_H

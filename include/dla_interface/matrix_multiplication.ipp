@@ -9,6 +9,20 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
 
   solver = dlai__util__fallbackCommunicator(comm_grid, solver);
 
+#ifdef DLA_HAVE_DPLASMA
+  if (solver == DPlasma) {
+    int mb = mat_c.blockSize().first;
+    int nb = mat_c.blockSize().second;
+    int mb2 = trans_a == NoTrans ? mat_a.blockSize().first : mat_a.blockSize().second;
+    int kb = trans_a == NoTrans ? mat_a.blockSize().second : mat_a.blockSize().first;
+    int kb2 = trans_b == NoTrans ? mat_b.blockSize().first : mat_b.blockSize().second;
+    int nb2 = trans_b == NoTrans ? mat_b.blockSize().second : mat_b.blockSize().first;
+    solver = dlai__util__fallbackScaLAPACKCondition(
+        mb != mb2 || nb != nb2 || kb != kb2, comm_grid, solver,
+        "Matrix matrix multiplication block sizes are incompatible.");
+  }
+#endif
+
   // For real Types OpTrans 'C' and 'T' are equivalent.
   // Since DPlasma doesn't support 'C' for real types replace 'C' with 'T' for reals.
   trans_a = util::RemoveConjOpTypeIfReal<ElType>(trans_a);

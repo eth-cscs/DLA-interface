@@ -71,10 +71,8 @@ TYPED_TEST(DLATypedTest, CholeskyFactorization) {
           auto A1 = std::make_shared<DistributedMatrix<ElType>>(n, n, nb, nb, *comm_ptr, dist);
           auto A2 =
               DistributedMatrix<ElType>(n + nb, n + nb, nb, nb, *comm_ptr, dist).subMatrix(n, n, nb, nb);
-          std::vector<std::shared_ptr<DistributedMatrix<ElType>>> mats{A1};
-          if (solver != HPX_LINALG) mats.push_back(A2);
-          if (solver == HPX_LINALG && uplo != Lower) continue;
-          for (auto A_ptr : mats) {
+
+          for (auto A_ptr : {A1, A2}) {
             auto& A = *A_ptr;
             fillDistributedMatrix(A, el_val);
 
@@ -127,10 +125,6 @@ TYPED_TEST(DLATypedTest, LUFactorization) {
     for (auto comm_ptr : comms) {
       for (auto dist : dists) {
         for (auto solver : solvers) {
-          // DPlasma supports only 1D communicators for LU.
-          if (solver == DPlasma && comm_ptr->size2D().first != 1)
-            continue;
-
           auto A1 = std::make_shared<DistributedMatrix<ElType>>(m, n, nb, nb, *comm_ptr, dist);
           auto A2 = DistributedMatrix<ElType>(m + nb, n + 2 * nb, nb, nb, *comm_ptr, dist)
                         .subMatrix(m, n, nb, 2 * nb);
