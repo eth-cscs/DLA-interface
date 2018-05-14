@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "gtest/gtest.h"
+#include "mpi_listener.h"
 #include "util_complex.h"
 #include "util_distributed_matrix.h"
 #include "communicator_grid.h"
@@ -267,7 +268,11 @@ int main(int argc, char** argv) {
     comms.push_back(&comm::CommunicatorManager::createCommunicator2DGrid(MPI_COMM_WORLD, 1, 6, order));
   }
 
+  comm::CommunicatorManager::getFallbackInfo().setFullReport(true);
+
   ::testing::InitGoogleTest(&argc, argv);
+
+  ::testing::setMPIListener("results_test_dla_interface");
 
   auto ret = RUN_ALL_TESTS();
 
