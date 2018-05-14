@@ -12,7 +12,9 @@
 #include "internal_error.h"
 #include "types.h"
 
+#ifdef DLA_HAVE_HPX_LINALG
 #include "hpx_linalg/hpx_linalg.h"
+#endif
 
 namespace dla_interface {
   namespace comm {
