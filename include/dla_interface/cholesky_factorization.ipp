@@ -11,6 +11,16 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
 
   solver = dlai__util__fallbackCommunicator(comm_grid, solver);
 
+#ifdef DLA_HAVE_HPX_LINALG
+  if (solver == HPX_LINALG) {
+    solver = dlai__util__fallbackScaLAPACKCondition(uplo != Lower, comm_grid, solver,
+                                                    "HPX linalg supports only uplo == Lower.");
+    solver = dlai__util__fallbackScaLAPACKCondition(mat.baseIndex() != Global2DIndex(0, 0),
+                                                    comm_grid, solver,
+                                                    "HPX linalg supports only baseIndex = (0, 0).");
+  }
+#endif
+
   double n = mat.size().first;
   double n3 = n * n * n;
   double flop = util::nrOps<ElType>(n3 / 6, n3 / 6);
