@@ -13,7 +13,7 @@ using namespace dla_interface;
 using namespace testing;
 
 constexpr auto dists = {scalapack_dist, tile_dist};
-constexpr auto solvers = {ScaLAPACK, ELPA, DPlasma, Chameleon};
+constexpr auto solvers = {ScaLAPACK, ELPA, DPlasma, Chameleon, HPX_LINALG};
 std::vector<comm::Communicator2DGrid*> comms;
 
 template <typename T>
@@ -39,6 +39,10 @@ bool choleskyFactorizationTestThrows(SolverType solver) {
 #ifdef DLA_HAVE_DPLASMA
   if (solver == DPlasma)
     return false;
+#endif
+#ifdef DLA_HAVE_HPX_LINALG
+  if (solver == HPX_LINALG)
+      return false;
 #endif
   return true;
 }
@@ -66,7 +70,10 @@ TYPED_TEST(DLATypedTest, CholeskyFactorization) {
           auto A1 = std::make_shared<DistributedMatrix<ElType>>(n, n, nb, nb, *comm_ptr, dist);
           auto A2 =
               DistributedMatrix<ElType>(n + nb, n + nb, nb, nb, *comm_ptr, dist).subMatrix(n, n, nb, nb);
-          for (auto A_ptr : {A1, A2}) {
+          std::vector<std::shared_ptr<DistributedMatrix<ElType>>> mats{A1};
+          if (solver != HPX_LINALG) mats.push_back(A2);
+          if (solver == HPX_LINALG && uplo != Lower) continue;
+          for (auto A_ptr : mats) {
             auto& A = *A_ptr;
             fillDistributedMatrix(A, el_val);
 

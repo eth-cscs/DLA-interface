@@ -12,6 +12,10 @@
 #include "internal_error.h"
 #include "types.h"
 
+#ifdef DLA_HAVE_HPX_LINALG
+#include "hpx_linalg/hpx_linalg.h"
+#endif
+
 namespace dla_interface {
   namespace comm {
     // static members:
@@ -174,8 +178,34 @@ namespace dla_interface {
 
       dplasma_cpuset_ = topo_.getCpuBind();
       dplasma_nr_threads_ = thread::NumThreads(1);
-#endif
+
+      // Restore main thread binding in case it has been modified.
       topo_.setCpuBind(application_cpuset);
+#endif
+
+#ifdef DLA_HAVE_HPX_LINALG
+      std::vector<std::string> cfg = {"hpx.commandline.allow_unknown=1",
+                                      "hpx.commandline.aliasing=0"};
+      if (nr_cores > 0) {
+        cfg.push_back("hpx.os_threads=" + std::to_string(nr_cores));
+      }
+
+      if (argc == nullptr || argv == nullptr) {
+        char name[] = "dla_interface_hpx_linalg";
+        char* argv_hpx_linalg[] = {name, nullptr};
+        int argc_hpx_linalg = 1;
+        hpx_linalg::start(argc_hpx_linalg, argv_hpx_linalg, cfg);
+      }
+      else {
+        hpx_linalg::start(*argc, *argv, cfg);
+      }
+
+      hpx_linalg_cpuset_ = application_cpuset;
+      hpx_linalg_nr_threads_ = thread::NumThreads(1);
+
+      // Restore main thread binding in case it has been modified.
+      topo_.setCpuBind(application_cpuset);
+#endif
     }
 
     CommunicatorManager::~CommunicatorManager() {
@@ -193,6 +223,9 @@ namespace dla_interface {
 #endif
 #ifdef DLA_HAVE_DPLASMA
       parsec_fini(&parsec_handle_);
+#endif
+#ifdef DLA_HAVE_HPX_LINALG
+      hpx_linalg::stop();
 #endif
 
       if (init_mpi_) {
