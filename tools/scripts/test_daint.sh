@@ -14,7 +14,7 @@ partition="mc"
 lapack="MKLst"
 scalapack="MKL"
 dplasma="Yes"
-hpx_linalg="Yes"
+hpx_linalg="No"
 
 # Print help statement and exit.
 print_help()
