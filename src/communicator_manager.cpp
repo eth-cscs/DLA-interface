@@ -176,6 +176,9 @@ namespace dla_interface {
 
       dplasma_cpuset_ = topo_.getCpuBind();
       dplasma_nr_threads_ = thread::NumThreads(1);
+
+      // Restore main thread binding in case it has been modified.
+      topo_.setCpuBind(application_cpuset);
 #endif
 
 #ifdef DLA_HAVE_HPX_LINALG
@@ -197,9 +200,10 @@ namespace dla_interface {
 
       hpx_linalg_cpuset_ = application_cpuset;
       hpx_linalg_nr_threads_ = thread::NumThreads(1);
-#endif
 
+      // Restore main thread binding in case it has been modified.
       topo_.setCpuBind(application_cpuset);
+#endif
     }
 
     CommunicatorManager::~CommunicatorManager() {
