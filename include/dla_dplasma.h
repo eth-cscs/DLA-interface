@@ -18,6 +18,7 @@ namespace dla_interface {
         case Upper:
           return PlasmaUpper;
       }
+      throw(std::invalid_argument(errorMessage("Invalid UpLo element.", uplo)));
     }
 
     inline PLASMA_enum plasmaTrans(OpTrans trans) {
@@ -29,6 +30,7 @@ namespace dla_interface {
         case ConjTrans:
           return PlasmaConjTrans;
       }
+      throw(std::invalid_argument(errorMessage("Invalid OpTrans element.", trans)));
     }
 
     template <class Routine, class... Args>
@@ -36,7 +38,7 @@ namespace dla_interface {
       auto parsec = comm::CommunicatorManager::getParsecContext();
       // Sets the MPI communicator.
       // TODO: uncomment this after parsec issue #135 is fixed
-      //       and remove continue in test_dla_interface.cpp:66.
+      //       and remove fallback to ScaLAPACK.
       // parsec_remote_dep_set_ctx(parsec, &comm);
       // Abort if the communicator is not equivalent to MPI_COMM_WORLD
       int size1, size2, rank1, rank2;

@@ -27,7 +27,6 @@ namespace dla_interface {
           return ConjTrans;
       }
       throw(std::invalid_argument(errorMessage("Wrong Trans char ", trans)));
-      return NoTrans;
     }
 
     inline UpLo getUpLo(char uplo) {
@@ -40,7 +39,6 @@ namespace dla_interface {
           return Lower;
       }
       throw(std::invalid_argument(errorMessage("Wrong UpLo char ", uplo)));
-      return Lower;
     }
 
     inline Ordering getOrdering(char ordering) {
@@ -53,7 +51,6 @@ namespace dla_interface {
           return ColMajor;
       }
       throw(std::invalid_argument(errorMessage("Wrong Ordering char ", ordering)));
-      return RowMajor;
     }
 
     // Return a string with the name of the solver.

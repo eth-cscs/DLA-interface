@@ -131,13 +131,13 @@ TEST(CheckUtilTest, CheckSameComm2D) {
     }
   }
   int i0 = 0;
-  for (int i1 = 0; i1 < mat1.size(); ++i1) {
+  for (size_t i1 = 0; i1 < mat1.size(); ++i1) {
     EXPECT_NO_THROW(dlai__util__checkSameComm2D(mat1[i0], mat1[i1]));
     EXPECT_NO_THROW(dlai__util__checkSameComm2D(mat2[i0], mat2[i1]));
     EXPECT_NO_THROW(dlai__util__checkSameComm2D(mat3[i0], mat3[i1]));
     EXPECT_THROW(dlai__util__checkSameComm2D(mat1[i0], mat2[i1]), std::invalid_argument);
     EXPECT_THROW(dlai__util__checkSameComm2D(mat1[i0], mat3[i1]), std::invalid_argument);
-    for (int i2 = 0; i2 < mat1.size(); ++i2) {
+    for (size_t i2 = 0; i2 < mat1.size(); ++i2) {
       EXPECT_NO_THROW(dlai__util__checkSameComm2D(mat1[i0], mat1[i1], mat1[i2]));
       EXPECT_NO_THROW(dlai__util__checkSameComm2D(mat2[i0], mat2[i1], mat2[i2]));
       EXPECT_NO_THROW(dlai__util__checkSameComm2D(mat3[i0], mat3[i1], mat3[i2]));
