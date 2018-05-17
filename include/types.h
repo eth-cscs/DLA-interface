@@ -4,21 +4,38 @@
 #include <complex>
 #include <map>
 #include <mpi.h>
+#include "util_macro.h"
 #ifdef DLA_HAVE_DPLASMA
 #include "ordered_dplasma.h"
 #endif
 
 namespace dla_interface {
+
+  // Note: When an element is added to a enum the corresponding
+  //       SET and name map (if it exists) have to be updated as well.
   enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, Chameleon = 4, HPX_LINALG = 5 };
-  const std::map<SolverType, std::string> solverNames = {
-      {ScaLAPACK, "ScaLAPACK"}, {ELPA, "ELPA"}, {DPlasma, "DPLASMA"}, {Chameleon, "Chameleon"}, {HPX_LINALG, "HPX_LINALG"}};
+  MAYBE_UNUSED constexpr auto SOLVER_SET = {ScaLAPACK, ELPA, DPlasma, Chameleon, HPX_LINALG};
+
+  const std::map<SolverType, std::string> solver_names = {{ScaLAPACK, "ScaLAPACK"},
+                                                          {ELPA, "ELPA"},
+                                                          {DPlasma, "DPLASMA"},
+                                                          {Chameleon, "Chameleon"},
+                                                          {HPX_LINALG, "HPX_LINALG"}};
 
   enum OpTrans { NoTrans = 'N', Trans = 'T', ConjTrans = 'C' };
+  MAYBE_UNUSED constexpr auto OPTRANS_SET = {NoTrans, Trans, ConjTrans};
+
   enum UpLo { Lower = 'L', Upper = 'U' };
+  MAYBE_UNUSED constexpr auto UPLO_SET = {Lower, Upper};
+
   // Distributed matrix distribution (see documentation for details):
   // Scalapack = 2D block cyclic distribution,
   // Tile = 2D block cyclic tile distribution.
   enum DistributionType { scalapack_dist = 1, tile_dist = 2 };
+  MAYBE_UNUSED constexpr auto DISTRIBUTION_SET = {scalapack_dist, tile_dist};
+
+  const std::map<DistributionType, std::string> dist_names = {{scalapack_dist, "ScaLAPACK"},
+                                                              {tile_dist, "Tile"}};
 
   using IndexType = int;
   using SizeType = int;
@@ -35,6 +52,7 @@ namespace dla_interface {
 #endif
 
   enum Ordering { RowMajor = 'R', ColMajor = 'C' };
+  MAYBE_UNUSED constexpr auto ORDER_SET = {RowMajor, ColMajor};
 
   // structure to access BaseType and ComplexType
   // defined in the following way:

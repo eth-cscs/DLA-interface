@@ -86,6 +86,10 @@ TEST(UtilTypesTest, getOrdering) {
 }
 
 TEST(UtilTypesTest, SolverString) {
+  for (auto solver : SOLVER_SET) {
+    EXPECT_EQ(solver, util::getSolverType(util::getSolverString(solver)));
+  }
+
   EXPECT_EQ(std::string("ScaLAPACK"), util::getSolverString(ScaLAPACK));
   EXPECT_EQ(std::string("ELPA"), util::getSolverString(ELPA));
   EXPECT_EQ(std::string("DPLASMA"), util::getSolverString(DPlasma));
@@ -95,4 +99,16 @@ TEST(UtilTypesTest, SolverString) {
   EXPECT_EQ(ELPA, util::getSolverType("ELPA"));
   EXPECT_EQ(DPlasma, util::getSolverType("DPLASMA"));
   EXPECT_EQ(Chameleon, util::getSolverType("Chameleon"));
+}
+
+TEST(UtilTypesTest, DistributionString) {
+  for (auto dist : DISTRIBUTION_SET) {
+    EXPECT_EQ(dist, util::getDistributionType(util::getDistributionString(dist)));
+  }
+
+  EXPECT_EQ(std::string("ScaLAPACK"), util::getDistributionString(scalapack_dist));
+  EXPECT_EQ(std::string("Tile"), util::getDistributionString(tile_dist));
+
+  EXPECT_EQ(scalapack_dist, util::getDistributionType("ScaLAPACK"));
+  EXPECT_EQ(tile_dist, util::getDistributionType("Tile"));
 }

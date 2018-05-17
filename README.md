@@ -70,7 +70,8 @@ The routines which will be available are (including the ScaLAPACK corresponding 
 # Known current limitations
 
 - MKL:
-  - The pivot array returned by MKL may be wrong for submatrices (when ia or ja are not 0). [Fixed in `MKL-2018u2`.]
+  - The pivot array returned by MKL distributed Cholesky factorization may be wrong for submatrices (when ia or ja are not 0). [Fixed in `MKL-2018u2`.]
+  - MKL distributed Matrix multiplication may be wrong for submatrices ("NN" case (both A and B matrices not transposed)). [Fixed in `MKL-2018u2`.]
 - Parsec:
   - Thread binding is wrong when multiple rank per node are used. (Parsec Issue #152)
   - Change of the Parsec MPI Communicator sometimes hangs (Parsec Issue #135), therefore only row ordered 2D communicator grids can be used.
