@@ -97,6 +97,107 @@ namespace dla_interface {
       util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::pzpotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
     }
+
+    inline void pheevd(UpLo uplo, int n, float* a, int ia, int ja, int* desca, float* w, float* z,
+                       int iz, int jz, int* descz, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      // Workspace query
+      int lwork = -1;
+      int liwork = -1;
+      {
+        float work;
+        int iwork;
+        scalapack::pssyevd_("V", &char_uplo, &n, a, &ia, &ja, desca, w, z, &iz, &jz, descz, &work,
+                            &lwork, &iwork, &liwork, &info);
+        lwork = static_cast<int>(work);
+        liwork = iwork;
+      }
+      // Allocate workspace
+      std::vector<float> work(lwork);
+      std::vector<int> iwork(liwork);
+
+      // Compute evs
+      scalapack::pssyevd_("V", &char_uplo, &n, a, &ia, &ja, desca, w, z, &iz, &jz, descz, &work[0],
+                          &lwork, &iwork[0], &liwork, &info);
+    }
+    inline void pheevd(UpLo uplo, int n, double* a, int ia, int ja, int* desca, double* w,
+                       double* z, int iz, int jz, int* descz, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      // Workspace query
+      int lwork = -1;
+      int liwork = -1;
+      {
+        double work;
+        int iwork;
+        scalapack::pdsyevd_("V", &char_uplo, &n, a, &ia, &ja, desca, w, z, &iz, &jz, descz, &work,
+                            &lwork, &iwork, &liwork, &info);
+        lwork = static_cast<int>(work);
+        liwork = iwork;
+      }
+      // Allocate workspace
+      std::vector<double> work(lwork);
+      std::vector<int> iwork(liwork);
+
+      // Compute evs
+      scalapack::pdsyevd_("V", &char_uplo, &n, a, &ia, &ja, desca, w, z, &iz, &jz, descz, &work[0],
+                          &lwork, &iwork[0], &liwork, &info);
+    }
+    inline void pheevd(UpLo uplo, int n, std::complex<float>* a, int ia, int ja, int* desca,
+                       float* w, std::complex<float>* z, int iz, int jz, int* descz, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      // Workspace query
+      int lwork = -1;
+      int lrwork = -1;
+      int liwork = -1;
+      {
+        std::complex<float> work;
+        float rwork;
+        int iwork;
+        scalapack::pcheevd_("V", &char_uplo, &n, a, &ia, &ja, desca, w, z, &iz, &jz, descz, &work,
+                            &lwork, &rwork, &lrwork, &iwork, &liwork, &info);
+        lwork = static_cast<int>(work.real());
+        lrwork = static_cast<int>(rwork);
+        liwork = iwork;
+      }
+      // Allocate workspace
+      std::vector<std::complex<float>> work(lwork);
+      std::vector<float> rwork(lrwork);
+      std::vector<int> iwork(liwork);
+
+      // Compute evs
+      scalapack::pcheevd_("V", &char_uplo, &n, a, &ia, &ja, desca, w, z, &iz, &jz, descz, &work[0],
+                          &lwork, &rwork[0], &lrwork, &iwork[0], &liwork, &info);
+    }
+    inline void pheevd(UpLo uplo, int n, std::complex<double>* a, int ia, int ja, int* desca,
+                       double* w, std::complex<double>* z, int iz, int jz, int* descz, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      // Workspace query
+      int lwork = -1;
+      int lrwork = -1;
+      int liwork = -1;
+      {
+        std::complex<double> work;
+        double rwork;
+        int iwork;
+        scalapack::pzheevd_("V", &char_uplo, &n, a, &ia, &ja, desca, w, z, &iz, &jz, descz, &work,
+                            &lwork, &rwork, &lrwork, &iwork, &liwork, &info);
+        lwork = static_cast<int>(work.real());
+        lrwork = static_cast<int>(rwork);
+        liwork = iwork;
+      }
+      // Allocate workspace
+      std::vector<std::complex<double>> work(lwork);
+      std::vector<double> rwork(lrwork);
+      std::vector<int> iwork(liwork);
+
+      // Compute evs
+      scalapack::pzheevd_("V", &char_uplo, &n, a, &ia, &ja, desca, w, z, &iz, &jz, descz, &work[0],
+                          &lwork, &rwork[0], &lrwork, &iwork[0], &liwork, &info);
+    }
   }
 }
 #endif

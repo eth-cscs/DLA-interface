@@ -50,6 +50,25 @@ namespace scalapack {
                 const int* ja, const int* desca, int* info);
   void pzpotrf_(const char* uplo, const int* n, std::complex<double>* a, const int* ia,
                 const int* ja, const int* desca, int* info);
+
+  void pssyevd_(const char* jobz, const char* uplo, const int* n, float* a, const int* ia,
+                const int* ja, const int* desca, float* w, float* z, const int* iz, const int* jz,
+                const int* descz, float* work, const int* lwork, int* iwork, const int* liwork,
+                int* info);
+  void pdsyevd_(const char* jobz, const char* uplo, const int* n, double* a, const int* ia,
+                const int* ja, const int* desca, double* w, double* z, const int* iz, const int* jz,
+                const int* descz, double* work, const int* lwork, int* iwork, const int* liwork,
+                int* info);
+  void pcheevd_(const char* jobz, const char* uplo, const int* n, std::complex<float>* a,
+                const int* ia, const int* ja, const int* desca, float* w, std::complex<float>* z,
+                const int* iz, const int* jz, const int* descz, std::complex<float>* work,
+                const int* lwork, float* rwork, const int* lrwork, int* iwork, const int* liwork,
+                int* info);
+  void pzheevd_(const char* jobz, const char* uplo, const int* n, std::complex<double>* a,
+                const int* ia, const int* ja, const int* desca, double* w, std::complex<double>* z,
+                const int* iz, const int* jz, const int* descz, std::complex<double>* work,
+                const int* lwork, double* rwork, const int* lrwork, int* iwork, const int* liwork,
+                int* info);
   }
 }
 #endif
