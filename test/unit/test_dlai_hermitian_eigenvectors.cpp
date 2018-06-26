@@ -64,9 +64,9 @@ class DLATypedTest : public ::testing::Test {
     std::vector<BaseType<T>> eval;
     hermitianEigenvectors(uplo, a, eval, evec, solver);
 
-    EXPECT_EQ(a.size().first, eval.size());
+    EXPECT_EQ(a.size().first, static_cast<int> (eval.size()));
     bool eval_check = true;
-    for (int i = 0; i < eval.size(); ++i) {
+    for (size_t i = 0; i < eval.size(); ++i) {
       if (std::abs(eval_expected(i) - eval[i]) > 1000 * this->epsilon()) {
         *outstream << "eval element (" << i << ") is wrong." << std::endl;
         *outstream << "Expected " << eval_expected(i) << "," << std::endl;
