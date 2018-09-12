@@ -54,7 +54,7 @@ class DLATypedTest : public ::testing::Test {
           -i + j);
     };
 
-    auto el_val_expected = [this, &el_val](int i, int j) {
+    auto el_val_expected = [this](int i, int j) {
       return i < j ? this->value(std::exp2(-2 * std::abs(i - j)), -i + j)
                    : this->value(std::exp2(-std::abs(i - j)), -i + j);
     };
