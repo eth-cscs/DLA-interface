@@ -63,7 +63,8 @@ class DLATypedTest : public ::testing::Test {
 
     LUFactorization(a, ipiv, solver);
 
-    EXPECT_TRUE(checkNearDistributedMatrix(a, el_val_expected, 10 * this->epsilon()));
+    EXPECT_TRUE(
+        checkNearDistributedMatrix(a, el_val_expected, 10 * this->epsilon(), 1e-3, *outstream));
 
     bool ipiv_check = true;
     for (int i = 0; i < a.localSize().first; ++i) {
