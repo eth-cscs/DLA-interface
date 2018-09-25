@@ -5,6 +5,9 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
   auto& comm_grid = mat.commGrid();
   util::Timer<> timer_full(comm_grid.rowOrderedMPICommunicator(), print_timers > 0);
 
+  if (uplo == All)
+    uplo = Lower;
+
   dlai__util__checkIsSquare(mat);
   dlai__util__checkBlocksAreSquare(mat);
   dlai__util__checkBaseIndexAtBlock(mat);
