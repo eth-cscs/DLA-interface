@@ -69,6 +69,21 @@ namespace scalapack {
                 const int* iz, const int* jz, const int* descz, std::complex<double>* work,
                 const int* lwork, double* rwork, const int* lrwork, int* iwork, const int* liwork,
                 int* info);
+
+  void pstradd_(const char* uplo, const char* trans, const int* m, const int* n, const float* alpha,
+                const float* a, const int* ia, const int* ja, const int* desca, const float* beta,
+                float* c, const int* ic, const int* jc, const int* descc);
+  void pdtradd_(const char* uplo, const char* trans, const int* m, const int* n, const double* alpha,
+                const double* a, const int* ia, const int* ja, const int* desca, const double* beta,
+                double* c, const int* ic, const int* jc, const int* descc);
+  void pctradd_(const char* uplo, const char* trans, const int* m, const int* n,
+                const std::complex<float>* alpha, const std::complex<float>* a, const int* ia,
+                const int* ja, const int* desca, const std::complex<float>* beta,
+                std::complex<float>* c, const int* ic, const int* jc, const int* descc);
+  void pztradd_(const char* uplo, const char* trans, const int* m, const int* n,
+                const std::complex<double>* alpha, const std::complex<double>* a, const int* ia,
+                const int* ja, const int* desca, const std::complex<double>* beta,
+                std::complex<double>* c, const int* ic, const int* jc, const int* descc);
   }
 }
 #endif

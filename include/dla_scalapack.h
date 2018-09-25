@@ -198,6 +198,46 @@ namespace dla_interface {
       scalapack::pzheevd_("V", &char_uplo, &n, a, &ia, &ja, desca, w, z, &iz, &jz, descz, &work[0],
                           &lwork, &rwork[0], &lrwork, &iwork[0], &liwork, &info);
     }
+
+    inline void ptradd(UpLo uplo, OpTrans trans, int m, int n, float alpha, const float* a, int ia,
+                       int ja, int* desca, float beta, float* c, int ic, int jc, int* descc) {
+      const char char_uplo = static_cast<char>(uplo);
+      const char char_trans = static_cast<char>(trans);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pstradd_(&char_uplo, &char_trans, &m, &n, &alpha, a, &ia, &ja, desca, &beta, c,
+                          &ic, &jc, descc);
+    }
+    inline void ptradd(UpLo uplo, OpTrans trans, int m, int n, double alpha, const double* a, int ia,
+                       int ja, int* desca, double beta, double* c, int ic, int jc, int* descc) {
+      const char char_uplo = static_cast<char>(uplo);
+      const char char_trans = static_cast<char>(trans);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pdtradd_(&char_uplo, &char_trans, &m, &n, &alpha, a, &ia, &ja, desca, &beta, c,
+                          &ic, &jc, descc);
+    }
+    inline void ptradd(UpLo uplo, OpTrans trans, int m, int n, std::complex<float> alpha,
+                       const std::complex<float>* a, int ia, int ja, int* desca,
+                       std::complex<float> beta, std::complex<float>* c, int ic, int jc, int* descc) {
+      const char char_uplo = static_cast<char>(uplo);
+      const char char_trans = static_cast<char>(trans);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pctradd_(&char_uplo, &char_trans, &m, &n, &alpha, a, &ia, &ja, desca, &beta, c,
+                          &ic, &jc, descc);
+    }
+    inline void ptradd(UpLo uplo, OpTrans trans, int m, int n, std::complex<double> alpha,
+                       const std::complex<double>* a, int ia, int ja, int* desca,
+                       std::complex<double> beta, std::complex<double>* c, int ic, int jc,
+                       int* descc) {
+      const char char_uplo = static_cast<char>(uplo);
+      const char char_trans = static_cast<char>(trans);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pztradd_(&char_uplo, &char_trans, &m, &n, &alpha, a, &ia, &ja, desca, &beta, c,
+                          &ic, &jc, descc);
+    }
   }
 }
 #endif
