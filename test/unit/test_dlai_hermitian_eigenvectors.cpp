@@ -63,8 +63,16 @@ class DLATypedTest : public ::testing::Test {
         return this->value(eval_expected(std::max(i, j)), 0);
       return this->value(0, 0);
     };
+    auto el_val_uplo = [this, uplo, &el_val](int i, int j) {
+      // Set the non used elements to -1.
+      if (i < j && uplo == Lower)
+        return this->value(-1, 0);
+      if (i > j && uplo == Upper)
+        return this->value(-1, 0);
+      return el_val(i, j);
+    };
 
-    fillDistributedMatrix(a, el_val);
+    fillDistributedMatrix(a, el_val_uplo);
 
     std::vector<BaseType<T>> eval;
     hermitianEigenvectors(uplo, a, eval, evec, solver);
