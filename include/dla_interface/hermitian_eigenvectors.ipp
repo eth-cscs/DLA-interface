@@ -17,9 +17,20 @@ void hermitianEigenvectors(UpLo uplo, DistributedMatrix<ElType>& mat, BaseType<E
   dlai__util__checkBlocksAreSquare(mat);
   dlai__util__checkBaseIndexAtBlock(mat);
 
+#ifdef DLA_HAVE_ELPA
+  if (solver == ELPA) {
+    solver =
+        dlai__util__fallbackScaLAPACKCondition(mat.baseIndex() != Global2DIndex(0, 0), comm_grid,
+                                               solver, "ELPA supports only baseIndex = (0, 0).");
+  }
+#endif
+
   switch (solver) {
 #ifdef DLA_HAVE_SCALAPACK
     case ScaLAPACK: {
+      // use the lower part if A is fully set.
+      if (uplo == All)
+        uplo = Lower;
       std::array<int, 6> timer_index;
       util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);
       timer_index[0] = 0;
@@ -73,6 +84,17 @@ void hermitianEigenvectors(UpLo uplo, DistributedMatrix<ElType>& mat, BaseType<E
 
         auto matrix_info = mat_scalapack.getScalapackDescription();
         auto matrix_ev_info = mat_ev_scalapack.getScalapackDescription();
+
+        if (uplo != All) {
+          UpLo inv_uplo = uplo == Lower ? Upper : Lower;
+          int ij = uplo == Lower ? 2 : 1;
+          int ji = uplo == Lower ? 1 : 2;
+          // matrix size - 1
+          int n1 = mat_scalapack.size().first - 1;
+          scalapack_wrappers::ptradd(inv_uplo, ConjTrans, n1, n1, 1., std::get<0>(matrix_info), ij,
+                                     ji, &std::get<3>(matrix_info)[0], 0., std::get<0>(matrix_info),
+                                     ji, ij, &std::get<3>(matrix_info)[0]);
+        }
 
         elpa::Handle handle(mat_scalapack, mat_scalapack.size().first);
         elpa::eigenvectors(handle, std::get<0>(matrix_info), evalues, std::get<0>(matrix_ev_info),
