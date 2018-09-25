@@ -59,6 +59,42 @@ void hermitianEigenvectors(UpLo uplo, DistributedMatrix<ElType>& mat, BaseType<E
       break;
     }
 #endif
+#ifdef DLA_HAVE_ELPA
+    case ELPA: {
+      std::array<int, 6> timer_index;
+      util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);
+      timer_index[0] = 0;
+      int info = 0;
+      {
+        DistributedMatrix<ElType> mat_scalapack(scalapack_dist, mat);
+        timer_index[1] = timer_part.save_time();
+        DistributedMatrix<ElType> mat_ev_scalapack(scalapack_dist, evectors);
+        timer_index[2] = timer_part.save_time();
+
+        auto matrix_info = mat_scalapack.getScalapackDescription();
+        auto matrix_ev_info = mat_ev_scalapack.getScalapackDescription();
+
+        elpa::Handle handle(mat_scalapack, mat_scalapack.size().first);
+        elpa::eigenvectors(handle, std::get<0>(matrix_info), evalues, std::get<0>(matrix_ev_info),
+                           &info);
+
+        timer_index[3] = timer_part.save_time();
+      }
+      timer_index[4] = timer_part.save_time();
+      if (comm_grid.id2D() == std::make_pair(0, 0)) {
+        timer_part.print_elapsed(timer_index[0], timer_index[1], "Conversion a: ");
+        timer_part.print_elapsed(timer_index[1], timer_index[2], "Conversion ev: ");
+        timer_part.print_elapsed(timer_index[2], timer_index[3], "ELPA Eigensolver time: ");
+        timer_part.print_elapsed(timer_index[3], timer_index[4], "Back conversion a, ev: ");
+      }
+      if (info != 0) {
+        throw std::invalid_argument(
+            errorMessage("ELPA Eigensolver returned (", info, " (", elpa_strerr(info), "))"));
+      }
+
+      break;
+    }
+#endif
 
     default:
       throw std::invalid_argument(errorMessage("Eigensolver is not available for solver ", solver));
