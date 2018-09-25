@@ -39,16 +39,17 @@ class DLATypedTest : public ::testing::Test {
   }
 
   void testHermitianEigenvectors(UpLo uplo, DistributedMatrix<T>& a, DistributedMatrix<T>& evec,
-                                 SolverType solver) {
+                                 DistributedMatrix<T>& tmp, SolverType solver) {
     if (hermitianEigenvectorsTestThrows(solver)) {
       std::vector<BaseType<T>> eval;
       EXPECT_THROW(hermitianEigenvectors(uplo, a, eval, evec, solver), std::invalid_argument);
       return;
     }
 
-    auto eval_expected = [n = a.size().first](int i) {
-      // E.g. n == 4: {1, .3333, -.3333, 1}
-      //      n == 5: {1, .5, 0, -.5, 1}
+    int n = a.size().first;
+    auto eval_expected = [n](int i) {
+      // E.g. n == 4: {-1, -.3333, .3333, 1}
+      //      n == 5: {-1, -.5, 0, .5, 1}
       return 2. * i / (n - 1) - 1.;
     };
 
@@ -64,7 +65,7 @@ class DLATypedTest : public ::testing::Test {
     std::vector<BaseType<T>> eval;
     hermitianEigenvectors(uplo, a, eval, evec, solver);
 
-    EXPECT_EQ(a.size().first, static_cast<int> (eval.size()));
+    EXPECT_EQ(a.size().first, static_cast<int>(eval.size()));
     bool eval_check = true;
     for (size_t i = 0; i < eval.size(); ++i) {
       if (std::abs(eval_expected(i) - eval[i]) > 1000 * this->epsilon()) {
@@ -77,9 +78,30 @@ class DLATypedTest : public ::testing::Test {
       }
     }
     EXPECT_TRUE(eval_check);
-  }
+    // Skip eigenvectors check if the eigenvalues are wrong.
+    if (!eval_check)
+      return;
 
-  // TODO Eigenvectors check. (Note: may be opposite vector.)
+    // reset a to the original matrix.
+    fillDistributedMatrix(a, el_val);
+
+    matrixMultiplication(NoTrans, NoTrans, this->value(1, 0), a, evec, this->value(0, 0), tmp,
+                         ScaLAPACK);
+    auto ev_val = [this, &eval](int i, int j) {
+      // diagonal matrix with eigenvalues.
+      if (i == j)
+        return this->value(eval[i], 0);
+      return this->value(0, 0);
+    };
+    // set a to the eigenvalue matrix.
+    fillDistributedMatrix(a, ev_val);
+
+    matrixMultiplication(NoTrans, NoTrans, this->value(-1, 0), evec, a, this->value(1, 0), tmp,
+                         ScaLAPACK);
+
+    auto expected = [this](int, int) { return this->value(0, 0); };
+    EXPECT_TRUE(checkNearDistributedMatrix(tmp, expected, n * this->epsilon(), 1., *outstream));
+  }
 };
 
 typedef ::testing::Types<float, double, std::complex<float>, std::complex<double>> MyTypes;
@@ -92,12 +114,12 @@ TYPED_TEST(DLATypedTest, HermitianEigenvectors) {
   for (auto n : {54, 59, 62})
     for (auto comm_ptr : comms) {
       for (auto dist : DISTRIBUTION_SET) {
+        DistributedMatrix<ElType> a(n, n, nb, nb, *comm_ptr, dist);
+        DistributedMatrix<ElType> evec(n, n, nb, nb, *comm_ptr, dist);
+        DistributedMatrix<ElType> tmp(n, n, nb, nb, *comm_ptr, dist);
         for (auto solver : SOLVER_SET) {
           for (auto uplo : UPLO_SET) {
-            DistributedMatrix<ElType> a(n, n, nb, nb, *comm_ptr, dist);
-            DistributedMatrix<ElType> evec(n, n, nb, nb, *comm_ptr, dist);
-
-            this->testHermitianEigenvectors(uplo, a, evec, solver);
+            this->testHermitianEigenvectors(uplo, a, evec, tmp, solver);
           }
         }
       }
@@ -121,7 +143,6 @@ int main(int argc, char** argv) {
   for (auto order : {RowMajor, ColMajor}) {
     comms.push_back(&comm::CommunicatorManager::createCommunicator2DGrid(MPI_COMM_WORLD, 2, 3, order));
     comms.push_back(&comm::CommunicatorManager::createCommunicator2DGrid(MPI_COMM_WORLD, 3, 2, order));
-    comms.push_back(&comm::CommunicatorManager::createCommunicator2DGrid(MPI_COMM_WORLD, 1, 6, order));
   }
 
   comm::CommunicatorManager::getFallbackInfo().setFullReport(true);
