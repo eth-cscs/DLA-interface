@@ -19,6 +19,7 @@ include(dla_scalapack)
 include(dla_dplasma)
 include(dla_hpx_linalg)
 include(dla_hwloc)
+include(dla_elpa)
 
 include(dla_openmp)
 include(dla_mpi)
@@ -32,6 +33,8 @@ dla_find_dplasma()
 dla_find_hpx_linalg()
 
 dla_find_hwloc()
+
+dla_find_elpa()
 
 if (${DLA_HAVE_SCALAPACK})
   setoption(DLA_WITH_FORTRAN BOOL ON "Build fortran binding")
@@ -97,6 +100,8 @@ include_directories(
 )
 # Suppress warnings for DPLASMA headers.
 include_directories(SYSTEM ${DLA_DPLASMA_INCLUDE_DIRS})
+# Suppress warnings for ELPA headers.
+include_directories(SYSTEM ${DLA_ELPA_INCLUDE_DIRS})
 
 # ---------------------------------------------------------------------------
 # extra options
@@ -116,10 +121,11 @@ add_subdirectory(src)
 set(DLA_LIBS
     dla_interface
     ${DLA_HPX_LINALG_LIBRARIES}
-    ${MPI_CXX_LIBRARIES}
+    ${DLA_ELPA_LIBRARY}
     ${DLA_DPLASMA_LIBS}
     ${DLA_SCALAPACK_LIBRARY}
     ${DLA_LAPACK_LIBRARY}
+    ${MPI_CXX_LIBRARIES}
     ${DLA_HWLOC_LIBS}
 )
 
