@@ -47,7 +47,7 @@ if (${DLA_WITH_FORTRAN})
     enable_language(Fortran)
   else()
     message(WARNING "Cannot build Fortran bindings without Scalapack. Setting DLA_WITH_FORTRAN to OFF")
-    set(${DLA_WITH_FORTRAN} OFF FORCE)
+    set(DLA_WITH_FORTRAN OFF FORCE)
   endif()
 endif()
 
@@ -98,6 +98,12 @@ include_directories(
     ${DLA_HPX_LINALG_INCLUDE_DIRS}
     ${HWLOC_INCLUDE_DIRS}
 )
+if (${DLA_WITH_FORTRAN})
+  # .mod files
+  include_directories(
+    ${PROJECT_BINARY_DIR}/src
+  )
+endif()
 # Suppress warnings for DPLASMA headers.
 include_directories(SYSTEM ${DLA_DPLASMA_INCLUDE_DIRS})
 # Suppress warnings for ELPA headers.
