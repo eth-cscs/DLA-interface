@@ -5,6 +5,10 @@ target_link_libraries(gtest ${MPI_CXX_LIBRARIES})
 add_library(gtest_main gtest/src/gtest_main.cpp)
 target_include_directories(gtest_main PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gtest>)
 
+add_library(test_dlai_main src/test_dlai_main.cpp)
+target_include_directories(test_dlai_main PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gtest>)
+target_include_directories(test_dlai_main PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+
 add_library(test_tools src/ref_scalapack_tools.cpp src/tile_matrix_tools.cpp)
 target_include_directories(test_tools PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
