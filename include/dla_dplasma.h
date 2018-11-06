@@ -17,8 +17,9 @@ namespace dla_interface {
           return PlasmaLower;
         case Upper:
           return PlasmaUpper;
+        default:
+          throw(std::invalid_argument(errorMessage("Invalid UpLo element.", uplo)));
       }
-      throw(std::invalid_argument(errorMessage("Invalid UpLo element.", uplo)));
     }
 
     inline PLASMA_enum plasmaTrans(OpTrans trans) {
@@ -29,8 +30,9 @@ namespace dla_interface {
           return PlasmaTrans;
         case ConjTrans:
           return PlasmaConjTrans;
+        default:
+          throw(std::invalid_argument(errorMessage("Invalid OpTrans element.", trans)));
       }
-      throw(std::invalid_argument(errorMessage("Invalid OpTrans element.", trans)));
     }
 
     template <class Routine, class... Args>

@@ -31,6 +31,9 @@ namespace dla_interface {
 
     inline UpLo getUpLo(char uplo) {
       switch (uplo) {
+        case 'a':
+        case 'A':
+          return All;
         case 'u':
         case 'U':
           return Upper;
