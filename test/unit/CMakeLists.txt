@@ -17,3 +17,6 @@ add_unit_test(test_dlai_cholesky_factorization MPIRANKS 6 LIBS test_tools test_d
 add_unit_test(test_dlai_matrix_multiplication MPIRANKS 6 LIBS test_tools test_dlai_main ${DLA_LIBS})
 add_unit_test(test_dlai_lu_factorization MPIRANKS 6 LIBS test_tools test_dlai_main ${DLA_LIBS})
 add_unit_test(test_dlai_hermitian_eigenvectors MPIRANKS 6 LIBS test_tools test_dlai_main ${DLA_LIBS})
+if (${DLA_WITH_FORTRAN})
+  add_unit_test(test_ftn_dlai_cholesky_factorization SRC test_ftn_dlai_cholesky_factorization.cpp test_ftn_dlai_cholesky_factorization.f90 MPIRANKS 6 LIBS test_tools test_ftn_dlai_main ${DLA_LIBS})
+endif()

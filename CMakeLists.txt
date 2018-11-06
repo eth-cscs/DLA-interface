@@ -21,6 +21,11 @@ include(dla_hpx_linalg)
 include(dla_hwloc)
 include(dla_elpa)
 
+setoption(DLA_WITH_FORTRAN BOOL ON "Build fortran binding")
+if (${DLA_WITH_FORTRAN})
+  enable_language(Fortran)
+endif()
+
 include(dla_openmp)
 include(dla_mpi)
 
@@ -36,18 +41,9 @@ dla_find_hwloc()
 
 dla_find_elpa()
 
-if (${DLA_HAVE_SCALAPACK})
-  setoption(DLA_WITH_FORTRAN BOOL ON "Build fortran binding")
-else()
-  setoption(DLA_WITH_FORTRAN BOOL OFF "Build fortran binding")
-endif()
-
 if (${DLA_WITH_FORTRAN})
-  if (${DLA_HAVE_SCALAPACK})
-    enable_language(Fortran)
-  else()
-    message(WARNING "Cannot build Fortran bindings without Scalapack. Setting DLA_WITH_FORTRAN to OFF")
-    set(DLA_WITH_FORTRAN OFF FORCE)
+  if (NOT ${DLA_HAVE_SCALAPACK})
+    message(FATAL_ERROR "Cannot build Fortran bindings without Scalapack. Set DLA_WITH_FORTRAN to OFF")
   endif()
 endif()
 
@@ -101,6 +97,7 @@ include_directories(
 if (${DLA_WITH_FORTRAN})
   # .mod files
   include_directories(
+    ${MPI_Fortran_INCLUDE_PATH}
     ${PROJECT_BINARY_DIR}/src
   )
 endif()
@@ -131,6 +128,7 @@ set(DLA_LIBS
     ${DLA_DPLASMA_LIBS}
     ${DLA_SCALAPACK_LIBRARY}
     ${DLA_LAPACK_LIBRARY}
+    ${MPI_Fortran_LIBRARIES}
     ${MPI_CXX_LIBRARIES}
     ${DLA_HWLOC_LIBS}
 )

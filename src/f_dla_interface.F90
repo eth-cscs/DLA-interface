@@ -78,9 +78,9 @@ module dla_interface
       implicit none                                                                     ;\
       character(len=1), intent(in) :: uplo                                              ;\
       integer, intent(in) :: n                                                          ;\
-      FtnType, dimension(:,:), intent(inout) :: a                                       ;\
-      integer, intent(in) :: ia, ja                                                     ;\
       integer, dimension(*), intent(in) :: desca                                        ;\
+      FtnType, dimension(desca(9),*), intent(inout) :: a                                ;\
+      integer, intent(in) :: ia, ja                                                     ;\
       character(len=*), intent(in) :: solver                                            ;\
       integer, intent(out) :: info                                                      ;\
       interface                                                                         ;\
@@ -110,9 +110,9 @@ module dla_interface
       implicit none                                                                     ;\
       integer, intent(in) :: m                                                          ;\
       integer, intent(in) :: n                                                          ;\
-      FtnType, dimension(:,:), intent(inout) :: a                                       ;\
-      integer, intent(in) :: ia, ja                                                     ;\
       integer, dimension(*), intent(in) :: desca                                        ;\
+      FtnType, dimension(desca(9),*), intent(inout) :: a                                ;\
+      integer, intent(in) :: ia, ja                                                     ;\
       integer, dimension(:), intent(in) :: ipiv                                         ;\
       character(len=*), intent(in) :: solver                                            ;\
       integer, intent(out) :: info                                                      ;\
@@ -146,10 +146,11 @@ module dla_interface
       character(len=1), intent(in) :: trans_a, trans_b                                  ;\
       integer, intent(in) :: m, n, k                                                    ;\
       FtnType, intent(in) :: alpha, beta                                                ;\
-      FtnType, dimension(:,:), intent(in) :: a, b                                       ;\
-      FtnType, dimension(:,:), intent(inout) :: c                                       ;\
-      integer, intent(in) :: ia, ja, ib, jb, ic, jc                                     ;\
       integer, dimension(*), intent(in) :: desca, descb, descc                          ;\
+      FtnType, dimension(desca(9),*), intent(in) :: a                                   ;\
+      FtnType, dimension(descb(9),*), intent(in) :: b                                   ;\
+      FtnType, dimension(descc(9),*), intent(inout) :: c                                ;\
+      integer, intent(in) :: ia, ja, ib, jb, ic, jc                                     ;\
       character(len=*), intent(in) :: solver                                            ;\
       integer :: i                                                                      ;\
       interface                                                                         ;\
