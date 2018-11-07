@@ -127,3 +127,27 @@ DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_s_matrix_multiplication, float, float)
 DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_d_matrix_multiplication, double, double)
 DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_c_matrix_multiplication, float, std::complex<float>)
 DLA_DEFINE_MATRIX_MULTIPLICATION(dlai_z_matrix_multiplication, double, std::complex<double>)
+
+#define DLA_DEFINE_HERMITIAN_EIGENVECTORS(function_name, CType, CppType, RealType)                   \
+  extern "C" int function_name(const char* uplo, const int* n, CType* a, const int* ia,              \
+                               const int* ja, const int* desca, RealType* evals, CType* v,           \
+                               const int* iv, const int* jv, const int* descv, const char* solver) { \
+    CppType* a_ = reinterpret_cast<CppType*>(a);                                                     \
+    CppType* v_ = reinterpret_cast<CppType*>(v);                                                     \
+    UpLo uplo_ = util::getUpLo(*uplo);                                                               \
+    DistributedMatrix<CppType> mat_a(scalapack_dist, *n, *n, a_, *ia, *ja, desca);                   \
+    DistributedMatrix<CppType> mat_v(scalapack_dist, *n, *n, v_, *iv, *jv, descv);                   \
+    SolverType solver_ = util::getSolverType(solver);                                                \
+    try {                                                                                            \
+      hermitianEigenvectors(uplo_, mat_a, evals, mat_v, solver_, dlai_print_timer_value);            \
+    }                                                                                                \
+    catch (std::invalid_argument & exc) {                                                            \
+      return -1;                                                                                     \
+    }                                                                                                \
+    return 0;                                                                                        \
+  }
+
+DLA_DEFINE_HERMITIAN_EIGENVECTORS(dlai_s_hermitian_eigenvectors, float, float, float)
+DLA_DEFINE_HERMITIAN_EIGENVECTORS(dlai_d_hermitian_eigenvectors, double, double, double)
+DLA_DEFINE_HERMITIAN_EIGENVECTORS(dlai_c_hermitian_eigenvectors, float, std::complex<float>, float)
+DLA_DEFINE_HERMITIAN_EIGENVECTORS(dlai_z_hermitian_eigenvectors, double, std::complex<double>, double)

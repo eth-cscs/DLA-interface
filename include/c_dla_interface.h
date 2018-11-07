@@ -55,6 +55,16 @@ DLA_DECLARE_MATRIX_MULTIPLICATION(dlai_d_matrix_multiplication, double);
 DLA_DECLARE_MATRIX_MULTIPLICATION(dlai_c_matrix_multiplication, float);
 DLA_DECLARE_MATRIX_MULTIPLICATION(dlai_z_matrix_multiplication, double);
 
+#define DLA_DECLARE_HERMITIAN_EIGENVECTORS(function_name, Type, RealType)                     \
+  int function_name(const char* uplo, const int* n, Type* a, const int* ia, const int* ja,    \
+                    const int* desca, RealType* evals, Type* v, const int* iv, const int* jv, \
+                    const int* descv, const char* solver);
+
+DLA_DECLARE_HERMITIAN_EIGENVECTORS(dlai_s_hermitian_eigenvectors, float, float)
+DLA_DECLARE_HERMITIAN_EIGENVECTORS(dlai_d_hermitian_eigenvectors, double, double)
+DLA_DECLARE_HERMITIAN_EIGENVECTORS(dlai_c_hermitian_eigenvectors, float, float)
+DLA_DECLARE_HERMITIAN_EIGENVECTORS(dlai_z_hermitian_eigenvectors, double, double)
+
 #ifdef __cplusplus
 }
 #endif
