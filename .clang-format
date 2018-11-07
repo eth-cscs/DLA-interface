@@ -1,5 +1,5 @@
 ---
-# Need clang-format version 3.8 or above
+# Need clang-format version 7
 
 Language:        Cpp
 
@@ -24,17 +24,18 @@ BinPackParameters: true
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
 BraceWrapping:
-  AfterClass:      false
+  AfterClass:            false
   AfterControlStatement: false
-  AfterEnum:       false
-  AfterFunction:   false
-  AfterNamespace:  false
-  AfterObjCDeclaration: false
-  AfterStruct:     false
-  AfterUnion:      false
-  BeforeCatch:     true
-  BeforeElse:      true
-  IndentBraces:    false
+  AfterEnum:             false
+  AfterFunction:         false
+  AfterNamespace:        false
+  AfterObjCDeclaration:  false
+  AfterStruct:           false
+  AfterUnion:            false
+  BeforeCatch:           true
+  BeforeElse:            true
+  IndentBraces:          false
+  AfterExternBlock:      false
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
 ColumnLimit:     100
@@ -45,6 +46,7 @@ ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
 DerivePointerAlignment: false
 DisableFormat:   false
+FixNamespaceComments: false
 ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
 IndentCaseLabels: true
 IndentWidth:     2
@@ -57,11 +59,11 @@ NamespaceIndentation: All
 PenaltyBreakBeforeFirstCallParameter: 10
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 400
-PenaltyBreakString: 10000
+PenaltyBreakString: 100000
 PenaltyExcessCharacter: 10
 PenaltyReturnTypeOnItsOwnLine: 100000000
 PointerAlignment: Left
-#ReflowComments: true # Supported only from clang 3.9
+ReflowComments: true
 SortIncludes: false
 SpaceAfterCStyleCast: false
 SpaceBeforeAssignmentOperators: true

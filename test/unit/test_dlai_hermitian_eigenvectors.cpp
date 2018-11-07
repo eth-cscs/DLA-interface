@@ -54,7 +54,7 @@ class DLATypedTest : public ::testing::Test {
       return 2. * i / (n - 1) - 1.;
     };
 
-    auto el_val = [ this, n = a.size().first, &eval_expected ](int i, int j) {
+    auto el_val = [this, n = a.size().first, &eval_expected](int i, int j) {
       // Antidiagonal symmetric matrix.
       if (i + j == n - 1)
         return this->value(eval_expected(std::max(i, j)), 0);
