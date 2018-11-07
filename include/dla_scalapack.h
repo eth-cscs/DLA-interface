@@ -1,6 +1,8 @@
 #ifndef DLA_INTERFACE_DLA_SCALAPACK_H
 #define DLA_INTERFACE_DLA_SCALAPACK_H
 
+#include <complex>
+#include <vector>
 #include "scalapack.h"
 #include "error_message.h"
 #include "util_thread.h"
