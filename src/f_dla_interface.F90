@@ -105,7 +105,7 @@ module dla_interface
     DLA_FTN_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, dlai_z_cholesky_factorization_internal, complex(8), complex(C_DOUBLE_COMPLEX))
 
 #define DLA_FTN_LU_FACTORIZATION(function_name, function_name_aux, FtnType, CType) \
-    subroutine function_name(m, n, a, ia, ja, desca, solver, ipiv, info)                ;\
+    subroutine function_name(m, n, a, ia, ja, desca, ipiv, solver, info)                ;\
       use, intrinsic :: ISO_C_BINDING                                                   ;\
       implicit none                                                                     ;\
       integer, intent(in) :: m                                                          ;\
@@ -113,7 +113,7 @@ module dla_interface
       integer, dimension(*), intent(in) :: desca                                        ;\
       FtnType, dimension(desca(9),*), intent(inout) :: a                                ;\
       integer, intent(in) :: ia, ja                                                     ;\
-      integer, dimension(:), intent(in) :: ipiv                                         ;\
+      integer, dimension(*), intent(in) :: ipiv                                         ;\
       character(len=*), intent(in) :: solver                                            ;\
       integer, intent(out) :: info                                                      ;\
       interface                                                                         ;\
@@ -140,7 +140,7 @@ module dla_interface
 
 #define DLA_FTN_MATRIX_MULTIPLICATION(function_name, function_name_aux, FtnType, CType)  \
     subroutine function_name(trans_a, trans_b, m, n, k, alpha, a, ia, ja, desca,         \
-        b, ib, jb, descb, beta, c, ic, jc, descc, solver)                               ;\
+        b, ib, jb, descb, beta, c, ic, jc, descc, solver, info)                         ;\
       use, intrinsic :: ISO_C_BINDING                                                   ;\
       implicit none                                                                     ;\
       character(len=1), intent(in) :: trans_a, trans_b                                  ;\
@@ -152,7 +152,7 @@ module dla_interface
       FtnType, dimension(descc(9),*), intent(inout) :: c                                ;\
       integer, intent(in) :: ia, ja, ib, jb, ic, jc                                     ;\
       character(len=*), intent(in) :: solver                                            ;\
-      integer :: i                                                                      ;\
+      integer, intent(out) :: info                                                      ;\
       interface                                                                         ;\
         integer(C_INT) function function_name_aux(trans_a, trans_b, m, n, k, alpha,      \
           a, ia, ja, desca, b, ib, jb, descb, beta, c, ic, jc, descc, solver)            \
@@ -169,8 +169,9 @@ module dla_interface
           character(len=1, kind=C_CHAR), dimension(*), intent(in) :: solver             ;\
         end function                                                                    ;\
       end interface                                                                     ;\
-      i = function_name_aux(trans_a, trans_b, m, n, k, alpha, a(1, 1), ia, ja, desca(1), \
-     b(1, 1), ib, jb, descb(1), beta, c(1, 1), ic, jc, descc(1), c_str(solver))         ;\
+      info = function_name_aux(trans_a, trans_b, m, n, k, alpha, a(1, 1), ia, ja,        \
+                               desca(1), b(1, 1), ib, jb, descb(1), beta, c(1, 1), ic,   \
+                               jc, descc(1), c_str(solver))                             ;\
     end subroutine
 
     DLA_FTN_MATRIX_MULTIPLICATION(dlai_s_matrix_multiplication, dlai_s_matrix_multiplication_internal, real(4), real(C_FLOAT))

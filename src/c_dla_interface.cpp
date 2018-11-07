@@ -74,7 +74,7 @@ DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, double, std::co
   extern "C" int function_name(const int* m, const int* n, CType* a, const int* ia, const int* ja, \
                                const int* desca, int* ipiv, const char* solver) {                  \
     CppType* a_ = reinterpret_cast<CppType*>(a);                                                   \
-    DistributedMatrix<CppType> mat_a(scalapack_dist, *n, *n, a_, *ia, *ja, desca);                 \
+    DistributedMatrix<CppType> mat_a(scalapack_dist, *m, *n, a_, *ia, *ja, desca);                 \
     SolverType solver_ = util::getSolverType(solver);                                              \
     try {                                                                                          \
       LUFactorization(mat_a, ipiv, solver_, dlai_print_timer_value);                               \
