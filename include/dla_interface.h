@@ -35,6 +35,10 @@ namespace dla_interface {
                              int print_timers = 0);
 
   template <class ElType>
+  void choleskyInverse(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType solver,
+                       int print_timers = 0);
+
+  template <class ElType>
   void LUFactorization(DistributedMatrix<ElType>& mat, std::vector<int>& ipiv, SolverType solver,
                        int print_timers = 0);
 
@@ -53,10 +57,16 @@ namespace dla_interface {
                              DistributedMatrix<ElType>& evectors, SolverType solver,
                              int print_timers = 0);
 
+  template <class ElType>
+  void triangularInverse(UpLo uplo, Diag diag, DistributedMatrix<ElType>& mat, SolverType solver,
+                         int print_timers = 0);
+
 #include "dla_interface/cholesky_factorization.ipp"
+#include "dla_interface/cholesky_inverse.ipp"
 #include "dla_interface/lu_factorization.ipp"
 #include "dla_interface/matrix_multiplication.ipp"
 #include "dla_interface/hermitian_eigenvectors.ipp"
+#include "dla_interface/triangular_inverse.ipp"
 }
 
 #endif  // DLA_INTERFACE_DLA_INTERFACE_H

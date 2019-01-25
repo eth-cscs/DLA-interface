@@ -51,6 +51,15 @@ namespace scalapack {
   void pzpotrf_(const char* uplo, const int* n, std::complex<double>* a, const int* ia,
                 const int* ja, const int* desca, int* info);
 
+  void pspotri_(const char* uplo, const int* n, float* a, const int* ia, const int* ja,
+                const int* desca, int* info);
+  void pdpotri_(const char* uplo, const int* n, double* a, const int* ia, const int* ja,
+                const int* desca, int* info);
+  void pcpotri_(const char* uplo, const int* n, std::complex<float>* a, const int* ia,
+                const int* ja, const int* desca, int* info);
+  void pzpotri_(const char* uplo, const int* n, std::complex<double>* a, const int* ia,
+                const int* ja, const int* desca, int* info);
+
   void pssyevd_(const char* jobz, const char* uplo, const int* n, float* a, const int* ia,
                 const int* ja, const int* desca, float* w, float* z, const int* iz, const int* jz,
                 const int* descz, float* work, const int* lwork, int* iwork, const int* liwork,
@@ -84,6 +93,15 @@ namespace scalapack {
                 const std::complex<double>* alpha, const std::complex<double>* a, const int* ia,
                 const int* ja, const int* desca, const std::complex<double>* beta,
                 std::complex<double>* c, const int* ic, const int* jc, const int* descc);
+
+  void pstrtri_(const char* uplo, const char* diag, const int* n, float* a, const int* ia,
+                const int* ja, const int* desca, int* info);
+  void pdtrtri_(const char* uplo, const char* diag, const int* n, double* a, const int* ia,
+                const int* ja, const int* desca, int* info);
+  void pctrtri_(const char* uplo, const char* diag, const int* n, std::complex<float>* a,
+                const int* ia, const int* ja, const int* desca, int* info);
+  void pztrtri_(const char* uplo, const char* diag, const int* n, std::complex<double>* a,
+                const int* ia, const int* ja, const int* desca, int* info);
   }
 }
 #endif

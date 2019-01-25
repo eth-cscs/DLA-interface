@@ -100,6 +100,33 @@ namespace dla_interface {
       scalapack::pzpotrf_(&char_uplo, &n, a, &ia, &ja, desca, &info);
     }
 
+    inline void ppotri(UpLo uplo, int n, float* a, int ia, int ja, int* desca, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pspotri_(&char_uplo, &n, a, &ia, &ja, desca, &info);
+    }
+    inline void ppotri(UpLo uplo, int n, double* a, int ia, int ja, int* desca, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pdpotri_(&char_uplo, &n, a, &ia, &ja, desca, &info);
+    }
+    inline void ppotri(UpLo uplo, int n, std::complex<float>* a, int ia, int ja, int* desca,
+                       int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pcpotri_(&char_uplo, &n, a, &ia, &ja, desca, &info);
+    }
+    inline void ppotri(UpLo uplo, int n, std::complex<double>* a, int ia, int ja, int* desca,
+                       int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pzpotri_(&char_uplo, &n, a, &ia, &ja, desca, &info);
+    }
+
     inline void pheevd(UpLo uplo, int n, float* a, int ia, int ja, int* desca, float* w, float* z,
                        int iz, int jz, int* descz, int& info) {
       const char char_uplo = static_cast<char>(uplo);
@@ -239,6 +266,37 @@ namespace dla_interface {
       util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
       scalapack::pztradd_(&char_uplo, &char_trans, &m, &n, &alpha, a, &ia, &ja, desca, &beta, c,
                           &ic, &jc, descc);
+    }
+
+    inline void ptrtri(UpLo uplo, Diag diag, int n, float* a, int ia, int ja, int* desca, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+      const char char_diag = static_cast<char>(diag);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pstrtri_(&char_uplo, &char_diag, &n, a, &ia, &ja, desca, &info);
+    }
+    inline void ptrtri(UpLo uplo, Diag diag, int n, double* a, int ia, int ja, int* desca, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+      const char char_diag = static_cast<char>(diag);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pdtrtri_(&char_uplo, &char_diag, &n, a, &ia, &ja, desca, &info);
+    }
+    inline void ptrtri(UpLo uplo, Diag diag, int n, std::complex<float>* a, int ia, int ja,
+                       int* desca, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+      const char char_diag = static_cast<char>(diag);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pctrtri_(&char_uplo, &char_diag, &n, a, &ia, &ja, desca, &info);
+    }
+    inline void ptrtri(UpLo uplo, Diag diag, int n, std::complex<double>* a, int ia, int ja,
+                       int* desca, int& info) {
+      const char char_uplo = static_cast<char>(uplo);
+      const char char_diag = static_cast<char>(diag);
+
+      util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getScalapackConfigInfo());
+      scalapack::pztrtri_(&char_uplo, &char_diag, &n, a, &ia, &ja, desca, &info);
     }
   }
 }

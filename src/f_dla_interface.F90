@@ -104,6 +104,38 @@ module dla_interface
     DLA_FTN_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization, dlai_c_cholesky_factorization_internal, complex(4), complex(C_FLOAT_COMPLEX))
     DLA_FTN_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, dlai_z_cholesky_factorization_internal, complex(8), complex(C_DOUBLE_COMPLEX))
 
+#define DLA_FTN_CHOLESKY_INVERSE(function_name, function_name_aux, FtnType, CType) \
+    subroutine function_name(uplo, n, a, ia, ja, desca, solver, info)                   ;\
+      use, intrinsic :: ISO_C_BINDING                                                   ;\
+      implicit none                                                                     ;\
+      character(len=1), intent(in) :: uplo                                              ;\
+      integer, intent(in) :: n                                                          ;\
+      integer, dimension(*), intent(in) :: desca                                        ;\
+      FtnType, dimension(desca(9),*), intent(inout) :: a                                ;\
+      integer, intent(in) :: ia, ja                                                     ;\
+      character(len=*), intent(in) :: solver                                            ;\
+      integer, intent(out) :: info                                                      ;\
+      interface                                                                         ;\
+        integer(C_INT) function function_name_aux(uplo, n, a, ia, ja, desca, solver)     \
+            bind(C, name="function_name")                                               ;\
+          use, intrinsic :: ISO_C_BINDING                                               ;\
+          implicit none                                                                 ;\
+          character(len=1, kind=C_CHAR), intent(in) :: uplo                             ;\
+          integer(C_INT), intent(in) :: n                                               ;\
+          CType, intent(inout) :: a                                                     ;\
+          integer(C_INT), intent(in) :: ia, ja                                          ;\
+          integer(C_INT), intent(in) :: desca                                           ;\
+          character(len=1, kind=C_CHAR), dimension(*), intent(in) :: solver             ;\
+        end function                                                                    ;\
+      end interface                                                                     ;\
+      info = function_name_aux(uplo, n, a(1, 1), ia, ja, desca(1), c_str(solver))       ;\
+    end subroutine
+
+    DLA_FTN_CHOLESKY_INVERSE(dlai_s_cholesky_inverse, dlai_s_cholesky_inverse_internal, real(4), real(C_FLOAT))
+    DLA_FTN_CHOLESKY_INVERSE(dlai_d_cholesky_inverse, dlai_d_cholesky_inverse_internal, real(8), real(C_DOUBLE))
+    DLA_FTN_CHOLESKY_INVERSE(dlai_c_cholesky_inverse, dlai_c_cholesky_inverse_internal, complex(4), complex(C_FLOAT_COMPLEX))
+    DLA_FTN_CHOLESKY_INVERSE(dlai_z_cholesky_inverse, dlai_z_cholesky_inverse_internal, complex(8), complex(C_DOUBLE_COMPLEX))
+
 #define DLA_FTN_LU_FACTORIZATION(function_name, function_name_aux, FtnType, CType) \
     subroutine function_name(m, n, a, ia, ja, desca, ipiv, solver, info)                ;\
       use, intrinsic :: ISO_C_BINDING                                                   ;\
@@ -217,4 +249,36 @@ module dla_interface
     DLA_FTN_HERMITIAN_EIGENVECTORS(dlai_d_hermitian_eigenvectors, dlai_d_hermitian_eigenvectors_internal, real(8), real(C_DOUBLE), real(8), real(C_DOUBLE))
     DLA_FTN_HERMITIAN_EIGENVECTORS(dlai_c_hermitian_eigenvectors, dlai_c_hermitian_eigenvectors_internal, complex(4), complex(C_FLOAT_COMPLEX), real(4), real(C_FLOAT))
     DLA_FTN_HERMITIAN_EIGENVECTORS(dlai_z_hermitian_eigenvectors, dlai_z_hermitian_eigenvectors_internal, complex(8), complex(C_DOUBLE_COMPLEX), real(8), real(C_DOUBLE))
+
+#define DLA_FTN_TRIANGULAR_INVERSE(function_name, function_name_aux, FtnType, CType) \
+    subroutine function_name(uplo, diag, n, a, ia, ja, desca, solver, info)               ;\
+      use, intrinsic :: ISO_C_BINDING                                                     ;\
+      implicit none                                                                       ;\
+      character(len=1), intent(in) :: uplo, diag                                          ;\
+      integer, intent(in) :: n                                                            ;\
+      integer, dimension(*), intent(in) :: desca                                          ;\
+      FtnType, dimension(desca(9),*), intent(inout) :: a                                  ;\
+      integer, intent(in) :: ia, ja                                                       ;\
+      character(len=*), intent(in) :: solver                                              ;\
+      integer, intent(out) :: info                                                        ;\
+      interface                                                                           ;\
+        integer(C_INT) function function_name_aux(uplo, diag, n, a, ia, ja, desca, solver) \
+            bind(C, name="function_name")                                                 ;\
+          use, intrinsic :: ISO_C_BINDING                                                 ;\
+          implicit none                                                                   ;\
+          character(len=1, kind=C_CHAR), intent(in) :: uplo, diag                         ;\
+          integer(C_INT), intent(in) :: n                                                 ;\
+          CType, intent(inout) :: a                                                       ;\
+          integer(C_INT), intent(in) :: ia, ja                                            ;\
+          integer(C_INT), intent(in) :: desca                                             ;\
+          character(len=1, kind=C_CHAR), dimension(*), intent(in) :: solver               ;\
+        end function                                                                      ;\
+      end interface                                                                       ;\
+      info = function_name_aux(uplo, diag, n, a(1, 1), ia, ja, desca(1), c_str(solver))   ;\
+    end subroutine
+
+    DLA_FTN_TRIANGULAR_INVERSE(dlai_s_triangular_inverse, dlai_s_triangular_inverse_internal, real(4), real(C_FLOAT))
+    DLA_FTN_TRIANGULAR_INVERSE(dlai_d_triangular_inverse, dlai_d_triangular_inverse_internal, real(8), real(C_DOUBLE))
+    DLA_FTN_TRIANGULAR_INVERSE(dlai_c_triangular_inverse, dlai_c_triangular_inverse_internal, complex(4), complex(C_FLOAT_COMPLEX))
+    DLA_FTN_TRIANGULAR_INVERSE(dlai_z_triangular_inverse, dlai_z_triangular_inverse_internal, complex(8), complex(C_DOUBLE_COMPLEX))
 end module
