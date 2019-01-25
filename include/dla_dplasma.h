@@ -35,6 +35,17 @@ namespace dla_interface {
       }
     }
 
+    inline PLASMA_enum plasmaDiag(Diag diag) {
+      switch (diag) {
+        case Unit:
+          return PlasmaUnit;
+        case NonUnit:
+          return PlasmaNonUnit;
+        default:
+          throw(std::invalid_argument(errorMessage("Invalid Diag element.", diag)));
+      }
+    }
+
     template <class Routine, class... Args>
     inline int dplasma_run(MPI_Comm comm, Args... args) {
       auto parsec = comm::CommunicatorManager::getParsecContext();

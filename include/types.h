@@ -28,6 +28,9 @@ namespace dla_interface {
   enum UpLo { All = 'A', Lower = 'L', Upper = 'U' };
   MAYBE_UNUSED constexpr auto UPLO_SET = {All, Lower, Upper};
 
+  enum Diag { Unit = 'U', NonUnit = 'N' };
+  MAYBE_UNUSED constexpr auto DIAG_SET = {Unit, NonUnit};
+
   // Distributed matrix distribution (see documentation for details):
   // Scalapack = 2D block cyclic distribution,
   // Tile = 2D block cyclic tile distribution.

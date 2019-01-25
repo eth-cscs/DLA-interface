@@ -65,6 +65,26 @@ TEST(UtilTypesTest, getUpLo) {
   EXPECT_THROW(util::getUpLo('{'), std::invalid_argument);
 }
 
+TEST(UtilTypesTest, getDiag) {
+  EXPECT_EQ(Unit, util::getDiag('U'));
+  EXPECT_EQ(Unit, util::getDiag('u'));
+  EXPECT_EQ(NonUnit, util::getDiag('N'));
+  EXPECT_EQ(NonUnit, util::getDiag('n'));
+
+  EXPECT_THROW(util::getDiag('L'), std::invalid_argument);
+  EXPECT_THROW(util::getDiag('l'), std::invalid_argument);
+  EXPECT_THROW(util::getDiag('T'), std::invalid_argument);
+  EXPECT_THROW(util::getDiag('t'), std::invalid_argument);
+  EXPECT_THROW(util::getDiag('C'), std::invalid_argument);
+  EXPECT_THROW(util::getDiag('c'), std::invalid_argument);
+  EXPECT_THROW(util::getDiag('R'), std::invalid_argument);
+  EXPECT_THROW(util::getDiag('r'), std::invalid_argument);
+
+  EXPECT_THROW(util::getDiag('3'), std::invalid_argument);
+  EXPECT_THROW(util::getDiag('Q'), std::invalid_argument);
+  EXPECT_THROW(util::getDiag('{'), std::invalid_argument);
+}
+
 TEST(UtilTypesTest, getOrdering) {
   EXPECT_EQ(RowMajor, util::getOrdering('R'));
   EXPECT_EQ(RowMajor, util::getOrdering('r'));
