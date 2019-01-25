@@ -76,8 +76,8 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
         parsec_tiled_matrix_dc_t* dp_mat =
             reinterpret_cast<parsec_tiled_matrix_dc_t*>(&std::get<0>(matrix_info));
 
-        dplasma_wrappers::dplasma_run<dplasma_wrappers::ppotrf<ElType>>(
-            std::get<1>(matrix_info), dplasma_wrappers::plasmaUpLo(uplo), dp_mat, &info);
+        info = dplasma_wrappers::dplasma_run<dplasma_wrappers::ppotrf<ElType>>(
+            std::get<1>(matrix_info), dplasma_wrappers::plasmaUpLo(uplo), dp_mat);
 
         timer_index[2] = timer_part.save_time();
       }
@@ -90,7 +90,10 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
         timer_part.print_elapsed(timer_index[2], timer_index[3], "Back conversion a: ");
       }
       if (info != 0) {
-        throw std::invalid_argument(errorMessage("Matrix is not positive definite (", info, ")"));
+        if (info < 0)
+          throw std::invalid_argument(errorMessage("DPLASMA Error ", info));
+        else
+          throw std::invalid_argument(errorMessage("Matrix is not positive definite (", info, ")"));
       }
       break;
     }
