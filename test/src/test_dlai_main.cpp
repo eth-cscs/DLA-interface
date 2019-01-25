@@ -1,5 +1,7 @@
+#include <cstring>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include "gtest/gtest.h"
 #include "mpi_listener.h"
 #include "communicator_grid.h"
@@ -36,7 +38,12 @@ int main(int argc, char** argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
 
-  outstream = &::testing::setMPIListener("results_test_dlai_matrix_multiplication");
+  const char* name = strrchr(argv[0], '/');
+  if (name == nullptr)
+    name = argv[0];
+  else
+    ++name;
+  outstream = &::testing::setMPIListener(std::string("results_") + name);
 
   auto ret = RUN_ALL_TESTS();
 
