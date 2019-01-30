@@ -11,10 +11,21 @@
 #include "types.h"
 #include "util_complex.h"
 #include "util_distributed_matrix.h"
-#include "test_dlai_main.h"
+#include "test_ftn_dlai_main.h"
 
 using namespace dla_interface;
 using namespace testing;
+
+#define TEST_FTN_CHOLESKY_FACTORIZATION(function_name)                                      \
+  void function_name(const char* uplo, const int* n, void* a, const int* ia, const int* ja, \
+                     const int* desca, const char* solver, int* info)
+
+extern "C" {
+TEST_FTN_CHOLESKY_FACTORIZATION(test_ftn_s_cholesky_factorization);
+TEST_FTN_CHOLESKY_FACTORIZATION(test_ftn_d_cholesky_factorization);
+TEST_FTN_CHOLESKY_FACTORIZATION(test_ftn_c_cholesky_factorization);
+TEST_FTN_CHOLESKY_FACTORIZATION(test_ftn_z_cholesky_factorization);
+}
 
 bool choleskyFactorizationTestThrows(SolverType solver) {
 #ifdef DLA_HAVE_SCALAPACK
@@ -33,7 +44,7 @@ bool choleskyFactorizationTestThrows(SolverType solver) {
 }
 
 template <typename T>
-class DLATypedTest : public ::testing::Test {
+class FtnDLATypedTest : public ::testing::Test {
   public:
   BaseType<T> epsilon() {
     return std::numeric_limits<BaseType<T>>::epsilon();
@@ -44,11 +55,6 @@ class DLATypedTest : public ::testing::Test {
   }
 
   void testCholeskyFactorization(UpLo uplo, DistributedMatrix<T>& a, SolverType solver) {
-    if (choleskyFactorizationTestThrows(solver)) {
-      EXPECT_THROW(choleskyFactorization(uplo, a, solver), std::invalid_argument);
-      return;
-    }
-
     auto el_val = [this](int i, int j) {
       return this->value(
           std::exp2(-(i + j) + 2 * (std::min(i, j) + 1)) / 3 - std::exp2(-(i + j)) / 3, -i + j);
@@ -63,8 +69,35 @@ class DLATypedTest : public ::testing::Test {
 
     fillDistributedMatrix(a, el_val);
 
-    choleskyFactorization(uplo, a, solver);
+    auto a_scalapack = a.getScalapackDescription();
+    int n = a.size().first;
+    const char c_uplo = static_cast<char>(uplo);
+    auto solver_s = util::getSolverString(solver);
+    int info = 0;
 
+    if (std::is_same<T, float>::value)
+      test_ftn_s_cholesky_factorization(&c_uplo, &n, std::get<0>(a_scalapack),
+                                        &std::get<1>(a_scalapack), &std::get<2>(a_scalapack),
+                                        &std::get<3>(a_scalapack)[0], solver_s.c_str(), &info);
+    if (std::is_same<T, double>::value)
+      test_ftn_d_cholesky_factorization(&c_uplo, &n, std::get<0>(a_scalapack),
+                                        &std::get<1>(a_scalapack), &std::get<2>(a_scalapack),
+                                        &std::get<3>(a_scalapack)[0], solver_s.c_str(), &info);
+    if (std::is_same<T, std::complex<float>>::value)
+      test_ftn_c_cholesky_factorization(&c_uplo, &n, std::get<0>(a_scalapack),
+                                        &std::get<1>(a_scalapack), &std::get<2>(a_scalapack),
+                                        &std::get<3>(a_scalapack)[0], solver_s.c_str(), &info);
+    if (std::is_same<T, std::complex<double>>::value)
+      test_ftn_z_cholesky_factorization(&c_uplo, &n, std::get<0>(a_scalapack),
+                                        &std::get<1>(a_scalapack), &std::get<2>(a_scalapack),
+                                        &std::get<3>(a_scalapack)[0], solver_s.c_str(), &info);
+
+    if (choleskyFactorizationTestThrows(solver)) {
+      EXPECT_NE(0, info);
+      return;
+    }
+
+    EXPECT_EQ(0, info);
     if (uplo == Lower)
       EXPECT_TRUE(checkNearDistributedMatrix(a, el_val_expected_lower, 10 * this->epsilon(), 1e-3,
                                              *outstream));
@@ -75,15 +108,16 @@ class DLATypedTest : public ::testing::Test {
 };
 
 typedef ::testing::Types<float, double, std::complex<float>, std::complex<double>> MyTypes;
-TYPED_TEST_CASE(DLATypedTest, MyTypes);
+TYPED_TEST_CASE(FtnDLATypedTest, MyTypes);
 
-TYPED_TEST(DLATypedTest, CholeskyFactorization) {
+TYPED_TEST(FtnDLATypedTest, CholeskyFactorization) {
   using ElType = TypeParam;
   int n = 59;
   int nb = 3;
 
   for (auto comm_ptr : comms) {
-    for (auto dist : DISTRIBUTION_SET) {
+    // Fortran interface only for ScaLAPACK matrices.
+    for (auto dist : {scalapack_dist}) {
       for (auto solver : SOLVER_SET) {
         for (auto uplo : UPLO_SET) {
           DistributedMatrix<ElType> a(n, n, nb, nb, *comm_ptr, dist);
@@ -95,13 +129,13 @@ TYPED_TEST(DLATypedTest, CholeskyFactorization) {
   }
 }
 
-TYPED_TEST(DLATypedTest, CholeskyFactorizationSubmatrixSame) {
+TYPED_TEST(FtnDLATypedTest, CholeskyFactorizationSubmatrixSame) {
   using ElType = TypeParam;
   int n = 59;
   int nb = 3;
 
   for (auto comm_ptr : comms) {
-    for (auto dist : DISTRIBUTION_SET) {
+    for (auto dist : {scalapack_dist}) {
       for (auto solver : SOLVER_SET) {
         for (auto uplo : UPLO_SET) {
           auto a_ptr =
@@ -114,13 +148,13 @@ TYPED_TEST(DLATypedTest, CholeskyFactorizationSubmatrixSame) {
   }
 }
 
-TYPED_TEST(DLATypedTest, CholeskyFactorizationSubmatrix) {
+TYPED_TEST(FtnDLATypedTest, CholeskyFactorizationSubmatrix) {
   using ElType = TypeParam;
   int n = 59;
   int nb = 3;
 
   for (auto comm_ptr : comms) {
-    for (auto dist : DISTRIBUTION_SET) {
+    for (auto dist : {scalapack_dist}) {
       for (auto solver : SOLVER_SET) {
         for (auto uplo : UPLO_SET) {
           auto a_ptr = DistributedMatrix<ElType>(n + 2 * nb, n + nb, nb, nb, *comm_ptr, dist)

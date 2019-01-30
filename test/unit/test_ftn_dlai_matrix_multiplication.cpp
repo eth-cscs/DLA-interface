@@ -11,10 +11,23 @@
 #include "types.h"
 #include "util_complex.h"
 #include "util_distributed_matrix.h"
-#include "test_dlai_main.h"
+#include "test_ftn_dlai_main.h"
 
 using namespace dla_interface;
 using namespace testing;
+
+#define TEST_FTN_MATRIX_MULTIPLICATION(function_name)                                           \
+  void function_name(const char* transa, const char* transb, const int* m, const int* n,        \
+                     const int* k, void* alpha, void* a, const int* ia, const int* ja,          \
+                     const int* desca, void* b, const int* ib, const int* jb, const int* descb, \
+                     void* beta, void* c, const int* ic, const int* jc, const int* descc,       \
+                     const char* solver, int* info);
+extern "C" {
+TEST_FTN_MATRIX_MULTIPLICATION(test_ftn_s_matrix_multiplication);
+TEST_FTN_MATRIX_MULTIPLICATION(test_ftn_d_matrix_multiplication);
+TEST_FTN_MATRIX_MULTIPLICATION(test_ftn_c_matrix_multiplication);
+TEST_FTN_MATRIX_MULTIPLICATION(test_ftn_z_matrix_multiplication);
+}
 
 bool matrixMultiplicationTestThrows(SolverType solver) {
 #ifdef DLA_HAVE_SCALAPACK
@@ -29,7 +42,7 @@ bool matrixMultiplicationTestThrows(SolverType solver) {
 }
 
 template <typename T>
-class DLATypedTest : public ::testing::Test {
+class FtnDLATypedTest : public ::testing::Test {
   public:
   BaseType<T> epsilon() {
     return std::numeric_limits<BaseType<T>>::epsilon();
@@ -43,12 +56,6 @@ class DLATypedTest : public ::testing::Test {
                                 DistributedMatrix<T>& b, DistributedMatrix<T>& c, SolverType solver) {
     T alpha(2);
     T beta(-1);
-
-    if (matrixMultiplicationTestThrows(solver)) {
-      EXPECT_THROW(matrixMultiplication(trans_a, trans_b, alpha, a, b, beta, c, solver),
-                   std::invalid_argument);
-      return;
-    }
 
     bool swap_index_a = trans_a == NoTrans ? false : true;
     int exp_complex_a = trans_a == ConjTrans ? -1 : 1;
@@ -82,7 +89,49 @@ class DLATypedTest : public ::testing::Test {
     fillDistributedMatrix(b, el_val_b);
     fillDistributedMatrix(c, el_val_c);
 
-    matrixMultiplication(trans_a, trans_b, alpha, a, b, beta, c, solver);
+    auto a_scalapack = a.getScalapackDescription();
+    auto b_scalapack = b.getScalapackDescription();
+    auto c_scalapack = c.getScalapackDescription();
+    int m = c.size().first;
+    int n = c.size().second;
+    const char c_trans_a = static_cast<char>(trans_a);
+    const char c_trans_b = static_cast<char>(trans_b);
+    auto solver_s = util::getSolverString(solver);
+    int info = 0;
+
+    if (std::is_same<T, float>::value)
+      test_ftn_s_matrix_multiplication(
+          &c_trans_a, &c_trans_b, &m, &n, &k, &alpha, std::get<0>(a_scalapack),
+          &std::get<1>(a_scalapack), &std::get<2>(a_scalapack), &std::get<3>(a_scalapack)[0],
+          std::get<0>(b_scalapack), &std::get<1>(b_scalapack), &std::get<2>(b_scalapack),
+          &std::get<3>(b_scalapack)[0], &beta, std::get<0>(c_scalapack), &std::get<1>(c_scalapack),
+          &std::get<2>(c_scalapack), &std::get<3>(c_scalapack)[0], solver_s.c_str(), &info);
+    if (std::is_same<T, double>::value)
+      test_ftn_d_matrix_multiplication(
+          &c_trans_a, &c_trans_b, &m, &n, &k, &alpha, std::get<0>(a_scalapack),
+          &std::get<1>(a_scalapack), &std::get<2>(a_scalapack), &std::get<3>(a_scalapack)[0],
+          std::get<0>(b_scalapack), &std::get<1>(b_scalapack), &std::get<2>(b_scalapack),
+          &std::get<3>(b_scalapack)[0], &beta, std::get<0>(c_scalapack), &std::get<1>(c_scalapack),
+          &std::get<2>(c_scalapack), &std::get<3>(c_scalapack)[0], solver_s.c_str(), &info);
+    if (std::is_same<T, std::complex<float>>::value)
+      test_ftn_c_matrix_multiplication(
+          &c_trans_a, &c_trans_b, &m, &n, &k, &alpha, std::get<0>(a_scalapack),
+          &std::get<1>(a_scalapack), &std::get<2>(a_scalapack), &std::get<3>(a_scalapack)[0],
+          std::get<0>(b_scalapack), &std::get<1>(b_scalapack), &std::get<2>(b_scalapack),
+          &std::get<3>(b_scalapack)[0], &beta, std::get<0>(c_scalapack), &std::get<1>(c_scalapack),
+          &std::get<2>(c_scalapack), &std::get<3>(c_scalapack)[0], solver_s.c_str(), &info);
+    if (std::is_same<T, std::complex<double>>::value)
+      test_ftn_z_matrix_multiplication(
+          &c_trans_a, &c_trans_b, &m, &n, &k, &alpha, std::get<0>(a_scalapack),
+          &std::get<1>(a_scalapack), &std::get<2>(a_scalapack), &std::get<3>(a_scalapack)[0],
+          std::get<0>(b_scalapack), &std::get<1>(b_scalapack), &std::get<2>(b_scalapack),
+          &std::get<3>(b_scalapack)[0], &beta, std::get<0>(c_scalapack), &std::get<1>(c_scalapack),
+          &std::get<2>(c_scalapack), &std::get<3>(c_scalapack)[0], solver_s.c_str(), &info);
+
+    if (matrixMultiplicationTestThrows(solver)) {
+      EXPECT_NE(0, info);
+      return;
+    }
 
     EXPECT_TRUE(
         checkNearDistributedMatrix(c, el_val_c_expected, k * this->epsilon(), 1e-3, *outstream));
@@ -90,9 +139,9 @@ class DLATypedTest : public ::testing::Test {
 };
 
 typedef ::testing::Types<float, double, std::complex<float>, std::complex<double>> MyTypes;
-TYPED_TEST_CASE(DLATypedTest, MyTypes);
+TYPED_TEST_CASE(FtnDLATypedTest, MyTypes);
 
-TYPED_TEST(DLATypedTest, MatrixMultiplication) {
+TYPED_TEST(FtnDLATypedTest, MatrixMultiplication) {
   using ElType = TypeParam;
   int m = 49;
   int n = 59;
@@ -100,7 +149,7 @@ TYPED_TEST(DLATypedTest, MatrixMultiplication) {
   int nb = 3;
 
   for (auto comm_ptr : comms) {
-    for (auto dist : DISTRIBUTION_SET) {
+    for (auto dist : {scalapack_dist}) {
       for (auto solver : SOLVER_SET) {
         for (auto trans_a : OPTRANS_SET) {
           for (auto trans_b : OPTRANS_SET) {
@@ -125,7 +174,7 @@ TYPED_TEST(DLATypedTest, MatrixMultiplication) {
   }
 }
 
-TYPED_TEST(DLATypedTest, MatrixMultiplicationDiffBlockSize) {
+TYPED_TEST(FtnDLATypedTest, MatrixMultiplicationDiffBlockSize) {
   using ElType = TypeParam;
   int m = 49;
   int n = 59;
@@ -138,7 +187,7 @@ TYPED_TEST(DLATypedTest, MatrixMultiplicationDiffBlockSize) {
   int c_nb = 3;
 
   for (auto comm_ptr : comms) {
-    for (auto dist : DISTRIBUTION_SET) {
+    for (auto dist : {scalapack_dist}) {
       for (auto solver : SOLVER_SET) {
         for (auto trans_a : OPTRANS_SET) {
           for (auto trans_b : OPTRANS_SET) {
@@ -167,7 +216,7 @@ TYPED_TEST(DLATypedTest, MatrixMultiplicationDiffBlockSize) {
   }
 }
 
-TYPED_TEST(DLATypedTest, MatrixMultiplicationSubMatrix) {
+TYPED_TEST(FtnDLATypedTest, MatrixMultiplicationSubMatrix) {
   using ElType = TypeParam;
   int m = 49;
   int n = 59;
@@ -175,7 +224,7 @@ TYPED_TEST(DLATypedTest, MatrixMultiplicationSubMatrix) {
   int nb = 3;
 
   for (auto comm_ptr : comms) {
-    for (auto dist : DISTRIBUTION_SET) {
+    for (auto dist : {scalapack_dist}) {
       for (auto solver : SOLVER_SET) {
         for (auto trans_a : OPTRANS_SET) {
           for (auto trans_b : OPTRANS_SET) {

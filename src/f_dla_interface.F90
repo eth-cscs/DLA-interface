@@ -78,9 +78,9 @@ module dla_interface
       implicit none                                                                     ;\
       character(len=1), intent(in) :: uplo                                              ;\
       integer, intent(in) :: n                                                          ;\
-      FtnType, dimension(:,:), intent(inout) :: a                                       ;\
-      integer, intent(in) :: ia, ja                                                     ;\
       integer, dimension(*), intent(in) :: desca                                        ;\
+      FtnType, dimension(desca(9),*), intent(inout) :: a                                ;\
+      integer, intent(in) :: ia, ja                                                     ;\
       character(len=*), intent(in) :: solver                                            ;\
       integer, intent(out) :: info                                                      ;\
       interface                                                                         ;\
@@ -105,15 +105,15 @@ module dla_interface
     DLA_FTN_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, dlai_z_cholesky_factorization_internal, complex(8), complex(C_DOUBLE_COMPLEX))
 
 #define DLA_FTN_LU_FACTORIZATION(function_name, function_name_aux, FtnType, CType) \
-    subroutine function_name(m, n, a, ia, ja, desca, solver, ipiv, info)                ;\
+    subroutine function_name(m, n, a, ia, ja, desca, ipiv, solver, info)                ;\
       use, intrinsic :: ISO_C_BINDING                                                   ;\
       implicit none                                                                     ;\
       integer, intent(in) :: m                                                          ;\
       integer, intent(in) :: n                                                          ;\
-      FtnType, dimension(:,:), intent(inout) :: a                                       ;\
-      integer, intent(in) :: ia, ja                                                     ;\
       integer, dimension(*), intent(in) :: desca                                        ;\
-      integer, dimension(:), intent(in) :: ipiv                                         ;\
+      FtnType, dimension(desca(9),*), intent(inout) :: a                                ;\
+      integer, intent(in) :: ia, ja                                                     ;\
+      integer, dimension(*), intent(in) :: ipiv                                         ;\
       character(len=*), intent(in) :: solver                                            ;\
       integer, intent(out) :: info                                                      ;\
       interface                                                                         ;\
@@ -140,18 +140,19 @@ module dla_interface
 
 #define DLA_FTN_MATRIX_MULTIPLICATION(function_name, function_name_aux, FtnType, CType)  \
     subroutine function_name(trans_a, trans_b, m, n, k, alpha, a, ia, ja, desca,         \
-        b, ib, jb, descb, beta, c, ic, jc, descc, solver)                               ;\
+        b, ib, jb, descb, beta, c, ic, jc, descc, solver, info)                         ;\
       use, intrinsic :: ISO_C_BINDING                                                   ;\
       implicit none                                                                     ;\
       character(len=1), intent(in) :: trans_a, trans_b                                  ;\
       integer, intent(in) :: m, n, k                                                    ;\
       FtnType, intent(in) :: alpha, beta                                                ;\
-      FtnType, dimension(:,:), intent(in) :: a, b                                       ;\
-      FtnType, dimension(:,:), intent(inout) :: c                                       ;\
-      integer, intent(in) :: ia, ja, ib, jb, ic, jc                                     ;\
       integer, dimension(*), intent(in) :: desca, descb, descc                          ;\
+      FtnType, dimension(desca(9),*), intent(in) :: a                                   ;\
+      FtnType, dimension(descb(9),*), intent(in) :: b                                   ;\
+      FtnType, dimension(descc(9),*), intent(inout) :: c                                ;\
+      integer, intent(in) :: ia, ja, ib, jb, ic, jc                                     ;\
       character(len=*), intent(in) :: solver                                            ;\
-      integer :: i                                                                      ;\
+      integer, intent(out) :: info                                                      ;\
       interface                                                                         ;\
         integer(C_INT) function function_name_aux(trans_a, trans_b, m, n, k, alpha,      \
           a, ia, ja, desca, b, ib, jb, descb, beta, c, ic, jc, descc, solver)            \
@@ -168,8 +169,9 @@ module dla_interface
           character(len=1, kind=C_CHAR), dimension(*), intent(in) :: solver             ;\
         end function                                                                    ;\
       end interface                                                                     ;\
-      i = function_name_aux(trans_a, trans_b, m, n, k, alpha, a(1, 1), ia, ja, desca(1), \
-     b(1, 1), ib, jb, descb(1), beta, c(1, 1), ic, jc, descc(1), c_str(solver))         ;\
+      info = function_name_aux(trans_a, trans_b, m, n, k, alpha, a(1, 1), ia, ja,        \
+                               desca(1), b(1, 1), ib, jb, descb(1), beta, c(1, 1), ic,   \
+                               jc, descc(1), c_str(solver))                             ;\
     end subroutine
 
     DLA_FTN_MATRIX_MULTIPLICATION(dlai_s_matrix_multiplication, dlai_s_matrix_multiplication_internal, real(4), real(C_FLOAT))
@@ -177,4 +179,42 @@ module dla_interface
     DLA_FTN_MATRIX_MULTIPLICATION(dlai_c_matrix_multiplication, dlai_c_matrix_multiplication_internal, complex(4), complex(C_FLOAT_COMPLEX))
     DLA_FTN_MATRIX_MULTIPLICATION(dlai_z_matrix_multiplication, dlai_z_matrix_multiplication_internal, complex(8), complex(C_DOUBLE_COMPLEX))
 
+#define DLA_FTN_HERMITIAN_EIGENVECTORS(function_name, function_name_aux, FtnType, CType, RealFtnType, RealCType) \
+    subroutine function_name(uplo, n, a, ia, ja, desca, evals, v, iv, jv, descv,         \
+                             solver, info)                                              ;\
+      use, intrinsic :: ISO_C_BINDING                                                   ;\
+      implicit none                                                                     ;\
+      character(len=1), intent(in) :: uplo                                              ;\
+      integer, intent(in) :: n                                                          ;\
+      integer, dimension(*), intent(in) :: desca, descv                                 ;\
+      FtnType, dimension(desca(9),*), intent(inout) :: a                                ;\
+      RealFtnType, dimension(*), intent(out) :: evals                                   ;\
+      FtnType, dimension(descv(9),*), intent(out) :: v                                  ;\
+      integer, intent(in) :: ia, ja, iv, jv                                             ;\
+      character(len=*), intent(in) :: solver                                            ;\
+      integer, intent(out) :: info                                                      ;\
+      interface                                                                         ;\
+        integer(C_INT) function function_name_aux(uplo, n, a, ia, ja, desca, evals,      \
+                                                  v, iv, jv, descv, solver)              \
+            bind(C, name="function_name")                                               ;\
+          use, intrinsic :: ISO_C_BINDING                                               ;\
+          implicit none                                                                 ;\
+          character(len=1, kind=C_CHAR), intent(in) :: uplo                             ;\
+          integer(C_INT), intent(in) :: n                                               ;\
+          CType, intent(inout) :: a                                                     ;\
+          RealCType, intent(out) :: evals                                               ;\
+          CType, intent(out) :: v                                                       ;\
+          integer(C_INT), intent(in) :: ia, ja, iv, jv                                  ;\
+          integer(C_INT), intent(in) :: desca, descv                                    ;\
+          character(len=1, kind=C_CHAR), dimension(*), intent(in) :: solver             ;\
+        end function                                                                    ;\
+      end interface                                                                     ;\
+      info = function_name_aux(uplo, n,  a(1, 1), ia, ja, desca(1), evals(1),            \
+                               v(1, 1), iv, jv, descv(1), c_str(solver))                ;\
+    end subroutine
+
+    DLA_FTN_HERMITIAN_EIGENVECTORS(dlai_s_hermitian_eigenvectors, dlai_s_hermitian_eigenvectors_internal, real(4), real(C_FLOAT), real(4), real(C_FLOAT))
+    DLA_FTN_HERMITIAN_EIGENVECTORS(dlai_d_hermitian_eigenvectors, dlai_d_hermitian_eigenvectors_internal, real(8), real(C_DOUBLE), real(8), real(C_DOUBLE))
+    DLA_FTN_HERMITIAN_EIGENVECTORS(dlai_c_hermitian_eigenvectors, dlai_c_hermitian_eigenvectors_internal, complex(4), complex(C_FLOAT_COMPLEX), real(4), real(C_FLOAT))
+    DLA_FTN_HERMITIAN_EIGENVECTORS(dlai_z_hermitian_eigenvectors, dlai_z_hermitian_eigenvectors_internal, complex(8), complex(C_DOUBLE_COMPLEX), real(8), real(C_DOUBLE))
 end module

@@ -9,6 +9,7 @@
 #include "blacs.h"
 #include "communicator_grid.h"
 #include "communicator_manager.h"
+#include "dla_elpa.h"
 #include "internal_error.h"
 #include "types.h"
 
@@ -148,6 +149,9 @@ namespace dla_interface {
       scalapack_cpuset_ = application_cpuset;
       scalapack_nr_threads_ = thread::getOmpBlasThreads();
 #endif
+#ifdef DLA_HAVE_ELPA
+      elpa::init();
+#endif
 
 #ifdef DLA_HAVE_DPLASMA
       if (argc == nullptr) {
@@ -220,6 +224,9 @@ namespace dla_interface {
       comm_grid_map_.clear();
 #ifdef DLA_HAVE_SCALAPACK
       ictxt_grid_map_.clear();
+#endif
+#ifdef DLA_HAVE_ELPA
+      elpa_uninit();
 #endif
 #ifdef DLA_HAVE_DPLASMA
       parsec_fini(&parsec_handle_);

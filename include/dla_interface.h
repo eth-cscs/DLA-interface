@@ -6,6 +6,7 @@
 #include "distributed_matrix.h"
 #include "dla_scalapack.h"
 #include "dla_dplasma.h"
+#include "dla_elpa.h"
 #include "dla_hpx_linalg.h"
 #include "error_message.h"
 #include "util_cast.h"
@@ -41,9 +42,21 @@ namespace dla_interface {
   void LUFactorization(DistributedMatrix<ElType>& mat, int* ipiv, SolverType solver,
                        int print_timers = 0);
 
+  template <class ElType>
+  void hermitianEigenvectors(UpLo uplo, DistributedMatrix<ElType>& mat,
+                             std::vector<BaseType<ElType>>& evalues,
+                             DistributedMatrix<ElType>& evectors, SolverType solver,
+                             int print_timers = 0);
+
+  template <class ElType>
+  void hermitianEigenvectors(UpLo uplo, DistributedMatrix<ElType>& mat, BaseType<ElType>* evalues,
+                             DistributedMatrix<ElType>& evectors, SolverType solver,
+                             int print_timers = 0);
+
 #include "dla_interface/cholesky_factorization.ipp"
 #include "dla_interface/lu_factorization.ipp"
 #include "dla_interface/matrix_multiplication.ipp"
+#include "dla_interface/hermitian_eigenvectors.ipp"
 }
 
 #endif  // DLA_INTERFACE_DLA_INTERFACE_H

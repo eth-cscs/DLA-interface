@@ -4,7 +4,7 @@
 # If MPIRANKS is defined the test is linked with the MPI library and runned with
 # ${TEST_RUNNER} ${RUNNER_NP_OPT} ${np} <exe>
 function(add_unit_test name)
-  cmake_parse_arguments("arg" "" "SRC;MPIRANKS" "DEFS;LIBS" ${ARGN} )
+  cmake_parse_arguments("arg" "" "MPIRANKS" "SRC;DEFS;LIBS" ${ARGN} )
 
   if(DEFINED arg_SRC)
     set(source ${arg_SRC})

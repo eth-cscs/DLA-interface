@@ -7,4 +7,4 @@
 #SBATCH --error=!TAG!.err
 #SBATCH --partition=cscsci
 
-tools/scripts/test_daint_ci.sh -t !TAG! -p $partition -b $build_type -l $lapack -s $scalapack -d $dplasma -x $hpx_linalg
+tools/scripts/test_daint_ci.sh -t !TAG! -p $partition -b $build_type -l $lapack -s $scalapack -e $elpa -d $dplasma -x $hpx_linalg

@@ -21,6 +21,17 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
         mb != mb2 || nb != nb2 || kb != kb2, comm_grid, solver,
         "Matrix matrix multiplication block sizes are incompatible.");
   }
+  if (solver == DPlasma) {
+    int ia = trans_a == NoTrans ? mat_a.baseIndex().row : mat_a.baseIndex().col;
+    int ja = trans_a == NoTrans ? mat_a.baseIndex().col : mat_a.baseIndex().row;
+    int ib = trans_b == NoTrans ? mat_b.baseIndex().row : mat_b.baseIndex().col;
+    int jb = trans_b == NoTrans ? mat_b.baseIndex().col : mat_b.baseIndex().row;
+    int ic = mat_c.baseIndex().row;
+    int jc = mat_c.baseIndex().col;
+    solver = dlai__util__fallbackScaLAPACKCondition(
+        ia != ic || ja != ib || jb != jc, comm_grid, solver,
+        "Matrix matrix multiplication ibase indeces are incompatible.");
+  }
 #endif
 
   // For real Types OpTrans 'C' and 'T' are equivalent.
@@ -35,9 +46,9 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
   int k2 = trans_b == NoTrans ? mat_b.size().first : mat_b.size().second;
   int n2 = trans_b == NoTrans ? mat_b.size().second : mat_b.size().first;
   if (m != m2 || n != n2 || k != k2)
-    throw std::invalid_argument(errorMessage("Incompatible sizes in matrix multiplication: ", m,
-                                             " != ", m2, " || ", n, " != ", n2, " || ", k, " != ",
-                                             k2));
+    throw std::invalid_argument(errorMessage("Incompatible sizes in matrix multiplication: ",
+                                             m, " != ", m2, " || ", n, " != ", n2, " || ",
+                                             k, " != ", k2));
 
   double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
   double flop = util::nrOps<ElType>(mnk, mnk);
@@ -90,6 +101,7 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
 
 #ifdef DLA_HAVE_DPLASMA
     case DPlasma: {
+      int info = 0;
       std::array<int, 6> timer_index;
       util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);
       timer_index[0] = 0;
@@ -117,7 +129,7 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
         parsec_tiled_matrix_dc_t* dp_mat_c =
             reinterpret_cast<parsec_tiled_matrix_dc_t*>(&std::get<0>(matrix_c_info));
 
-        dplasma_wrappers::dplasma_run<dplasma_wrappers::pgemm<ElType>>(
+        info = dplasma_wrappers::dplasma_run<dplasma_wrappers::pgemm<ElType>>(
             std::get<1>(matrix_c_info), dplasma_wrappers::plasmaTrans(trans_a),
             dplasma_wrappers::plasmaTrans(trans_b), util::castToC(alpha), dp_mat_a, dp_mat_b,
             util::castToC(beta), dp_mat_c);
@@ -133,7 +145,8 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
                                  "Matrix Matrix Multiplication (DPlasma) time: ", flop);
         timer_part.print_elapsed(timer_index[4], timer_index[5], "Back conversion c: ");
       }
-
+      if (info != 0)
+        throw std::invalid_argument(errorMessage("DPLASMA Error ", info));
       break;
     }
 #endif

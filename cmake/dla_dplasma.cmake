@@ -37,12 +37,12 @@ function(dla_find_dplasma)
       set(DLA_DPLASMA_LIB_DIR "-Wl,-rpath,${PARSEC_DIR}/dplasma/lib;-L${PARSEC_DIR}/dplasma/lib;-Wl,-rpath,${PARSEC_DIR}/lib;-L${PARSEC_DIR}/lib;-L${COREBLAS_LIBDIR}")
 
       set(DLA_DPLASMA_INCLUDE_DIRS ${PARSEC_INCLUDE_DIRS} ${PARSEC_DIR}/dplasma/include ${PARSEC_DIR}/include/parsec ${COREBLAS_INCLUDE_DIRS} CACHE STRING "Include paths for DPlasma" FORCE)
-      set(DLA_DPLASMA_LIBS "${DLA_DPLASMA_LIB_DIR};dplasma;parsec_distribution_matrix;parsec;${PARSEC_LIBRARIES};coreblas" CACHE STRING "Libraries for DPlasma" FORCE)
+      set(DLA_DPLASMA_LIBS "${DLA_DPLASMA_LIB_DIR};dplasma;parsec;${PARSEC_LIBRARIES};coreblas" CACHE STRING "Libraries for DPlasma" FORCE)
 
       set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/include" "${MPI_CXX_INCLUDE_PATH}" "${DLA_DPLASMA_INCLUDE_DIRS}")
       set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_EXE_LINKER_FLAGS}" "${MPI_CXX_LIBRARIES}" "${DLA_DPLASMA_LIBS}")
 
-      CHECK_CXX_SYMBOL_EXISTS(dplasma_map ordered_dplasma.h DPLASMA_FOUND)
+      CHECK_CXX_SYMBOL_EXISTS(dplasma_iceil ordered_dplasma.h DPLASMA_FOUND)
       if (DPLASMA_FOUND)
         set(DLA_HAVE_DPLASMA_INTERNAL ON)
       else()

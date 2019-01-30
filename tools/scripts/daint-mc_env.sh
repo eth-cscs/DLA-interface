@@ -1,5 +1,5 @@
 module switch PrgEnv-cray PrgEnv-gnu
-module load daint-mc        
+module load daint-mc
 module load CMake
 module load cray-python
 module unload cray-libsci   # should have no effect but it makes sure that libsci is not used if MKL is linked incorrectly.

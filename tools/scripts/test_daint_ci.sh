@@ -1,7 +1,7 @@
 OPTIONS=dfo:v
 LONGOPTIONS=debug,force,output:,verbose
 
-OPTIONS=`getopt -o h::t:b:p:l:s:d:x: -l help::,tag:,build-type,partition:,lapack:,scalapack:,dplasma:,hpx_linalg: --name "$0" -- "$@"`
+OPTIONS=`getopt -o h::t:b:p:l:s:e:d:x: -l help::,tag:,build-type,partition:,lapack:,scalapack:,elpa:,dplasma:,hpx_linalg: --name "$0" -- "$@"`
 ret=$?
 if [ $ret -ne 0 ]; then
     exit 1
@@ -13,6 +13,7 @@ build_type="Release"
 partition="mc"
 lapack="MKLst"
 scalapack="MKL"
+elpa="Yes"
 dplasma="Yes"
 hpx_linalg="No"
 
@@ -47,6 +48,11 @@ print_help()
     "-s, --scalapack [MKL]" \
     "Scalapack type [default: ${scalapack}]."
 
+  # --elpa
+  printf "  %-35s %s\n" \
+    "-e, --elpa [No|Yes]" \
+    "Build with ELPA [default: ${elpa}]."
+
   # --dplasma
   printf "  %-35s %s\n" \
     "-d, --dplasma [No|Yes]" \
@@ -74,6 +80,7 @@ while true; do
     -p|--partition)  partition="$2"  ; shift 2 ;;
     -l|--lapack)     lapack="$2"     ; shift 2 ;;
     -s|--scalapack)  scalapack="$2"  ; shift 2 ;;
+    -e|--elpa)       elpa="$2"       ; shift 2 ;;
     -d|--dplasma)    dplasma="$2"    ; shift 2 ;;
     -x|--hpx_linalg) hpx_linalg="$2" ; shift 2 ;;
     --) shift ; break ;;
@@ -97,11 +104,23 @@ case $scalapack in
   *) echo "Wrong --scalapack option: $scalapack" ; print_help ; exit 1 ;;
 esac
 
-PSEC_LIB_DIR=/project/csstaff/rasolca/jenkins/${partition}
+ELPA_VERS=2018.05.001
+ELPA_LIB_DIR=/apps/daint/UES/sandbox/rasolca/elpa
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ELPA_LIB_DIR/lib
+
+case $elpa in
+  No|no)   OPT_ELPA=() ;;
+  Yes|yes) OPT_ELPA=(-DELPA_ROOT="${ELPA_LIB_DIR}" -DELPA_VERSION="${ELPA_VERS}") ;;
+  *)  echo "Wrong --elpa option: $elpa" ; print_help ; exit 1 ;;
+esac
+
+PLASMA_LIB_DIR=/apps/daint/UES/sandbox/rasolca/plasma-${partition}
+PSEC_LIB_DIR=/apps/daint/UES/sandbox/rasolca/parsec-${partition}
 
 case $dplasma in
   No|no)   OPT_DPLASMA=() ;;
-  Yes|yes) OPT_DPLASMA=(-DParsec_DIR="${PSEC_LIB_DIR}/lib/cmake/" -DPLASMA_DIR="${PSEC_LIB_DIR}") ;;
+  Yes|yes) OPT_DPLASMA=(-DParsec_DIR="${PSEC_LIB_DIR}/lib/cmake/" -DPLASMA_DIR="${PLASMA_LIB_DIR}") ;;
   *)  echo "Wrong --dplasma option: $dplasma" ; print_help ; exit 1 ;;
 esac
 
@@ -119,6 +138,7 @@ echo -n " build_type: ${build_type},"
 echo -n " partition: ${partition},"
 echo -n " lapack: ${lapack},"
 echo -n " scalapack: ${scalapack},"
+echo -n " elpa: ${elpa},"
 echo -n " dplasma: ${dplasma}"
 echo    " hpx_linalg: ${hpx_linalg}"
 
@@ -141,6 +161,7 @@ OPT_CMAKE=(\
   -DDLA_ALL_TESTS_USE_RUNNER=ON \
   "${OPT_LAPACK[@]}" \
   "${OPT_SCALAPACK[@]}" \
+  "${OPT_ELPA[@]}" \
   "${OPT_DPLASMA[@]}" \
   "${OPT_HPX_LINALG[@]}" \
   -DHWLOC_ROOT=$EBROOTHWLOC \

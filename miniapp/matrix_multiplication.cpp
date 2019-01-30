@@ -88,9 +88,9 @@ int main(int argc, char** argv) {
   const int b_n = transb == NoTrans ? n : k;
 
   std::vector<SolverType> solvers;
-  if (vm.count("scalapack"))
+  for (size_t i = 0; i < vm.count("scalapack"); ++i)
     solvers.push_back(ScaLAPACK);
-  if (vm.count("dplasma"))
+  for (size_t i = 0; i < vm.count("dplasma"); ++i)
     solvers.push_back(DPlasma);
 
   comm::CommunicatorManager::initialize(nr_threads, &argc, &argv, true);

@@ -25,8 +25,8 @@ namespace dla_interface {
   enum OpTrans { NoTrans = 'N', Trans = 'T', ConjTrans = 'C' };
   MAYBE_UNUSED constexpr auto OPTRANS_SET = {NoTrans, Trans, ConjTrans};
 
-  enum UpLo { Lower = 'L', Upper = 'U' };
-  MAYBE_UNUSED constexpr auto UPLO_SET = {Lower, Upper};
+  enum UpLo { All = 'A', Lower = 'L', Upper = 'U' };
+  MAYBE_UNUSED constexpr auto UPLO_SET = {All, Lower, Upper};
 
   // Distributed matrix distribution (see documentation for details):
   // Scalapack = 2D block cyclic distribution,

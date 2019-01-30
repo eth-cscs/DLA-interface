@@ -11,10 +11,21 @@
 #include "types.h"
 #include "util_complex.h"
 #include "util_distributed_matrix.h"
-#include "test_dlai_main.h"
+#include "test_ftn_dlai_main.h"
 
 using namespace dla_interface;
 using namespace testing;
+
+#define TEST_FTN_LU_FACTORIZATION(function_name)                                        \
+  void function_name(const int* m, const int* n, void* a, const int* ia, const int* ja, \
+                     const int* desca, int* ipiv, const char* solver, int* info)
+
+extern "C" {
+TEST_FTN_LU_FACTORIZATION(test_ftn_s_lu_factorization);
+TEST_FTN_LU_FACTORIZATION(test_ftn_d_lu_factorization);
+TEST_FTN_LU_FACTORIZATION(test_ftn_c_lu_factorization);
+TEST_FTN_LU_FACTORIZATION(test_ftn_z_lu_factorization);
+}
 
 bool LUFactorizationTestThrows(SolverType solver) {
 #ifdef DLA_HAVE_SCALAPACK
@@ -29,7 +40,7 @@ bool LUFactorizationTestThrows(SolverType solver) {
 }
 
 template <typename T>
-class DLATypedTest : public ::testing::Test {
+class FtnDLATypedTest : public ::testing::Test {
   public:
   BaseType<T> epsilon() {
     return std::numeric_limits<BaseType<T>>::epsilon();
@@ -40,11 +51,6 @@ class DLATypedTest : public ::testing::Test {
   }
 
   void testLUFactorization(DistributedMatrix<T>& a, std::vector<int>& ipiv, SolverType solver) {
-    if (LUFactorizationTestThrows(solver)) {
-      EXPECT_THROW(LUFactorization(a, ipiv, solver), std::invalid_argument);
-      return;
-    }
-
     auto el_val = [this](int i, int j) {
       return this->value(
           std::exp2(-(i + 2 * j) + 3 * (std::min(i, j) + 1)) / 7 - std::exp2(-(i + 2 * j)) / 7,
@@ -58,7 +64,34 @@ class DLATypedTest : public ::testing::Test {
 
     fillDistributedMatrix(a, el_val);
 
-    LUFactorization(a, ipiv, solver);
+    ipiv.resize(a.localBaseIndex().row + a.localSize().first + a.blockSize().first);
+    auto a_scalapack = a.getScalapackDescription();
+    int m = a.size().first;
+    int n = a.size().second;
+    auto solver_s = util::getSolverString(solver);
+    int info = 0;
+
+    if (std::is_same<T, float>::value)
+      test_ftn_s_lu_factorization(&m, &n, std::get<0>(a_scalapack), &std::get<1>(a_scalapack),
+                                  &std::get<2>(a_scalapack), &std::get<3>(a_scalapack)[0], &ipiv[0],
+                                  solver_s.c_str(), &info);
+    if (std::is_same<T, double>::value)
+      test_ftn_d_lu_factorization(&m, &n, std::get<0>(a_scalapack), &std::get<1>(a_scalapack),
+                                  &std::get<2>(a_scalapack), &std::get<3>(a_scalapack)[0], &ipiv[0],
+                                  solver_s.c_str(), &info);
+    if (std::is_same<T, std::complex<float>>::value)
+      test_ftn_c_lu_factorization(&m, &n, std::get<0>(a_scalapack), &std::get<1>(a_scalapack),
+                                  &std::get<2>(a_scalapack), &std::get<3>(a_scalapack)[0], &ipiv[0],
+                                  solver_s.c_str(), &info);
+    if (std::is_same<T, std::complex<double>>::value)
+      test_ftn_z_lu_factorization(&m, &n, std::get<0>(a_scalapack), &std::get<1>(a_scalapack),
+                                  &std::get<2>(a_scalapack), &std::get<3>(a_scalapack)[0], &ipiv[0],
+                                  solver_s.c_str(), &info);
+
+    if (LUFactorizationTestThrows(solver)) {
+      EXPECT_NE(0, info);
+      return;
+    }
 
     EXPECT_TRUE(
         checkNearDistributedMatrix(a, el_val_expected, 10 * this->epsilon(), 1e-3, *outstream));
@@ -82,15 +115,15 @@ class DLATypedTest : public ::testing::Test {
 };
 
 typedef ::testing::Types<float, double, std::complex<float>, std::complex<double>> MyTypes;
-TYPED_TEST_CASE(DLATypedTest, MyTypes);
+TYPED_TEST_CASE(FtnDLATypedTest, MyTypes);
 
-TYPED_TEST(DLATypedTest, LUFactorization) {
+TYPED_TEST(FtnDLATypedTest, LUFactorization) {
   using ElType = TypeParam;
   int n = 59;
   int nb = 3;
 
   for (auto comm_ptr : comms) {
-    for (auto dist : DISTRIBUTION_SET) {
+    for (auto dist : {scalapack_dist}) {
       for (auto solver : SOLVER_SET) {
         for (int m : {47, 59, 79}) {
           DistributedMatrix<ElType> a(m, n, nb, nb, *comm_ptr, dist);
@@ -103,13 +136,13 @@ TYPED_TEST(DLATypedTest, LUFactorization) {
   }
 }
 
-TYPED_TEST(DLATypedTest, LUFactorizationSubmatrixSame) {
+TYPED_TEST(FtnDLATypedTest, LUFactorizationSubmatrixSame) {
   using ElType = TypeParam;
   int n = 59;
   int nb = 3;
 
   for (auto comm_ptr : comms) {
-    for (auto dist : DISTRIBUTION_SET) {
+    for (auto dist : {scalapack_dist}) {
       for (auto solver : SOLVER_SET) {
         for (int m : {47, 59, 79}) {
           auto a_ptr =
@@ -123,13 +156,13 @@ TYPED_TEST(DLATypedTest, LUFactorizationSubmatrixSame) {
   }
 }
 
-TYPED_TEST(DLATypedTest, LUFactorizationSubmatrix) {
+TYPED_TEST(FtnDLATypedTest, LUFactorizationSubmatrix) {
   using ElType = TypeParam;
   int n = 59;
   int nb = 3;
 
   for (auto comm_ptr : comms) {
-    for (auto dist : DISTRIBUTION_SET) {
+    for (auto dist : {scalapack_dist}) {
       for (auto solver : SOLVER_SET) {
         for (int m : {47, 59, 79}) {
           auto a_ptr = DistributedMatrix<ElType>(m + 2 * nb, n + nb, nb, nb, *comm_ptr, dist)

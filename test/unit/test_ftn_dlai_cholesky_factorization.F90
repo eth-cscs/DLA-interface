@@ -1,0 +1,38 @@
+module test_ftn_cholesky_factorization
+  use dla_interface
+  use, intrinsic :: ISO_C_BINDING
+  implicit none
+
+  contains
+
+#define TEST_FTN_CHOLESKY_FACTORIZATION(test_function_name, function_name, CType) \
+    subroutine test_function_name(uplo, n, a, ia, ja, desca, solver, info)               \
+        bind(C, name="test_function_name")                                              ;\
+      use, intrinsic :: ISO_C_BINDING                                                   ;\
+      implicit none                                                                     ;\
+      character(kind=C_CHAR), intent(in) :: uplo                                        ;\
+      integer(C_INT), intent(in) :: n, ia, ja                                           ;\
+      integer(C_INT), dimension(*), intent(in) :: desca                                 ;\
+      CType, dimension(desca(9),*), intent(inout) :: a                                  ;\
+      character(len=1, kind=C_CHAR), dimension(*), intent(in) :: solver(*)              ;\
+      integer(C_INT), intent(out) :: info                                               ;\
+                                                                                        ;\
+      integer lsolver                                                                   ;\
+      character(len=50) :: f_solver                                                     ;\
+                                                                                        ;\
+      info = 0                                                                          ;\
+      lsolver = 0                                                                       ;\
+      do while (solver(lsolver + 1) .ne. C_NULL_CHAR .and. lsolver .lt. 50)             ;\
+        lsolver = lsolver + 1                                                           ;\
+        f_solver(lsolver:lsolver) = solver(lsolver)                                     ;\
+      end do                                                                            ;\
+                                                                                        ;\
+      call function_name(uplo, n, a, ia, ja, desca, f_solver(1:lsolver), info)          ;\
+    end subroutine
+
+    TEST_FTN_CHOLESKY_FACTORIZATION(test_ftn_s_cholesky_factorization, dlai_s_cholesky_factorization, real(C_FLOAT))
+    TEST_FTN_CHOLESKY_FACTORIZATION(test_ftn_d_cholesky_factorization, dlai_d_cholesky_factorization, real(C_DOUBLE))
+    TEST_FTN_CHOLESKY_FACTORIZATION(test_ftn_c_cholesky_factorization, dlai_c_cholesky_factorization, complex(C_FLOAT_COMPLEX))
+    TEST_FTN_CHOLESKY_FACTORIZATION(test_ftn_z_cholesky_factorization, dlai_z_cholesky_factorization, complex(C_DOUBLE_COMPLEX))
+
+end module

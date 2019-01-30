@@ -17,8 +17,9 @@ namespace dla_interface {
           return PlasmaLower;
         case Upper:
           return PlasmaUpper;
+        default:
+          throw(std::invalid_argument(errorMessage("Invalid UpLo element.", uplo)));
       }
-      throw(std::invalid_argument(errorMessage("Invalid UpLo element.", uplo)));
     }
 
     inline PLASMA_enum plasmaTrans(OpTrans trans) {
@@ -29,12 +30,13 @@ namespace dla_interface {
           return PlasmaTrans;
         case ConjTrans:
           return PlasmaConjTrans;
+        default:
+          throw(std::invalid_argument(errorMessage("Invalid OpTrans element.", trans)));
       }
-      throw(std::invalid_argument(errorMessage("Invalid OpTrans element.", trans)));
     }
 
     template <class Routine, class... Args>
-    inline void dplasma_run(MPI_Comm comm, Args... args) {
+    inline int dplasma_run(MPI_Comm comm, Args... args) {
       auto parsec = comm::CommunicatorManager::getParsecContext();
       // Sets the MPI communicator.
       // TODO: uncomment this after parsec issue #135 is fixed
@@ -55,12 +57,7 @@ namespace dla_interface {
       util::SetNumThreadsAndCpuBind config(comm::CommunicatorManager::getDPlasmaConfigInfo());
 
       // Creates and schedules the operation
-      parsec_taskpool_t* taskpool = Routine::create(args...);
-      parsec_enqueue(parsec, taskpool);
-      // Parsec starts the computation
-      parsec_context_start(parsec);
-      // Wait for the completion
-      parsec_context_wait(parsec);
+      return Routine::run(parsec, args...);
     }
 
     template <class ElType>
@@ -69,32 +66,32 @@ namespace dla_interface {
     template <>
     struct pgemm<float> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_sgemm_New(args...);
+      static auto run(Args... args) {
+        return dplasma_sgemm(args...);
       }
     };
 
     template <>
     struct pgemm<double> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_dgemm_New(args...);
+      static auto run(Args... args) {
+        return dplasma_dgemm(args...);
       }
     };
 
     template <>
     struct pgemm<std::complex<float>> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_cgemm_New(args...);
+      static auto run(Args... args) {
+        return dplasma_cgemm(args...);
       }
     };
 
     template <>
     struct pgemm<std::complex<double>> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_zgemm_New(args...);
+      static auto run(Args... args) {
+        return dplasma_zgemm(args...);
       }
     };
 
@@ -104,32 +101,32 @@ namespace dla_interface {
     template <>
     struct pgetrf<float> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_sgetrf_New(args...);
+      static auto run(Args... args) {
+        return dplasma_sgetrf(args...);
       }
     };
 
     template <>
     struct pgetrf<double> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_dgetrf_New(args...);
+      static auto run(Args... args) {
+        return dplasma_dgetrf(args...);
       }
     };
 
     template <>
     struct pgetrf<std::complex<float>> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_cgetrf_New(args...);
+      static auto run(Args... args) {
+        return dplasma_cgetrf(args...);
       }
     };
 
     template <>
     struct pgetrf<std::complex<double>> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_zgetrf_New(args...);
+      static auto run(Args... args) {
+        return dplasma_zgetrf(args...);
       }
     };
 
@@ -139,32 +136,32 @@ namespace dla_interface {
     template <>
     struct ppotrf<float> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_spotrf_New(args...);
+      static auto run(Args... args) {
+        return dplasma_spotrf(args...);
       }
     };
 
     template <>
     struct ppotrf<double> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_dpotrf_New(args...);
+      static auto run(Args... args) {
+        return dplasma_dpotrf(args...);
       }
     };
 
     template <>
     struct ppotrf<std::complex<float>> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_cpotrf_New(args...);
+      static auto run(Args... args) {
+        return dplasma_cpotrf(args...);
       }
     };
 
     template <>
     struct ppotrf<std::complex<double>> {
       template <class... Args>
-      static auto create(Args... args) {
-        return dplasma_zpotrf_New(args...);
+      static auto run(Args... args) {
+        return dplasma_zpotrf(args...);
       }
     };
   }
