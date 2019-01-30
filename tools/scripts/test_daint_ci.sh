@@ -107,6 +107,8 @@ esac
 ELPA_VERS=2018.05.001
 ELPA_LIB_DIR=/apps/daint/UES/sandbox/rasolca/elpa
 
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ELPA_LIB_DIR/lib
+
 case $elpa in
   No|no)   OPT_ELPA=() ;;
   Yes|yes) OPT_ELPA=(-DELPA_ROOT="${ELPA_LIB_DIR}" -DELPA_VERSION="${ELPA_VERS}") ;;
