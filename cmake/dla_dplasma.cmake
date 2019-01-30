@@ -42,7 +42,7 @@ function(dla_find_dplasma)
       set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/include" "${MPI_CXX_INCLUDE_PATH}" "${DLA_DPLASMA_INCLUDE_DIRS}")
       set(CMAKE_REQUIRED_LIBRARIES "${CMAKE_EXE_LINKER_FLAGS}" "${MPI_CXX_LIBRARIES}" "${DLA_DPLASMA_LIBS}")
 
-      CHECK_CXX_SYMBOL_EXISTS(dplasma_map ordered_dplasma.h DPLASMA_FOUND)
+      CHECK_CXX_SYMBOL_EXISTS(dplasma_iceil ordered_dplasma.h DPLASMA_FOUND)
       if (DPLASMA_FOUND)
         set(DLA_HAVE_DPLASMA_INTERNAL ON)
       else()
