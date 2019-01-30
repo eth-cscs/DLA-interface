@@ -104,7 +104,7 @@ case $scalapack in
   *) echo "Wrong --scalapack option: $scalapack" ; print_help ; exit 1 ;;
 esac
 
-ELPA_VERSION=2018.05.001
+ELPA_VERS=2018.05.001
 ELPA_LIB_DIR=/apps/daint/UES/sandbox/rasolca/elpa
 
 case $elpa in
