@@ -34,6 +34,15 @@ DLA_DECLARE_CHOLESKY_FACTORIZATION(dlai_d_cholesky_factorization, double);
 DLA_DECLARE_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization, float);
 DLA_DECLARE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, double);
 
+#define DLA_DECLARE_CHOLESKY_INVERSE(function_name, Type)                                  \
+  int function_name(const char* uplo, const int* n, Type* a, const int* ia, const int* ja, \
+                    const int* desca, const char* solver)
+
+DLA_DECLARE_CHOLESKY_INVERSE(dlai_s_cholesky_inverse, float);
+DLA_DECLARE_CHOLESKY_INVERSE(dlai_d_cholesky_inverse, double);
+DLA_DECLARE_CHOLESKY_INVERSE(dlai_c_cholesky_inverse, float);
+DLA_DECLARE_CHOLESKY_INVERSE(dlai_z_cholesky_inverse, double);
+
 #define DLA_DECLARE_LU_FACTORIZATION(function_name, Type)                              \
   int function_name(const int* m, const int* n, Type* a, const int* ia, const int* ja, \
                     const int* desca, int* ipiv, const char* solver)
@@ -65,6 +74,14 @@ DLA_DECLARE_HERMITIAN_EIGENVECTORS(dlai_d_hermitian_eigenvectors, double, double
 DLA_DECLARE_HERMITIAN_EIGENVECTORS(dlai_c_hermitian_eigenvectors, float, float)
 DLA_DECLARE_HERMITIAN_EIGENVECTORS(dlai_z_hermitian_eigenvectors, double, double)
 
+#define DLA_DECLARE_TRIANGULAR_INVERSE(function_name, Type)                                   \
+  int function_name(const char* uplo, const char* diag, const int* n, Type* a, const int* ia, \
+                    const int* ja, const int* desca, const char* solver)
+
+DLA_DECLARE_TRIANGULAR_INVERSE(dlai_s_triangular_inverse, float);
+DLA_DECLARE_TRIANGULAR_INVERSE(dlai_d_triangular_inverse, double);
+DLA_DECLARE_TRIANGULAR_INVERSE(dlai_c_triangular_inverse, float);
+DLA_DECLARE_TRIANGULAR_INVERSE(dlai_z_triangular_inverse, double);
 #ifdef __cplusplus
 }
 #endif

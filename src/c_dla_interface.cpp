@@ -70,6 +70,27 @@ DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_d_cholesky_factorization, double, double)
 DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_c_cholesky_factorization, float, std::complex<float>)
 DLA_DEFINE_CHOLESKY_FACTORIZATION(dlai_z_cholesky_factorization, double, std::complex<double>)
 
+#define DLA_DEFINE_CHOLESKY_INVERSE(function_name, CType, CppType)                      \
+  extern "C" int function_name(const char* uplo, const int* n, CType* a, const int* ia, \
+                               const int* ja, const int* desca, const char* solver) {   \
+    CppType* a_ = reinterpret_cast<CppType*>(a);                                        \
+    UpLo uplo_ = util::getUpLo(*uplo);                                                  \
+    DistributedMatrix<CppType> mat_a(scalapack_dist, *n, *n, a_, *ia, *ja, desca);      \
+    SolverType solver_ = util::getSolverType(solver);                                   \
+    try {                                                                               \
+      choleskyInverse(uplo_, mat_a, solver_, dlai_print_timer_value);                   \
+    }                                                                                   \
+    catch (std::invalid_argument & exc) {                                               \
+      return -1;                                                                        \
+    }                                                                                   \
+    return 0;                                                                           \
+  }
+
+DLA_DEFINE_CHOLESKY_INVERSE(dlai_s_cholesky_inverse, float, float)
+DLA_DEFINE_CHOLESKY_INVERSE(dlai_d_cholesky_inverse, double, double)
+DLA_DEFINE_CHOLESKY_INVERSE(dlai_c_cholesky_inverse, float, std::complex<float>)
+DLA_DEFINE_CHOLESKY_INVERSE(dlai_z_cholesky_inverse, double, std::complex<double>)
+
 #define DLA_DEFINE_LU_FACTORIZATION(function_name, CType, CppType)                                 \
   extern "C" int function_name(const int* m, const int* n, CType* a, const int* ia, const int* ja, \
                                const int* desca, int* ipiv, const char* solver) {                  \
@@ -151,3 +172,25 @@ DLA_DEFINE_HERMITIAN_EIGENVECTORS(dlai_s_hermitian_eigenvectors, float, float, f
 DLA_DEFINE_HERMITIAN_EIGENVECTORS(dlai_d_hermitian_eigenvectors, double, double, double)
 DLA_DEFINE_HERMITIAN_EIGENVECTORS(dlai_c_hermitian_eigenvectors, float, std::complex<float>, float)
 DLA_DEFINE_HERMITIAN_EIGENVECTORS(dlai_z_hermitian_eigenvectors, double, std::complex<double>, double)
+
+#define DLA_DEFINE_TRIANGULAR_INVERSE(function_name, CType, CppType)                                 \
+  extern "C" int function_name(const char* uplo, const char* diag, const int* n, CType* a,           \
+                               const int* ia, const int* ja, const int* desca, const char* solver) { \
+    CppType* a_ = reinterpret_cast<CppType*>(a);                                                     \
+    UpLo uplo_ = util::getUpLo(*uplo);                                                               \
+    Diag diag_ = util::getDiag(*diag);                                                               \
+    DistributedMatrix<CppType> mat_a(scalapack_dist, *n, *n, a_, *ia, *ja, desca);                   \
+    SolverType solver_ = util::getSolverType(solver);                                                \
+    try {                                                                                            \
+      triangularInverse(uplo_, diag_, mat_a, solver_, dlai_print_timer_value);                       \
+    }                                                                                                \
+    catch (std::invalid_argument & exc) {                                                            \
+      return -1;                                                                                     \
+    }                                                                                                \
+    return 0;                                                                                        \
+  }
+
+DLA_DEFINE_TRIANGULAR_INVERSE(dlai_s_triangular_inverse, float, float)
+DLA_DEFINE_TRIANGULAR_INVERSE(dlai_d_triangular_inverse, double, double)
+DLA_DEFINE_TRIANGULAR_INVERSE(dlai_c_triangular_inverse, float, std::complex<float>)
+DLA_DEFINE_TRIANGULAR_INVERSE(dlai_z_triangular_inverse, double, std::complex<double>)

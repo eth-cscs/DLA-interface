@@ -35,6 +35,17 @@ namespace dla_interface {
       }
     }
 
+    inline PLASMA_enum plasmaDiag(Diag diag) {
+      switch (diag) {
+        case Unit:
+          return PlasmaUnit;
+        case NonUnit:
+          return PlasmaNonUnit;
+        default:
+          throw(std::invalid_argument(errorMessage("Invalid Diag element.", diag)));
+      }
+    }
+
     template <class Routine, class... Args>
     inline int dplasma_run(MPI_Comm comm, Args... args) {
       auto parsec = comm::CommunicatorManager::getParsecContext();
@@ -162,6 +173,76 @@ namespace dla_interface {
       template <class... Args>
       static auto run(Args... args) {
         return dplasma_zpotrf(args...);
+      }
+    };
+
+    template <class ElType>
+    struct ppotri {};
+
+    template <>
+    struct ppotri<float> {
+      template <class... Args>
+      static auto run(Args... args) {
+        return dplasma_spotri(args...);
+      }
+    };
+
+    template <>
+    struct ppotri<double> {
+      template <class... Args>
+      static auto run(Args... args) {
+        return dplasma_dpotri(args...);
+      }
+    };
+
+    template <>
+    struct ppotri<std::complex<float>> {
+      template <class... Args>
+      static auto run(Args... args) {
+        return dplasma_cpotri(args...);
+      }
+    };
+
+    template <>
+    struct ppotri<std::complex<double>> {
+      template <class... Args>
+      static auto run(Args... args) {
+        return dplasma_zpotri(args...);
+      }
+    };
+
+    template <class ElType>
+    struct ptrtri {};
+
+    template <>
+    struct ptrtri<float> {
+      template <class... Args>
+      static auto run(Args... args) {
+        return dplasma_strtri(args...);
+      }
+    };
+
+    template <>
+    struct ptrtri<double> {
+      template <class... Args>
+      static auto run(Args... args) {
+        return dplasma_dtrtri(args...);
+      }
+    };
+
+    template <>
+    struct ptrtri<std::complex<float>> {
+      template <class... Args>
+      static auto run(Args... args) {
+        return dplasma_ctrtri(args...);
+      }
+    };
+
+    template <>
+    struct ptrtri<std::complex<double>> {
+      template <class... Args>
+      static auto run(Args... args) {
+        return dplasma_ztrtri(args...);
       }
     };
   }

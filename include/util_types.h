@@ -44,6 +44,18 @@ namespace dla_interface {
       throw(std::invalid_argument(errorMessage("Wrong UpLo char ", uplo)));
     }
 
+    inline Diag getDiag(char diag) {
+      switch (diag) {
+        case 'u':
+        case 'U':
+          return Unit;
+        case 'n':
+        case 'N':
+          return NonUnit;
+      }
+      throw(std::invalid_argument(errorMessage("Wrong Diag char ", diag)));
+    }
+
     inline Ordering getOrdering(char ordering) {
       switch (ordering) {
         case 'r':
