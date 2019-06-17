@@ -7,4 +7,17 @@
 #SBATCH --error=!TAG!.err
 #SBATCH --partition=cscsci
 
-tools/scripts/test_daint_ci.sh -t !TAG! -p $partition -b $build_type -l $lapack -s $scalapack -e $elpa -d $dplasma -x $hpx_linalg
+elpa="No"
+dplasma="No"
+hpx_linalg="No"
+
+case $libraries in
+  None) ;;
+  ELPA) elpa="Yes" ;;
+  DPlasma) dplasma="Yes" ;;
+  HPXLinalg) hpx_linalg="Yes" ;;
+  All) elpa="Yes" dplasma="Yes" hpx_linalg="Yes" ;;
+  *) echo "Wrong library selection defaulting to `None`" ;;
+esac
+
+tools/scripts/test_daint_ci.sh -p $partition -b $build_type -l $lapack -s $scalapack -e $elpa -d $dplasma -x $hpx_linalg
