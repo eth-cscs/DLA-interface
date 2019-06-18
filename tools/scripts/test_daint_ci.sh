@@ -1,14 +1,13 @@
 OPTIONS=dfo:v
 LONGOPTIONS=debug,force,output:,verbose
 
-OPTIONS=`getopt -o h::t:b:p:l:s:e:d:x: -l help::,tag:,build-type,partition:,lapack:,scalapack:,elpa:,dplasma:,hpx_linalg: --name "$0" -- "$@"`
+OPTIONS=`getopt -o h::b:p:l:s:e:d:x: -l help::,build-type,partition:,lapack:,scalapack:,elpa:,dplasma:,hpx_linalg: --name "$0" -- "$@"`
 ret=$?
 if [ $ret -ne 0 ]; then
     exit 1
 fi
 
 # default values
-tag="notag"
 build_type="Release"
 partition="mc"
 lapack="MKLst"
@@ -22,11 +21,6 @@ print_help()
 {
   printf "Usage: $0 [options]\n\n"
   printf "Options:\n"
-
-  # --tag
-  printf "  %-35s %s\n" \
-    "-t, --tag" \
-    "Build tag [default: ${tag}]."
 
   # --build-type
   printf "  %-35s %s\n" \
@@ -76,7 +70,6 @@ while true; do
   case "$1" in
     -h|--h*)         print_help ; exit 0 ;;
     -b|--build-type) build_type="$2" ; shift 2 ;;
-    -t|--tag)        tag="$2"        ; shift 2 ;;
     -p|--partition)  partition="$2"  ; shift 2 ;;
     -l|--lapack)     lapack="$2"     ; shift 2 ;;
     -s|--scalapack)  scalapack="$2"  ; shift 2 ;;
@@ -133,7 +126,6 @@ case $hpx_linalg in
 esac
 
 echo -n "Running with options:"
-echo -n " tag: ${tag},"
 echo -n " build_type: ${build_type},"
 echo -n " partition: ${partition},"
 echo -n " lapack: ${lapack},"
@@ -149,7 +141,7 @@ source $SCRIPT_DIR/daint-${partition}_env.sh
 
 cd $SRC_DIR
 
-BUILD_DIR=$SRC_DIR/build_$tag
+BUILD_DIR=$SRC_DIR/build
 
 rm -rf $BUILD_DIR
 mkdir $BUILD_DIR

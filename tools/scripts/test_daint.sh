@@ -15,19 +15,24 @@ fi
 
 echo ""
 
+ARCHIVE=/project/csstaff/rasolca/jenkins/output/${J_PROJ}/${BUILD_ID}/${BUILD_TAG}
+mkdir -p -- $ARCHIVE
+
 echo "----- Output: -----"
+cp ${BUILD_TAG}.out ${ARCHIVE}/out
 cat ${BUILD_TAG}.out
 
 echo ""
 
 echo "----- Error:  -----"
+cp ${BUILD_TAG}.err ${ARCHIVE}/err
 cat ${BUILD_TAG}.err
 
 echo ""
 
 echo "----- Log:    -----"
-cp build_${BUILD_TAG}/Testing/Temporary/LastTest.log* /project/csstaff/rasolca/jenkins/output/${BUILD_TAG}-out.log
-cat build_${BUILD_TAG}/Testing/Temporary/LastTest.log*
+cp build/Testing/Temporary/LastTest.log* ${ARCHIVE}/log
+cat build/Testing/Temporary/LastTest.log*
 
 if [ "$ret" -ne "0" ]; then
   exit 2
