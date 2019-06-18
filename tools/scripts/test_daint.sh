@@ -34,6 +34,8 @@ echo "----- Log:    -----"
 cp build/Testing/Temporary/LastTest.log* ${ARCHIVE}/log
 cat build/Testing/Temporary/LastTest.log*
 
+rm -rf $WORKSPACE/build
+
 if [ "$ret" -ne "0" ]; then
   exit 2
 fi
