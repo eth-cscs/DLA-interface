@@ -34,10 +34,6 @@ echo "----- Log:    -----"
 cp build/Testing/Temporary/LastTest.log* ${ARCHIVE}/log
 cat build/Testing/Temporary/LastTest.log*
 
-# remove this build workspace
-cd ~
-rm -rf $WORKSPACE
-
 if [ "$ret" -ne "0" ]; then
   exit 2
 fi
