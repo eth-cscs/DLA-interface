@@ -15,7 +15,7 @@ fi
 
 echo ""
 
-ARCHIVE=/project/csstaff/rasolca/jenkins/output/${BUILD_ID}/${BUILD_TAG}
+ARCHIVE=/project/csstaff/rasolca/jenkins/output/${J_PROJ}/${BUILD_ID}/${BUILD_TAG}
 mkdir -p -- $ARCHIVE
 
 echo "----- Output: -----"
@@ -31,10 +31,11 @@ cat ${BUILD_TAG}.err
 echo ""
 
 echo "----- Log:    -----"
-cp build/Testing/Temporary/LastTest.log* ${ARCHIVE}.log
+cp build/Testing/Temporary/LastTest.log* ${ARCHIVE}/log
 cat build/Testing/Temporary/LastTest.log*
 
 # remove this build workspace
+cd ~
 rm -rf $WORKSPACE
 
 if [ "$ret" -ne "0" ]; then
