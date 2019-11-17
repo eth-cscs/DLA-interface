@@ -1,115 +1,64 @@
-project(DLA_Interface_Doc)
+#
+# Distributed Linear Algebra Interface (DLAI)
+#
+# Copyright (c) 2018-2019, ETH Zurich
+# All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+#
 
-set_directory_properties(PROPERTIES EXCLUDE_FROM_ALL TRUE)
+# *** If (DLAI_INTERNAL_DOCUMENTATION) is ON !!! ***
 
-project(DLA_Interface_Doc)
+# check if Doxygen is installed
+find_package(Doxygen)
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-  if(CMAKE_SYSTEM_NAME MATCHES Linux)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1 -g1")
-  endif(CMAKE_SYSTEM_NAME MATCHES Linux)
-endif(CMAKE_COMPILER_IS_GNUCXX)
+macro(transform_to_doxygen_list list)
+  string(REPLACE ";" " " ${list} "${${list}}")
+endmacro()
 
-# some examples and snippets needs c++11, so let's check it once
-check_cxx_compiler_flag("-std=c++11" EIGEN_COMPILER_SUPPORT_CPP11)
+if (DOXYGEN_FOUND)
+	message("Doxygen installed on system
+	")
+	
+	set(DLAI_DOXY_PROJECT_NAME	"DLAI")
+	
+	# Doxygen source inputs
+	set(DOXYGEN_INPUTS
+		# Description
+		${CMAKE_CURRENT_SOURCE_DIR}/Mainpage.dox
+		# Examples & Tests
+		${CMAKE_CURRENT_SOURCE_DIR}/Examples.dox
+		# Inline documentation files
+		${CMAKE_CURRENT_SOURCE_DIR}/../include/
+		#${CMAKE_CURRENT_SOURCE_DIR}/../src/
+		#${CMAKE_CURRENT_SOURCE_DIR}/../doc/
+	)
+	transform_to_doxygen_list(DOXYGEN_INPUTS)
 
-option(EIGEN_INTERNAL_DOCUMENTATION "Build internal documentation" OFF)
+	set(DOXYGEN_EXAMPLE_PATH
+		# doc path
+		${CMAKE_CURRENT_SOURCE_DIR}/
+		# test path
+		${CMAKE_CURRENT_SOURCE_DIR}/../test/src/
+	)
+	transform_to_doxygen_list(DOXYGEN_EXAMPLE_PATH)
+	
+    # Configuration input and output files
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/../doc/Doxyfile.in)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
+    # request to configure the file
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+    message("Doxygen build started")
 
-# Set some Doxygen flags
-set(EIGEN_DOXY_PROJECT_NAME             "Eigen")
-set(EIGEN_DOXY_OUTPUT_DIRECTORY_SUFFIX  "")
-set(EIGEN_DOXY_INPUT                    "\"${Eigen_SOURCE_DIR}/Eigen\" \"${Eigen_SOURCE_DIR}/doc\"")
-set(EIGEN_DOXY_HTML_COLORSTYLE_HUE      "220")
-set(EIGEN_DOXY_TAGFILES                 "")
-if(EIGEN_INTERNAL_DOCUMENTATION)
-  set(EIGEN_DOXY_INTERNAL                 "YES")
-else(EIGEN_INTERNAL_DOCUMENTATION)
-  set(EIGEN_DOXY_INTERNAL                 "NO")
-endif(EIGEN_INTERNAL_DOCUMENTATION)
-
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-  ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-)
-
-set(EIGEN_DOXY_PROJECT_NAME             "Eigen-unsupported")
-set(EIGEN_DOXY_OUTPUT_DIRECTORY_SUFFIX  "/unsupported")
-set(EIGEN_DOXY_INPUT                    "\"${Eigen_SOURCE_DIR}/unsupported/Eigen\" \"${Eigen_SOURCE_DIR}/unsupported/doc\"")
-set(EIGEN_DOXY_HTML_COLORSTYLE_HUE      "0")
-set(EIGEN_DOXY_TAGFILES                 "\"${Eigen_BINARY_DIR}/doc/Eigen.doxytags=..\"")
-#set(EIGEN_DOXY_TAGFILES                 "")
-
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-  ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile-unsupported
-)
-
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/eigendoxy_header.html.in
-  ${CMAKE_CURRENT_BINARY_DIR}/eigendoxy_header.html
-)
-
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/eigendoxy_footer.html.in
-  ${CMAKE_CURRENT_BINARY_DIR}/eigendoxy_footer.html
-)
-
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/eigendoxy_layout.xml.in
-  ${CMAKE_CURRENT_BINARY_DIR}/eigendoxy_layout.xml
-)
-
-configure_file(
-  ${Eigen_SOURCE_DIR}/unsupported/doc/eigendoxy_layout.xml.in
-  ${Eigen_BINARY_DIR}/doc/unsupported/eigendoxy_layout.xml
-)
-
-set(examples_targets "")
-set(snippets_targets "")
-
-add_definitions("-DEIGEN_MAKING_DOCS")
-add_custom_target(all_examples)
-
-add_subdirectory(examples)
-add_subdirectory(special_examples)
-add_subdirectory(snippets)
-
-add_custom_target(
-  doc-eigen-prerequisites
-  ALL
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/html/
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/eigen_navtree_hacks.js           ${CMAKE_CURRENT_BINARY_DIR}/html/
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Eigen_Silly_Professor_64x64.png  ${CMAKE_CURRENT_BINARY_DIR}/html/
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ftv2pnode.png                    ${CMAKE_CURRENT_BINARY_DIR}/html/
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ftv2node.png                     ${CMAKE_CURRENT_BINARY_DIR}/html/
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/AsciiQuickReference.txt          ${CMAKE_CURRENT_BINARY_DIR}/html/
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-add_custom_target(
-  doc-unsupported-prerequisites
-  ALL
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${Eigen_BINARY_DIR}/doc/html/unsupported
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/eigen_navtree_hacks.js           ${CMAKE_CURRENT_BINARY_DIR}/html/unsupported/
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/Eigen_Silly_Professor_64x64.png  ${CMAKE_CURRENT_BINARY_DIR}/html/unsupported/
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ftv2pnode.png                    ${CMAKE_CURRENT_BINARY_DIR}/html/unsupported/
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/ftv2node.png                     ${CMAKE_CURRENT_BINARY_DIR}/html/unsupported/
-  WORKING_DIRECTORY ${Eigen_BINARY_DIR}/doc
-)
-
-add_dependencies(doc-eigen-prerequisites all_snippets all_examples)
-add_dependencies(doc-unsupported-prerequisites unsupported_snippets unsupported_examples)
-
-add_custom_target(doc ALL
-  COMMAND doxygen
-  COMMAND doxygen Doxyfile-unsupported
-  COMMAND ${CMAKE_COMMAND} -E copy ${Eigen_BINARY_DIR}/doc/html/group__TopicUnalignedArrayAssert.html ${Eigen_BINARY_DIR}/doc/html/TopicUnalignedArrayAssert.html
-  COMMAND ${CMAKE_COMMAND} -E rename html eigen-doc
-  COMMAND ${CMAKE_COMMAND} -E remove eigen-doc/eigen-doc.tgz eigen-doc/unsupported/_formulas.log eigen-doc/_formulas.log
-  COMMAND ${CMAKE_COMMAND} -E tar cfz eigen-doc.tgz eigen-doc
-  COMMAND ${CMAKE_COMMAND} -E rename eigen-doc.tgz eigen-doc/eigen-doc.tgz
-  COMMAND ${CMAKE_COMMAND} -E rename eigen-doc html
-  WORKING_DIRECTORY ${Eigen_BINARY_DIR}/doc)
-
-add_dependencies(doc doc-eigen-prerequisites doc-unsupported-prerequisites)
+    # note the option ALL which allows to build the docs together with the application
+    add_custom_target( doc ALL
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM
+	)
+else (DOXYGEN_FOUND)
+  message("Doxygen need to be installed to generate the doxygen documentation")
+endif (DOXYGEN_FOUND)
