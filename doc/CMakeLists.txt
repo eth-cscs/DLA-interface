@@ -28,7 +28,7 @@ if (DOXYGEN_FOUND)
 		# Description
 		${CMAKE_CURRENT_SOURCE_DIR}/Mainpage.dox
 		# Installation documentation
-		${CMAKE_CURRENT_SOURCE_DIR}/Install.dox
+		${CMAKE_CURRENT_SOURCE_DIR}/Start.dox
 		# Examples & Tests
 		${CMAKE_CURRENT_SOURCE_DIR}/Examples.dox
 		# Inline documentation files
