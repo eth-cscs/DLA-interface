@@ -27,12 +27,16 @@ if (DOXYGEN_FOUND)
 	set(DOXYGEN_INPUTS
 		# Description
 		${CMAKE_CURRENT_SOURCE_DIR}/Mainpage.dox
+		# Installation documentation
+		${CMAKE_CURRENT_SOURCE_DIR}/Install.dox
 		# Examples & Tests
 		${CMAKE_CURRENT_SOURCE_DIR}/Examples.dox
 		# Inline documentation files
 		${CMAKE_CURRENT_SOURCE_DIR}/../include/
 		#${CMAKE_CURRENT_SOURCE_DIR}/../src/
 		#${CMAKE_CURRENT_SOURCE_DIR}/../doc/
+		# License text
+		${CMAKE_CURRENT_SOURCE_DIR}/License.dox
 	)
 	transform_to_doxygen_list(DOXYGEN_INPUTS)
 
