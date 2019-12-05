@@ -32,8 +32,8 @@ namespace dla_interface {
     	 * Initializes the 2D communication grid:
          * - it initializes the MPI communicators,
          * - if ScaLAPACK is available it initializes the BLACS context
-         * Throws a std::invalid_argument exception
-         * if the number of ranks in base_comm is different from nr_rows * nr_cols.
+         *
+         * @throws std::invalid_argument if the number of ranks in base_comm is different from nr_rows * nr_cols.
          *
     	 * @param base_comm MPI base communicator.
     	 * @param nr_rows Number of rows.

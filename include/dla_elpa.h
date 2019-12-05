@@ -39,7 +39,7 @@ const char* elpa_strerr(int elpa_error);
 namespace dla_interface {
   namespace elpa {
     namespace generic {
-      // C++ Generic equivalent of elpa_set.
+      /// C++ Generic equivalent of elpa_set.
       template <class T>
       void set(elpa_t, const char*, T, int*);
       template <>

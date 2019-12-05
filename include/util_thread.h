@@ -19,8 +19,8 @@
 namespace dla_interface {
   namespace util {
     class SetNumThreadsAndCpuBind {
-      // On costruction sets the BLAS number of threads and cpu binding to the given value.
-      // On destruction resets the BLAS number of threads and cpu binding to the original value.
+      /// On costruction sets the BLAS number of threads and cpu binding to the given value.<br>
+      /// On destruction resets the BLAS number of threads and cpu binding to the original value.
 
       public:
       SetNumThreadsAndCpuBind(std::tuple<const thread::NumThreads&, const thread::CpuSet&> settings)

@@ -71,9 +71,11 @@ namespace dla_interface {
 #endif
     }
 
-    // Sets the number of threads used by BLAS using
-    // - omp_set_num_threads and
-    // - mkl_set_num_threads if DLA_HAVE_MKL_NUM_THREADS_UTIL is defined.
+    /// Sets the number of threads used by BLAS using
+    /// <ul>
+    /// 	<li>omp_set_num_threads and</li>
+    ///     <li>mkl_set_num_threads if DLA_HAVE_MKL_NUM_THREADS_UTIL is defined.</li>
+    /// </ul>
     inline void setOmpBlasThreads(NumThreads nr_threads) {
       printOmpBlasThreadDebugInfo("setOmpBlasThreads called:\n  Previous value:");
 
@@ -89,9 +91,12 @@ namespace dla_interface {
       printOmpBlasThreadDebugInfo("  New      value:");
     }
 
-    // Sets the number of threads used by BLAS if nr_threads > 0 using
-    // - omp_set_num_threads and
-    // - mkl_set_num_threads if DLA_HAVE_MKL_NUM_THREADS_UTIL is defined.
+    /// Sets the number of threads used by BLAS if nr_threads > 0 using
+    ///
+    /// <ul>
+    /// 	<li>omp_set_num_threads and</li>
+    /// 	<li>mkl_set_num_threads if DLA_HAVE_MKL_NUM_THREADS_UTIL is defined.</li>
+    /// </ul>
     inline void setOmpBlasThreads(int nr_threads) {
       setOmpBlasThreads(NumThreads(nr_threads));
     }
