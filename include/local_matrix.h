@@ -28,13 +28,13 @@ namespace dla_interface {
   class LocalMatrix {
 
 	///<br><br>
-	/// \note
+	/// @note
 	/// <b>(1)</b> \anchor note_01<br>
 	/// The returned LocalMatrix will use the memory provided by the user through the pointer.
 	/// <b>Requirement:</b> The memory region [ptr, ptr + m + ld * (n-1)) has to be valid for the
 	/// lifetime of the LocalMatrix object.
 	///
-	///<br>
+	/// @note
 	/// <b>(2)</b> \anchor note_02<br>
 	/// The returned LocalMatrix will use part of the memory allocated for the original matrix.
 	/// If the original matrix is destroyed, the memory of the original matrix is not deallocated
