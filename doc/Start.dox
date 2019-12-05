@@ -2,45 +2,52 @@
 
 /** \page GettingStarted Getting started
 
-This is a very short guide on how to get started with Eigen. It has a dual purpose. It serves as a minimal introduction to the Eigen library for people who want to start coding as soon as possible. You can also read this page as the first part of the Tutorial, which explains the library in more detail; in this case you will continue with \ref TutorialMatrixClass.
+\section GettingStartedMotivation Motivation behind DLA
 
-\section GettingStartedInstallation How to "install" DLAI?
+The use of the LAPACK and ScaLAPACK libraries for numerical linear algebra is
+ubiquitous in high-performance computing applications, and many vendors and
+software providers use it as the basis of their own high-performance math
+libraries.
 
-In order to use DLAI, you just need to download and extract Eigen's source code (see <a href="http://eigen.tuxfamily.org/index.php?title=Main_Page#Download">the wiki</a> for download instructions). In fact, the header files in the \c Eigen subdirectory are the only files required to compile programs using Eigen. The header files are the same for all platforms. It is not necessary to use CMake or install anything.
+However, there currently exists no distributed GPU-enabled library.
+Other packages for linear algebra with GPU support (or without GPU support but
+with better performances) exist, but they have different interfaces,
+therefore major changes in the application code are needed to adopt them.
 
-Sample of how to run a script program
-\verbatim
-$ ./script_name [args]
-\endverbatim
+\section GettingStartedBuild How to build DLAI?
 
+To build DLA interface on a local machine you require a Linux distribution.
 
-\section GettingStartedFirstProgram A simple first program
+The required packages on a apt-get (Debian, Ubuntu, ...) distribution:
 
-Here is a rather simple program to get you started.
+    sudo apt-get install build-essential git cmake doxygen openmpi-bin
 
-\include test_dlai_main.cpp
+The required packages on a yum (CentOS7, ...) distribution:
 
-We will explain the program after telling you how to compile it.
+    sudo yum groupinstall "Development Tools"
+    sudo yum install git cmake doxygen openmpi-devel
+    # Do not forget to load the MPI with
+    module load mpi
 
-\section GettingStartedCompiling Compiling and running your first program
+DLA interface also requires a scalabale LAPACK implementation, i.e.,
+<a href="http://icl.utk.edu/dplasma">DPLASMA</a> or
+<a href="https://www.netlib.org/scalapack">ScaLAPACK</a> and a LAPACK/BLAS
+implementation, i.e.,
+<a href="https://github.com/xianyi/OpenBLAS">OpenBLAS</a>.
 
-There is no library to link to. The only thing that you need to keep in mind when compiling the above program is that the compiler must be able to find the Eigen header files. The directory in which you placed Eigen's source code must be in the include path. With GCC you use the -I option to achieve this, so you can compile the program with a command like this:
+Scripts are prepared in the tools/script directory to download and build
+OpenBLAS and ScaLAPACK and in the end DLA interface.
 
-\code g++ -I /path/to/eigen/ my_program.cpp -o my_program \endcode
+    $ cd DLA-interface
+    $ ./tools/script/build-OpenBLAS.sh
+    $ ./tools/script/build-ScaLAPACK.sh
+    $ ./tools/script/build-DLAI.sh
 
-On Linux or Mac OS X, another option is to symlink or copy the Eigen folder into /usr/local/include/. This way, you can compile the program with:
+To change compilation options edit the scripts and to see what CMake options
+does DLA interface have.
 
-\code g++ my_program.cpp -o my_program \endcode
-
-When you run the program, it produces the following output:
-
-\include QuickStart_example.out
-
-
-\section GettingStartedExplanation Explanation of the first program
-
-The Eigen header files define many types, but for simple applications it may be enough to use only the \c MatrixXd type. This represents a matrix of arbitrary size (hence the \c X in \c MatrixXd), in which every entry is a \c double (hence the \c d in \c MatrixXd). See the \ref QuickRef_Types "quick reference guide" for an overview of the different types you can use to represent a matrix.
-
-The \c Eigen/Dense header file defines all member functions for the MatrixXd type and related types (see also the \ref QuickRef_Headers "table of header files"). All classes and functions defined in this header file (and other Eigen header files) are in the \c Eigen namespace.
+If you wish to build DLA interface on a HPC, you will can again use the scripts
+to build OpenBLAS and ScaLAPACK or load the module environments for such
+packages or compiler toolchains.
 
 */

@@ -10,7 +10,7 @@ Examples are didved into stages ....
 \b First \b example
 \br
 
-The first test is DLA interface primary aallocation of MPI communication channels.
+The first test is DLA interface primary allocation of MPI communication channels.
 
 \include test_dlai_main.cpp
 
@@ -18,5 +18,5 @@ The first test is DLA interface primary aallocation of MPI communication channel
 
 Some ScaLAPACK examples ...
 
-	
+
 */
