@@ -28,7 +28,7 @@ if [ ! -e ${SRC_DIR}/.configured ]; then
     LD_LIBRARY_PATH=${BUILDROOT}/OpenBLAS/BUILD/lib:${LD_LIBRARY_PATH} \
     LIBRARY_DIR=${BUILDROOT}/OpenBLAS/BUILD/lib:${LIBRARY_DIR} \
     PKG_CONFIG_PATH=${BUILDROOT}/OpenBLAS/BUILD/lib/pkgconfig:${PKG_CONFIG_PATH} \
-    cmake .. -DUSE_OPTIMIZED_BLAS=1 -DBUILD_SHARED_LIBS=On
+    cmake .. -DUSE_OPTIMIZED_LAPACK_BLAS=1 -DBUILD_SHARED_LIBS=On
     touch ${SRC_DIR}/.configured
 fi
 
