@@ -50,7 +50,7 @@ TEST(MathUtilTest, MultSize) {
   EXPECT_EQ(res, util::multSize(7ll, 8ll));
   EXPECT_EQ(res, util::multSize(7ull, 8ull));
 
-  if (std::numeric_limits<int>::max() < std::numeric_limits<std::size_t>::max()) {
+  if (static_cast<std::size_t>(std::numeric_limits<int>::max()) < std::numeric_limits<std::size_t>::max()) {
     int b = 2;
     int a = std::numeric_limits<int>::max() / b + 1;
     std::size_t res = static_cast<std::size_t>(a) * static_cast<std::size_t>(b);

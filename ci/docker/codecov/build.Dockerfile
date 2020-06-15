@@ -38,7 +38,9 @@ RUN wget -qO - https://github.com/xianyi/OpenBLAS/archive/v${OPENBLAS_VERSION}.t
     cd OpenBLAS-${OPENBLAS_VERSION}/ && \
     make USE_OPENMP=1 USE_THREAD=1 USE_LOCKING=1 DEBUG=1 -j$(nproc) && \
     make install NO_STATIC=1 PREFIX=${OPENBLAS_PATH} && \
-    rm -rf /root/openblas.tar.gz /root/OpenBLAS-${OPENBLAS_VERSION}/
+    rm -rf /root/openblas.tar.gz /root/OpenBLAS-${OPENBLAS_VERSION}/ && \
+    echo ${OPENBLAS_PATH}/lib >> /etc/ld.so.conf.d/openblas.conf && \
+    ldconfig
 
 # Install ScaLAPACK
 ARG SCALAPACK_VERSION=2.1.0
@@ -57,7 +59,9 @@ RUN wget -qO - http://www.netlib.org/scalapack/scalapack-${SCALAPACK_VERSION}.tg
       -DBUILD_SHARED_LIBS=ON && \
     make -j$(nproc) && \
     make install && \
-    rm -rf /root/scalapack.tgz /root/scalapack-${SCALAPACK_VERSION}/
+    rm -rf /root/scalapack.tgz /root/scalapack-${SCALAPACK_VERSION}/ && \
+    echo ${SCALAPACK_PATH}/lib >> /etc/ld.so.conf.d/scalapack.conf && \
+    ldconfig
 
 # Install hwloc
 ARG HWLOC_MAJOR=2
