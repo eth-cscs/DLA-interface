@@ -33,6 +33,7 @@ int main(int argc, char** argv) {
       ("U,upper", "Use upper triangular part of the matrix. (If not specified the lower triangular part is used.)")
       ("scalapack", "Run test with ScaLAPACK.")
       ("dplasma", "Run test with DPlasma.")
+	  ("dlaf", "Run test with DLA Future.")
       ("p,row_procs", "The number of rows in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
       ("q,col_procs", "The number of cols in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
       ("nr_threads", "The number of threads per rank.", cxxopts::value<int>()->default_value("1"))
@@ -64,6 +65,10 @@ int main(int argc, char** argv) {
     solvers.push_back(ScaLAPACK);
   for (size_t i = 0; i < vm.count("dplasma"); ++i)
     solvers.push_back(DPlasma);
+  for (size_t i = 0; i < vm.count("dlaf"); ++i)
+      solvers.push_back(DLAF);
+
+  std::cout << "p=" << p << ", q=" << q << std::endl;
 
   comm::CommunicatorManager::initialize(nr_threads, &argc, &argv, true);
 

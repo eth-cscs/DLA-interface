@@ -1,6 +1,12 @@
 // public interface
 #include "util_output.h"
 
+// Define to have a normal view of source file in Eclipse CDT!
+#ifdef VIEW_IPP
+	#include "distributed_matrix.h"
+	namespace dla_interface {
+#endif
+
 template <class ElType>
 DistributedMatrix<ElType>::DistributedMatrix()
  : DistributedMatrix(__func__, std::make_pair(0, 0), std::make_pair(1, 1), false, 0, nullptr,
@@ -70,7 +76,7 @@ DistributedMatrix<ElType>::DistributedMatrix(DistributionType distribution, int 
                                .size2D()
                                .second))),
           desc[8], 1, scalapack_dist) {}
-#endif
+#endif //DLA_HAVE_SCALAPACK
 
 template <class ElType>
 DistributedMatrix<ElType>::~DistributedMatrix() {
@@ -318,7 +324,8 @@ std::tuple<const ElType*, IndexType, IndexType, std::array<int, 9>> DistributedM
 
   return std::make_tuple(ptr_->ptr(), i, j, std::move(desc));
 }
-#endif
+#endif //DLA_HAVE_SCALAPACK
+
 #ifdef DLA_HAVE_DPLASMA
 template <class ElType>
 DPlasmaDescriptor DistributedMatrix<ElType>::getDPlasmaDescriptionInternal() const {
@@ -372,7 +379,7 @@ std::tuple<const DPlasmaDescriptor, MPI_Comm> DistributedMatrix<ElType>::getDPla
 
   return std::make_tuple(desc, row_ordered_comm);
 }
-#endif
+#endif //DLA_HAVE_DPLASMA
 
 template <class ElType>
 template <class Out>
@@ -801,3 +808,7 @@ void DistributedMatrix<ElType>::remove_referenced() {
   referenced_leading_nr_blocks_ = {};
   referenced_distribution_ = {};
 }
+
+#ifdef VIEW_IPP
+	} // namespace dla_interface
+#endif

@@ -1,0 +1,53 @@
+// Getting started Doxygen file
+
+/** \page GettingStarted Getting started
+
+\section GettingStartedMotivation Motivation behind DLA
+
+The use of the LAPACK and ScaLAPACK libraries for numerical linear algebra is
+ubiquitous in high-performance computing applications, and many vendors and
+software providers use it as the basis of their own high-performance math
+libraries.
+
+However, there currently exists no distributed GPU-enabled library.
+Other packages for linear algebra with GPU support (or without GPU support but
+with better performances) exist, but they have different interfaces,
+therefore major changes in the application code are needed to adopt them.
+
+\section GettingStartedBuild How to build DLAI?
+
+To build DLA interface on a local machine you require a Linux distribution.
+
+The required packages on a apt-get (Debian, Ubuntu, ...) distribution:
+
+    sudo apt-get install build-essential git cmake doxygen openmpi-bin
+
+The required packages on a yum (CentOS7, ...) distribution:
+
+    sudo yum groupinstall "Development Tools"
+    sudo yum install git cmake doxygen openmpi-devel
+    # Do not forget to load the MPI with
+    module load mpi
+
+DLA interface also requires a scalabale LAPACK implementation, i.e.,
+<a href="http://icl.utk.edu/dplasma">DPLASMA</a> or
+<a href="https://www.netlib.org/scalapack">ScaLAPACK</a> and a LAPACK/BLAS
+implementation, i.e.,
+<a href="https://github.com/xianyi/OpenBLAS">OpenBLAS</a>.
+
+Scripts are prepared in the tools/script directory to download and build
+OpenBLAS and ScaLAPACK and in the end DLA interface.
+
+    $ cd DLA-interface
+    $ ./tools/script/build-OpenBLAS.sh
+    $ ./tools/script/build-ScaLAPACK.sh
+    $ ./tools/script/build-DLAI.sh
+
+To change compilation options edit the scripts and to see what CMake options
+does DLA interface have.
+
+If you wish to build DLA interface on a HPC, you will can again use the scripts
+to build OpenBLAS and ScaLAPACK or load the module environments for such
+packages or compiler toolchains.
+
+*/

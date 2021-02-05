@@ -1,0 +1,22 @@
+
+// Examples Doxygen file
+
+/** \page examples Examples
+
+Examples are didved into stages ....
+
+\section Matrix
+
+\b First \b example
+\br
+
+The first test is DLA interface primary allocation of MPI communication channels.
+
+\include test_dlai_main.cpp
+
+\section ScaLAPACK
+
+Some ScaLAPACK examples ...
+
+
+*/
