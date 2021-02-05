@@ -4,7 +4,7 @@ include(CheckFunctionExists)
 
 function(dla_find_hwloc)
   unset(HWLOC_FOUND CACHE)
-  setoption(HWLOC_ROOT PATH "/usr" "HWLOC root directory")
+  setoption(HWLOC_ROOT PATH ${HWLOCROOT} "HWLOC root directory")
   
   if (HWLOC_ROOT)
     set(CMAKE_PREFIX_PATH ${HWLOC_ROOT})
