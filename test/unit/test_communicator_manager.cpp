@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <vector>
 #include "gtest/gtest.h"
-#include "mpi_listener.h"
 #include "communicator_grid.h"
 #include "util_mpi.h"
 
@@ -208,11 +207,11 @@ int main(int argc, char** argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
 
-#ifdef COMM_INITS_MPI
-  ::testing::setMPIListener("results_test_communicator_manager_init");
-#else
-  ::testing::setMPIListener("results_test_communicator_manager");
-#endif
+//#ifdef COMM_INITS_MPI
+//  ::testing::setMPIListener("results_test_communicator_manager_init");
+//#else
+//  ::testing::setMPIListener("results_test_communicator_manager");
+//#endif
 
   auto ret = RUN_ALL_TESTS();
 

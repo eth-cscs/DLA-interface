@@ -6,7 +6,6 @@
 #include "communicator_manager.h"
 #include "local_matrix.h"
 #include "gtest/gtest.h"
-#include "mpi_listener.h"
 #include "null_stream.h"
 #include "util_local_matrix.h"
 #include "util_distributed_matrix.h"
@@ -1928,7 +1927,7 @@ int main(int argc, char** argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
 
-  ::testing::setMPIListener("results_test_distributed_matrix");
+  // ::testing::setMPIListener("results_test_distributed_matrix");
 
   auto ret = RUN_ALL_TESTS();
 
