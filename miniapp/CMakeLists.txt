@@ -1,6 +1,10 @@
-add_miniapp(overlap_gaussian_orbitals LIBS ${DLA_LIBS})
-add_miniapp(miniapp_matrix_multiplication EXE_NAME matrix_multiplication LIBS ${DLA_LIBS})
+add_executable(overlap_gaussian_orbitals overlap_gaussian_orbitals.cpp)
+target_link_libraries(overlap_gaussian_orbitals PUBLIC dla_interface)
 
-if(DLA_HAVE_SCALAPACK)
-add_miniapp(overlap_gaussian_orbitals_c LIBS ${DLA_LIBS})
+add_executable(matrix_multiplication matrix_multiplication.cpp)
+target_link_libraries(matrix_multiplication PUBLIC dla_interface)
+
+if (DLA_HAVE_SCALAPACK)
+  add_executable(overlap_gaussian_orbitals_c overlap_gaussian_orbitals_c.cpp)
+  target_link_libraries(miniapp_matrix_multiplication PUBLIC dla_interface)
 endif()
