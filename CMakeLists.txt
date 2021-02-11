@@ -96,6 +96,9 @@ endif()
 # ----- OpenMP
 find_package(OpenMP REQUIRED)
 
+# ----- EXTERNAL
+add_subdirectory(external)
+
 # ----- MISC
 # TODO fix these
 if (DLAI_WITH_DPLASMA)
