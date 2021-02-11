@@ -160,45 +160,10 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -ffree-line-length-0")
 # ---------------------------------------------------------------------------
 # DLAI library
 # ---------------------------------------------------------------------------
-include_directories(
-    ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/libs
-    ${MPI_CXX_INCLUDE_PATH}
-    ${DLA_LAPACK_INCLUDE_PATH}
-    ${DLA_HPX_LINALG_INCLUDE_DIRS}
-    ${HWLOC_INCLUDE_DIRS}
-)
-if (DLA_WITH_FORTRAN)
-  # .mod files
-  include_directories(
-    ${MPI_Fortran_INCLUDE_PATH}
-    ${PROJECT_BINARY_DIR}/src
-  )
-endif()
-
-# Suppress warnings for DPLASMA headers.
-include_directories(SYSTEM ${DLA_DPLASMA_INCLUDE_DIRS})
-# Suppress warnings for ELPA headers.
-include_directories(SYSTEM ${DLA_ELPA_INCLUDE_DIRS})
-
 add_subdirectory(src)
 set(DLA_LIBS
     dla_interface
-    ${DLA_HPX_LINALG_LIBRARIES}
-    ${DLA_ELPA_LIBRARY}
-    ${DLA_DPLASMA_LIBS}
-    ${DLA_SCALAPACK_LIBRARY}
-    ${MPI_Fortran_LIBRARIES}
-    ${MPI_CXX_LIBRARIES}
-    ${DLA_HWLOC_LIBS}
-
-    ${LAPACK_TARGET}
-    # TODO SCALAPACK_TARGET
-    OpenMP::OpenMP_CXX
-    $<$<BOOL:${DLAI_WITH_FORTRAN}>:OpenMP::OpenMP_Fortran>
 )
-
-message(${DLA_LIBS})
 
 # ---------------------------------------------------------------------------
 # mini Apps
