@@ -1,5 +1,3 @@
-include(dla_miniapp)
-
 add_miniapp(overlap_gaussian_orbitals LIBS ${DLA_LIBS})
 add_miniapp(miniapp_matrix_multiplication EXE_NAME matrix_multiplication LIBS ${DLA_LIBS})
 
