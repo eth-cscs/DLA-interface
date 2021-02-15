@@ -60,7 +60,7 @@ namespace dla_interface {
       free_coords = {1, 0};
       MPI_Cart_sub(row_ordered_comm_, &free_coords[0], &col_comm_);
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       blacs_ictxt_ = blacs::Csys2blacs_handle(base_comm);
       char ordering = 'R';
       if (comm_ordering == ColMajor)
@@ -70,7 +70,7 @@ namespace dla_interface {
     }
 
     Communicator2DGrid::~Communicator2DGrid() {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       blacs::Cblacs_gridexit(blacs_ictxt_);
 #endif
       MPI_Comm_free(&col_comm_);

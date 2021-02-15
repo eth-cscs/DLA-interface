@@ -8,26 +8,19 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-set(DLA_SRC
-    communicator_grid.cpp
-    communicator_manager.cpp
-)
+add_library(dla_interface
+  communicator_grid.cpp
+  communicator_manager.cpp
 
-# C/Fortran interface enabled only if ScaLAPACK is available
-if(DLA_HAVE_SCALAPACK)
-list(APPEND DLA_SRC
-     c_dla_interface.cpp
-)
-endif()
-if(DLA_WITH_FORTRAN)
-list(APPEND DLA_SRC
-     f_dla_interface.F90
-)
-endif()
+  # C/Fortran interface enabled only if ScaLAPACK is available
+  $<$<BOOL:${SCALAPACK_FOUND}>:c_dla_interface.cpp>
 
-add_library(dla_interface ${DLA_SRC})
+  $<$<BOOL:${DLAI_WITH_FORTRAN}>:f_dla_interface.F90>
+)
 
 target_compile_definitions(dla_interface PUBLIC
+  $<$<BOOL:${SCALAPACK_FOUND}>:DLAI_WITH_SCALAPACK>
+
   $<$<BOOL:${DLAI_WITH_ELPA}>:DLAI_WITH_ELPA>
 )
 
@@ -36,7 +29,7 @@ target_include_directories(dla_interface PUBLIC
   ${PROJECT_SOURCE_DIR}/libs
 
   # *.mod files
-  $<$<BOOL:DLAI_WITH_FORTRAN>:${PROJET_BINARY_DIR}/src>
+  $<$<BOOL:${DLAI_WITH_FORTRAN}>:${CMAKE_CURRENT_BINARY_DIR}>
 
   ${DLA_HPX_LINALG_INCLUDE_DIRS}
 )
@@ -57,9 +50,10 @@ target_link_libraries(dla_interface PUBLIC
 
   MPI::MPI_CXX
   $<$<BOOL:${DLAI_WITH_FORTRAN}>:MPI::MPI_Fortran>
-  ${LAPACK_TARGET}
-  # TODO SCALAPACK_TARGET
-  ${DLA_SCALAPACK_LIBRARY}
+
+  LAPACK::LAPACK
+  $<$<BOOL:${SCALAPACK_FOUND}>:SCALAPACK::SCALAPACK>
+
   OpenMP::OpenMP_CXX
   $<$<BOOL:${DLAI_WITH_FORTRAN}>:OpenMP::OpenMP_Fortran>
 )

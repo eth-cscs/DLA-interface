@@ -53,7 +53,7 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
   double mnk = static_cast<double>(m) * static_cast<double>(n) * static_cast<double>(k);
   double flop = util::nrOps<ElType>(mnk, mnk);
   switch (solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     case ScaLAPACK: {
       std::array<int, 6> timer_index;
       util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);

@@ -28,7 +28,7 @@ TEST_FTN_LU_FACTORIZATION(test_ftn_z_lu_factorization);
 }
 
 bool LUFactorizationTestThrows(SolverType solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
   if (solver == ScaLAPACK)
     return false;
 #endif

@@ -39,7 +39,7 @@ namespace dla_interface {
 // TODO: Needed ?
 // MPI_Comm MPI_ColOrderedCommunicator() const;
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       BlacsContextType blacsContext() const {
         return blacs_ictxt_;
       }
@@ -71,7 +71,7 @@ namespace dla_interface {
       MPI_Comm col_comm_;
       MPI_Comm row_ordered_comm_;
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       BlacsContextType blacs_ictxt_;
 #endif
     };

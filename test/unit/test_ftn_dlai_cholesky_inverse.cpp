@@ -28,7 +28,7 @@ TEST_FTN_CHOLESKY_INVERSE(test_ftn_z_cholesky_inverse);
 }
 
 bool choleskyInverseTestThrows(SolverType solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
   if (solver == ScaLAPACK)
     return false;
 #endif

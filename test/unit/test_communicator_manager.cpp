@@ -7,7 +7,7 @@
 #include "communicator_grid.h"
 #include "util_mpi.h"
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 #include "blacs.h"
 #endif
 
@@ -52,7 +52,7 @@ TEST(CommunicatorManager, Test) {
     }
   }
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
   int ictxt_max = 0;
 #endif
   for (auto comm : comms) {
@@ -62,7 +62,7 @@ TEST(CommunicatorManager, Test) {
                         comm->rowMPICommunicator())));
     EXPECT_EQ(comm, &(comm::CommunicatorManager::getCommunicator2DGridFromMPIComm(
                         comm->rowOrderedMPICommunicator())));
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     EXPECT_EQ(comm, &(comm::CommunicatorManager::getCommunicator2DGridFromBlacsContext(
                         comm->blacsContext())));
     ictxt_max = std::max(ictxt_max, comm->blacsContext());
@@ -70,7 +70,7 @@ TEST(CommunicatorManager, Test) {
   }
   EXPECT_THROW(comm::CommunicatorManager::getCommunicator2DGridFromMPIComm(MPI_COMM_NULL),
                std::invalid_argument);
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
   // No BLACS context with id ictxt_max + 1 exists.
   EXPECT_THROW(comm::CommunicatorManager::getCommunicator2DGridFromBlacsContext(ictxt_max + 1),
                std::invalid_argument);
@@ -81,7 +81,7 @@ TEST(CommunicatorManager, Test) {
     MPI_Comm row_comm = comm->rowMPICommunicator();
     MPI_Comm col_comm = comm->colMPICommunicator();
     MPI_Comm row_ordered_comm = comm->rowOrderedMPICommunicator();
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     int ictxt = comm->blacsContext();
 #endif
     switch (i % 5) {
@@ -94,7 +94,7 @@ TEST(CommunicatorManager, Test) {
       case 3:
         comm::CommunicatorManager::free2DGridFromMPIComm(row_ordered_comm);
         break;
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       case 4:
         comm::CommunicatorManager::free2DGridFromBlacsContext(ictxt);
         break;
@@ -105,14 +105,14 @@ TEST(CommunicatorManager, Test) {
 
     EXPECT_THROW(comm::CommunicatorManager::getCommunicator2DGridFromMPIComm(row_comm),
                  std::invalid_argument);
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     EXPECT_THROW(comm::CommunicatorManager::getCommunicator2DGridFromBlacsContext(ictxt),
                  std::invalid_argument);
 #endif
   }
 }
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 TEST(CommunicatorManager, TestBlacsConstr) {
   std::vector<comm::Communicator2DGrid*> comms;
   for (const auto& mpi_comm : mpi_comms) {

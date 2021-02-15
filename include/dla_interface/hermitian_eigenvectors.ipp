@@ -26,7 +26,7 @@ void hermitianEigenvectors(UpLo uplo, DistributedMatrix<ElType>& mat, BaseType<E
 #endif
 
   switch (solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     case ScaLAPACK: {
       // use the lower part if A is fully set.
       if (uplo == All)

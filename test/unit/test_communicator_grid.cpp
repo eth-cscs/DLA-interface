@@ -153,7 +153,7 @@ TEST(Communicato2DGridTest, MPIRowOrderedCommunicator) {
   }
 }
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 TEST(Communicato2DGridTest, BlacsContext) {
   for (const auto& mpi_comm : mpi_comms) {
     auto id_size_pair = commInfo(mpi_comm);

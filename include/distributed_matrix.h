@@ -60,7 +60,7 @@ namespace dla_interface {
     // of the given DistributedMatrix distributed according distribution
     // and which reference the same memory (See note (1)).
     DistributedMatrix(DistributionType distribution, DistributedMatrix& mat);
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     // Creates a distributed matrix which has the same size, block size and rank grid
     // of the given Scalapack matrix and which reference the same memory (See note (1)).
     // Throws std::invalid_argument
@@ -159,7 +159,7 @@ namespace dla_interface {
       return res;
     }
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     // Returns a ptr to a new const distributed matrix which has the same size, block size and rank
     // grid
     // of the given Scalapack matrix and which reference the same memory (See note (1)).
@@ -390,7 +390,7 @@ namespace dla_interface {
     const ElementType* ptr(Local2DIndex index) const;
     ElementType* ptr(Local2DIndex index);
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     // Returns a tuple containing ptr, i, j and a std::array containing the descriptor, needed for
     // ScaLAPACK calls.
     // Throws std::invalid_argument if the matrix is not distributed in the ScaLAPACK way.

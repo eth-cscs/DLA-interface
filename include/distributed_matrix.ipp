@@ -37,7 +37,7 @@ DistributedMatrix<ElType>::DistributedMatrix(DistributionType distribution, Dist
  : DistributedMatrix(__func__, mat.size_, mat.base_index_, mat.block_size_, mat.comm_grid_,
                      distribution, mat.ptr_, mat.ld_, mat.leading_nr_blocks_, mat.distribution_) {}
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 template <class ElType>
 DistributedMatrix<ElType>::DistributedMatrix(DistributionType distribution, int m, int n,
                                              ElementType* ptr, ScalapackIndex i, ScalapackIndex j,
@@ -268,7 +268,7 @@ ElType* DistributedMatrix<ElType>::ptr(Local2DIndex index) {
   return ptr_->ptr(storageBaseIndexFromLocalBaseIndex(__func__, index + local_base_index_));
 }
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 template <class ElType>
 std::tuple<ElType*, IndexType, IndexType, std::array<int, 9>> DistributedMatrix<
     ElType>::getScalapackDescription() {

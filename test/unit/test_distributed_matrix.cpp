@@ -1617,7 +1617,7 @@ TEST(DistributedMatrixTest, Copy) {
   }
 }
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 TEST(DistributedMatrixTest, ScalapackDescriptor) {
   using Type = double;
   int m = 17;

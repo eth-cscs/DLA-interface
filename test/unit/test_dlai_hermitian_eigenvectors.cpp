@@ -17,7 +17,7 @@ using namespace dla_interface;
 using namespace testing;
 
 bool hermitianEigenvectorsTestThrows(SolverType solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
   if (solver == ScaLAPACK)
     return false;
 #endif

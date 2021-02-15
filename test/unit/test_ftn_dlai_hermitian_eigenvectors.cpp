@@ -29,7 +29,7 @@ TEST_FTN_HERMITIAN_EIGENVECTORS(test_ftn_z_hermitian_eigenvectors);
 }
 
 bool hermitianEigenvectorsTestThrows(SolverType solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
   if (solver == ScaLAPACK)
     return false;
 #endif

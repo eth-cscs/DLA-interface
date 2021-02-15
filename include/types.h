@@ -43,7 +43,7 @@ namespace dla_interface {
   using IndexType = int;
   using SizeType = int;
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
   using ScalapackIndex = int;  // Base 1 indeces.
   using ScalapackDescriptor = int*;
   using constScalapackDescriptor = const int*;

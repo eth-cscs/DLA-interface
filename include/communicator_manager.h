@@ -47,7 +47,7 @@ namespace dla_interface {
       static Communicator2DGrid& createCommunicator2DGrid(MPI_Comm base_comm, int nr_rows,
                                                           int nr_cols, Ordering comm_ordering);
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       // Creates a 2D grid based on the MPI communicator base_comm =
       // Cblacs2sys_handle(blacs_handle), with nr_rows rows
       // and nr_cols columns, where the ranks are ordered in comm_ordering order.
@@ -66,7 +66,7 @@ namespace dla_interface {
       // Throws a std::invalid_argument exception if no Communicator2DGrid is found.
       static Communicator2DGrid& getCommunicator2DGridFromMPIComm(MPI_Comm comm);
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       // Returns a reference of the Communicator2DGrid created with createCommunicator2DGrid
       // whose BLACS context index is id.
       // Throws a std::invalid_argument exception if no Communicator2DGrid is found.
@@ -76,11 +76,11 @@ namespace dla_interface {
       // Free the Communicator2DGrid object and the related MPI communicators and BLACS grids.
       static void free2DGrid(Communicator2DGrid& grid);
       static void free2DGridFromMPIComm(MPI_Comm comm);
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       static void free2DGridFromBlacsContext(BlacsContextType id);
 #endif
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       // Returns the number of threads and cpuset for Scalapack.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getScalapackConfigInfo() {
         return std::make_tuple(std::cref(comm_manager_->scalapack_nr_threads_),
@@ -118,7 +118,7 @@ namespace dla_interface {
       Communicator2DGrid& communicator2DGrid(MPI_Comm base_comm, int row_size, int col_size,
                                              Ordering comm_ordering);
       Communicator2DGrid& communicator2DGridFromMPIComm(MPI_Comm comm) const;
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       Communicator2DGrid& communicator2DGridFromBlacsContext(BlacsContextType id) const;
 #endif
       void destroy2DGrid(Communicator2DGrid& grid);
@@ -152,12 +152,12 @@ namespace dla_interface {
 #endif
 
       std::map<MPI_Comm, std::shared_ptr<Communicator2DGrid>> comm_grid_map_;
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       std::map<BlacsContextType, std::shared_ptr<Communicator2DGrid>> ictxt_grid_map_;
 #endif
 
       thread::SystemTopology topo_;
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       thread::NumThreads scalapack_nr_threads_;
       thread::CpuSet scalapack_cpuset_;
 #endif

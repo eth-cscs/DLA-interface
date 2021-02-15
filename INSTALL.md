@@ -55,7 +55,7 @@ Parsec has to be configured to build DPlasma (Need COREBLAS from Plasma-2.8.0), 
 
 ## Other options
 
-- `DLA_WITH_FORTRAN` default `ON` (`OFF` if ScaLAPACK is not available): If `ON` builds the fortran iso C interface. (Only available if ScaLAPACK is enabled)
+- `DLAI_WITH_FORTRAN` default `ON` (`OFF` if ScaLAPACK is not available): If `ON` builds the fortran iso C interface. (Only available if ScaLAPACK is enabled)
 - `DLA_PRINT_DEBUG_INFO` default `OFF`: If `ON` prints some extra debug informations. (E.g. thread binding.)
 - `DLA_PRINT_DEBUG_CALL_PARAM` default `OFF`: If `ON` DLA interface routines print the call arguments.
 - `DLA_COVERAGE_TEST` default `OFF`: If `ON` enables coverage test (Requires GCC). The library is built with the `--coverage` flags and enables `make coverage` which make the coverage test summary with lcov.

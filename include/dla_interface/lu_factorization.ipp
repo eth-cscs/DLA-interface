@@ -29,7 +29,7 @@ void LUFactorization(DistributedMatrix<ElType>& mat, int* ipiv, SolverType solve
   double flop = util::nrOps<ElType>(ops, ops);
 
   switch (solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     case ScaLAPACK: {
       std::array<int, 4> timer_index;
       util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);
