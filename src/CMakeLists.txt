@@ -22,6 +22,7 @@ target_compile_definitions(dla_interface PUBLIC
   $<$<BOOL:${SCALAPACK_FOUND}>:DLAI_WITH_SCALAPACK>
   $<$<BOOL:${HWLOC_FOUND}>:DLAI_WITH_HWLOC>
 
+  $<$<BOOL:${DLAI_WITH_DLAF}>:DLAI_WITH_DLAF>
   $<$<BOOL:${DLAI_WITH_ELPA}>:DLAI_WITH_ELPA>
 )
 
@@ -42,7 +43,8 @@ target_include_directories(dla_interface PUBLIC SYSTEM ${ELPA_INCLUDE_DIRS})
 
 target_link_libraries(dla_interface PUBLIC
   # backends
-  ${DLA_HPX_LINALG_LIBRARIES}
+  $<$<BOOL:${DLAI_WITH_DLAF}>:DLAF::DLAF>
+  # TODO fix these
   ${DLA_ELPA_LIBRARY}
   ${DLA_DPLASMA_LIBS}
 

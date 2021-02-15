@@ -105,14 +105,14 @@ find_package(OpenMP REQUIRED)
 # ----- EXTERNAL
 add_subdirectory(external)
 
-# ----- MISC
+# ----- BACKENDs
+if (DLAI_WITH_DLAF)
+  find_package(DLAF REQUIRED)
+endif()
+
 # TODO fix these
 if (DLAI_WITH_DPLASMA)
   find_package(DPLASMA REQUIRED)
-endif()
-
-if (DLAI_WITH_HPXLINALG)
-  find_package(HPXLINALG REQUIRED)
 endif()
 
 if (DLAI_WITH_ELPA)
