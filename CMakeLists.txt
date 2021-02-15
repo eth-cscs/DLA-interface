@@ -78,14 +78,20 @@ find_package(MPI REQUIRED)
 
 # ----- LAPACK/SCALAPACK
 if (DLAI_WITH_MKL)
-  set(MKL_CUSTOM_THREADING "Sequential")
-  find_package(MKL REQUIRED COMPONENTS BLAS_32BIT_SEQ)
+  find_package(MKL REQUIRED)
 
-  add_library(LAPACK::LAPACK ALIAS "mkl::blas_32bit_seq")
+  set(LAPACK_TARGET "mkl::mkl_intel_32bit_seq_dyn")
+  set(SCALAPACK_TARGET "mkl::scalapack_mpich_intel_32bit_seq_dyn")
 
-  set(SCALAPACK_FOUND MKL_SCALAPACK_32BIT_SEQ_FOUND)
-  if (SCALAPACK_FOUND)
-    add_library(SCALAPACK::SCALAPACK ALIAS "mkl::scalapack_32bit_seq")
+  if (TARGET ${LAPACK_TARGET})
+    add_library(LAPACK::LAPACK ALIAS ${LAPACK_TARGET})
+  else()
+    message(FATAL_ERROR "not available")
+  endif()
+
+  if (TARGET ${SCALAPACK_TARGET})
+    set(SCALAPACK_FOUND TRUE)
+    add_library(SCALAPACK::SCALAPACK ALIAS ${SCALAPACK_TARGET})
   endif()
 else()
   if (LAPACK_TYPE OR LAPACK_INCLUDE_DIR OR LAPACK_LIBRARY)
