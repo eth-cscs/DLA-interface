@@ -19,7 +19,7 @@ TEST(ThreadBindingTest, ThreadBindingRunTest) {
   ASSERT_EQ(cpuset, topo.getCpuBind());
 }
 
-#ifdef DLA_HAVE_HWLOC
+#ifdef DLAI_WITH_HWLOC
 std::string expectedSet(const char* str) {
   return str;
 }

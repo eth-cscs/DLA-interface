@@ -61,17 +61,7 @@ set(CMAKE_CXX_STANDARD 14)
 # Libraries configuration
 # ---------------------------------------------------------------------------
 # ----- HWLOC
-# TODO fix this
-if (HWLOC_ROOT)
-  set(CMAKE_PREFIX_PATH ${HWLOC_ROOT})
-  find_package(PkgConfig REQUIRED)
-  pkg_search_module(HWLOC REQUIRED hwloc)
-  unset(CMAKE_PREFIX_PATH)
-  set(DLA_HWLOC_LIBS "-L${HWLOC_LIBDIR};${HWLOC_LIBRARIES}" CACHE STRING "Libraries for HWLOC" FORCE)
-  add_definitions(-DDLAI_WITH_HWLOC)
-else()
-  message(WARNING "Configurations without HWLOC may have bad performance due to bad thread binding. Please refers to DLAI documentation.")
-endif()
+find_package(HWLOC)
 
 # ----- MPI
 find_package(MPI REQUIRED)

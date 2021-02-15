@@ -20,6 +20,7 @@ add_library(dla_interface
 
 target_compile_definitions(dla_interface PUBLIC
   $<$<BOOL:${SCALAPACK_FOUND}>:DLAI_WITH_SCALAPACK>
+  $<$<BOOL:${HWLOC_FOUND}>:DLAI_WITH_HWLOC>
 
   $<$<BOOL:${DLAI_WITH_ELPA}>:DLAI_WITH_ELPA>
 )
@@ -45,8 +46,7 @@ target_link_libraries(dla_interface PUBLIC
   ${DLA_ELPA_LIBRARY}
   ${DLA_DPLASMA_LIBS}
 
-  # TODO HWLOC
-  ${DLA_HWLOC_LIBS}
+  $<$<BOOL:${HWLOC_FOUND}>:HWLOC::HWLOC>
 
   MPI::MPI_CXX
   $<$<BOOL:${DLAI_WITH_FORTRAN}>:MPI::MPI_Fortran>
