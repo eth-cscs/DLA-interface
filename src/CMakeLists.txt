@@ -8,7 +8,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-add_library(dla_interface
+add_library(DLAI
   communicator_grid.cpp
   communicator_manager.cpp
 
@@ -18,7 +18,7 @@ add_library(dla_interface
   $<$<BOOL:${DLAI_WITH_FORTRAN}>:f_dla_interface.F90>
 )
 
-target_compile_definitions(dla_interface PUBLIC
+target_compile_definitions(DLAI PUBLIC
   $<$<BOOL:${SCALAPACK_FOUND}>:DLAI_WITH_SCALAPACK>
   $<$<BOOL:${HWLOC_FOUND}>:DLAI_WITH_HWLOC>
 
@@ -26,7 +26,7 @@ target_compile_definitions(dla_interface PUBLIC
   $<$<BOOL:${DLAI_WITH_ELPA}>:DLAI_WITH_ELPA>
 )
 
-target_include_directories(dla_interface PUBLIC
+target_include_directories(DLAI PUBLIC
   ${PROJECT_SOURCE_DIR}/include
   ${PROJECT_SOURCE_DIR}/libs
 
@@ -37,11 +37,11 @@ target_include_directories(dla_interface PUBLIC
 )
 
 # Suppress warnings for DPLASMA headers.
-target_include_directories(dla_interface PUBLIC SYSTEM ${DLA_DPLASMA_INCLUDE_DIRS})
+target_include_directories(DLAI PUBLIC SYSTEM ${DLA_DPLASMA_INCLUDE_DIRS})
 # Suppress warnings for ELPA headers.
-target_include_directories(dla_interface PUBLIC SYSTEM ${ELPA_INCLUDE_DIRS})
+target_include_directories(DLAI PUBLIC SYSTEM ${ELPA_INCLUDE_DIRS})
 
-target_link_libraries(dla_interface PUBLIC
+target_link_libraries(DLAI PUBLIC
   # backends
   $<$<BOOL:${DLAI_WITH_DLAF}>:DLAF::DLAF>
   # TODO fix these

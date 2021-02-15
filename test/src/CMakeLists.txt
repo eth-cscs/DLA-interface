@@ -9,8 +9,7 @@
 #
 
 add_library(test_dlai_main test_dlai_main.cpp gtest_mpi_listener.cpp)
-target_include_directories(test_dlai_main PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>)
-target_link_libraries(test_dlai_main PUBLIC gtest dla_interface)
+target_link_libraries(test_dlai_main PUBLIC gtest DLAI DLAI_test)
 
 if (DLAI_WITH_FORTRAN)
   add_library(test_ftn_dlai_main
@@ -18,13 +17,9 @@ if (DLAI_WITH_FORTRAN)
     test_ftn_setup.f90
     gtest_mpi_listener.cpp
   )
-  target_include_directories(test_ftn_dlai_main
-    PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
-  )
-  target_link_libraries(test_ftn_dlai_main PUBLIC gtest dla_interface)
+  target_link_libraries(test_ftn_dlai_main PUBLIC gtest DLAI DLAI_test)
 endif()
 
 add_library(test_tools ref_scalapack_tools.cpp tile_matrix_tools.cpp)
 target_include_directories(test_tools PUBLIC ../include)
-target_link_libraries(test_tools PUBLIC dla_interface)
+target_link_libraries(test_tools PUBLIC DLAI)

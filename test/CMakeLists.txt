@@ -65,14 +65,14 @@ endif()
 # ----- HPX
 set(DLAF_HPXTEST_EXTRA_ARGS "" CACHE STRING "Extra arguments for tests with HPX")
 
-add_library(DLAF_test INTERFACE)
+add_library(DLAI_test INTERFACE)
 
-target_include_directories(DLAF_test
+target_include_directories(DLAI_test
   INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-target_link_libraries(DLAF_test
+target_link_libraries(DLAI_test
   INTERFACE
     gtest
 )

@@ -170,9 +170,6 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -ffree-line-length-0")
 # DLAI library
 # ---------------------------------------------------------------------------
 add_subdirectory(src)
-set(DLA_LIBS
-    dla_interface
-)
 
 # ---------------------------------------------------------------------------
 # mini Apps
