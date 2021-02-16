@@ -5,7 +5,7 @@
 #include <map>
 #include <mpi.h>
 #include "util_macro.h"
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
 #include "ordered_dplasma.h"
 #endif
 
@@ -49,7 +49,7 @@ namespace dla_interface {
   using constScalapackDescriptor = const int*;
   using BlacsContextType = int;
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
   using ParsecContext = parsec_context_t*;
   using DPlasmaDescriptor = two_dim_block_cyclic_t;
 #endif
@@ -70,7 +70,7 @@ namespace dla_interface {
   template <>
   struct TypeInfo<int> {
     using ElementType = int;
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     static constexpr matrix_type dplasma_type = matrix_Integer;
 #endif
   };
@@ -81,7 +81,7 @@ namespace dla_interface {
     using ComplexType = std::complex<float>;
     static constexpr int ops_add = 1;
     static constexpr int ops_mult = 1;
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     static constexpr matrix_type dplasma_type = matrix_RealFloat;
 #endif
   };
@@ -92,7 +92,7 @@ namespace dla_interface {
     using ComplexType = std::complex<double>;
     static constexpr int ops_add = 1;
     static constexpr int ops_mult = 1;
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     static constexpr matrix_type dplasma_type = matrix_RealDouble;
 #endif
   };
@@ -103,7 +103,7 @@ namespace dla_interface {
     using ComplexType = std::complex<float>;
     static constexpr int ops_add = 2;
     static constexpr int ops_mult = 6;
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     static constexpr matrix_type dplasma_type = matrix_ComplexFloat;
 #endif
   };
@@ -114,7 +114,7 @@ namespace dla_interface {
     using ComplexType = std::complex<double>;
     static constexpr int ops_add = 2;
     static constexpr int ops_mult = 6;
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     static constexpr matrix_type dplasma_type = matrix_ComplexDouble;
 #endif
   };

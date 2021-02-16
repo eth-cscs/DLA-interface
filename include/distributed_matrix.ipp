@@ -319,7 +319,7 @@ std::tuple<const ElType*, IndexType, IndexType, std::array<int, 9>> DistributedM
   return std::make_tuple(ptr_->ptr(), i, j, std::move(desc));
 }
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
 template <class ElType>
 DPlasmaDescriptor DistributedMatrix<ElType>::getDPlasmaDescriptionInternal() const {
   if (distribution_ != tile_dist) {

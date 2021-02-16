@@ -15,7 +15,7 @@ void LUFactorization(DistributedMatrix<ElType>& mat, int* ipiv, SolverType solve
   dlai__util__checkBaseIndexAtBlock(mat);
 
   solver = dlai__util__fallbackCommunicator(comm_grid, solver);
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
   if (solver == DPlasma) {
     solver =
         dlai__util__fallbackScaLAPACKCondition(comm_grid.size2D().first != 1, comm_grid, solver,
@@ -65,7 +65,7 @@ void LUFactorization(DistributedMatrix<ElType>& mat, int* ipiv, SolverType solve
     }
 #endif
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     case DPlasma: {
       std::array<int, 5> timer_index;
       util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);

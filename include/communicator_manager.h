@@ -17,12 +17,12 @@ namespace dla_interface {
     class CommunicatorManager {
       public:
       // Initializes the CommunicatorManager.
-      // If DLA_HAVE_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      // If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
       // If initialize_mpi is true:
       // - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
       // - MPI_Finalize is called when finalize is called.
       // Precondition: initialize must have not been called before. (It can be called only once.)
-      // If specified argc and argv are used in MPI and DPLASMA (if DLA_HAVE_DPLASMA is true)
+      // If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
       // initialization (arguments after -- are passed to Parsec).
       static void initialize(bool initialize_mpi = true);
       static void initialize(int nr_cores, bool initialize_mpi = true);
@@ -32,7 +32,7 @@ namespace dla_interface {
       // Precondition: initialize must have been called before and
       //               finalize must have not been called before. (It can be called only once.)
       static void finalize();
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
       // Returns the parsec context.
       static ParsecContext getParsecContext();
 #endif
@@ -87,7 +87,7 @@ namespace dla_interface {
                                std::cref(comm_manager_->scalapack_cpuset_));
       }
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
       // Returns the number of threads and cpuset for DPlasma.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getDPlasmaConfigInfo() {
         return std::make_tuple(std::cref(comm_manager_->dplasma_nr_threads_),
@@ -147,7 +147,7 @@ namespace dla_interface {
       static std::unique_ptr<CommunicatorManager> comm_manager_;
 
       bool init_mpi_;
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
       ParsecContext parsec_handle_;
 #endif
 
@@ -161,7 +161,7 @@ namespace dla_interface {
       thread::NumThreads scalapack_nr_threads_;
       thread::CpuSet scalapack_cpuset_;
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
       thread::NumThreads dplasma_nr_threads_;
       thread::CpuSet dplasma_cpuset_;
 #endif

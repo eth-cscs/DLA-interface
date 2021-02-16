@@ -74,7 +74,7 @@ namespace dla_interface {
     DistributedMatrix(DistributionType distribution, int m, int n, ElementType* ptr,
                       ScalapackIndex i, ScalapackIndex j, constScalapackDescriptor desc);
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
 // TODO: check this and test it.
 // Creates a distributed matrix which has the same size, block size and rank grid
 // of the given D-PLASMA matrix and which reference the same memory (See note (1)).
@@ -397,7 +397,7 @@ namespace dla_interface {
     std::tuple<ElementType*, IndexType, IndexType, std::array<int, 9>> getScalapackDescription();
     std::tuple<const ElementType*, IndexType, IndexType, std::array<int, 9>> getScalapackDescription() const;
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     private:
     DPlasmaDescriptor getDPlasmaDescriptionInternal() const;
 

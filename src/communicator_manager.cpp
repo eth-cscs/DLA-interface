@@ -39,7 +39,7 @@ namespace dla_interface {
       comm_manager_ = nullptr;
     }
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     ParsecContext CommunicatorManager::getParsecContext() {
       return comm_manager_->parsec_handle_;
     }
@@ -153,7 +153,7 @@ namespace dla_interface {
       elpa::init();
 #endif
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
       if (argc == nullptr) {
         parsec_handle_ = parsec_init(nr_cores, nullptr, nullptr);
       }
@@ -228,7 +228,7 @@ namespace dla_interface {
 #ifdef DLA_HAVE_ELPA
       elpa_uninit();
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
       parsec_fini(&parsec_handle_);
 #endif
 #ifdef DLA_HAVE_HPX_LINALG

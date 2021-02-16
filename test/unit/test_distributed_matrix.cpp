@@ -1807,7 +1807,7 @@ TEST(DistributedMatrixTest, ConvertConstScalapack) {
 }
 #endif
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
 TEST(DistributedMatrixTest, DPlasmaDescriptor) {
   using Type = double;
   int m = 17;

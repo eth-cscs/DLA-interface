@@ -34,7 +34,7 @@ bool matrixMultiplicationTestThrows(SolverType solver) {
   if (solver == ScaLAPACK)
     return false;
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
   if (solver == DPlasma)
     return false;
 #endif

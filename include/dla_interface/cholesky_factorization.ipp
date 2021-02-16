@@ -63,7 +63,7 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
     }
 #endif
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     case DPlasma: {
       std::array<int, 4> timer_index;
       util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);

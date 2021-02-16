@@ -11,7 +11,7 @@ namespace dla_interface {
 
     inline SolverType fallbackCommunicator(const char* func, const comm::Communicator2DGrid& comm,
                                            SolverType solver) {
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
       if (solver == DPlasma) {
         int res;
         MPI_Comm_compare(comm.rowOrderedMPICommunicator(), MPI_COMM_WORLD, &res);

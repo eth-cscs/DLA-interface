@@ -9,7 +9,7 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
 
   solver = dlai__util__fallbackCommunicator(comm_grid, solver);
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
   if (solver == DPlasma) {
     int mb = mat_c.blockSize().first;
     int nb = mat_c.blockSize().second;
@@ -99,7 +99,7 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
     }
 #endif
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     case DPlasma: {
       int info = 0;
       std::array<int, 6> timer_index;

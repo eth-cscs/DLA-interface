@@ -23,6 +23,7 @@ target_compile_definitions(DLAI PUBLIC
   $<$<BOOL:${HWLOC_FOUND}>:DLAI_WITH_HWLOC>
 
   $<$<BOOL:${DLAI_WITH_DLAF}>:DLAI_WITH_DLAF>
+  $<$<BOOL:${DLAI_WITH_DPLASMA}>:DLAI_WITH_DPLASMA>
   $<$<BOOL:${DLAI_WITH_ELPA}>:DLAI_WITH_ELPA>
 )
 
@@ -32,21 +33,17 @@ target_include_directories(DLAI PUBLIC
 
   # *.mod files
   $<$<BOOL:${DLAI_WITH_FORTRAN}>:${CMAKE_CURRENT_BINARY_DIR}>
-
-  ${DLA_HPX_LINALG_INCLUDE_DIRS}
 )
 
-# Suppress warnings for DPLASMA headers.
-target_include_directories(DLAI PUBLIC SYSTEM ${DLA_DPLASMA_INCLUDE_DIRS})
 # Suppress warnings for ELPA headers.
 target_include_directories(DLAI PUBLIC SYSTEM ${ELPA_INCLUDE_DIRS})
 
 target_link_libraries(DLAI PUBLIC
   # backends
   $<$<BOOL:${DLAI_WITH_DLAF}>:DLAF::DLAF>
+  $<$<BOOL:${DLAI_WITH_DPLASMA}>:DPlasma::dplasma>
   # TODO fix these
   ${DLA_ELPA_LIBRARY}
-  ${DLA_DPLASMA_LIBS}
 
   $<$<BOOL:${HWLOC_FOUND}>:HWLOC::HWLOC>
 
