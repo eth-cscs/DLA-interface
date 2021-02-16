@@ -169,7 +169,7 @@ function(DLAI_addTest test_target_name)
       $<$<BOOL:${IS_AN_MPI_TEST}>: NUM_MPI_RANKS=${DLAI_AT_MPIRANKS}>
   )
   target_include_directories(${test_target_name} PRIVATE ${DLAI_AT_INCLUDE_DIRS})
-  #target_add_warnings(${test_target_name})
+  target_add_warnings(${test_target_name})
   add_test(
     NAME ${test_target_name}
     COMMAND ${_TEST_COMMAND} ${_TEST_ARGUMENTS}

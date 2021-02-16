@@ -20,34 +20,39 @@ macro(target_add_warnings target_name)
 
   target_compile_options(${target_name}
     PRIVATE
-      -Wall
-      -Wextra
-      -Wnon-virtual-dtor
-      -Wunused
-      -Woverloaded-virtual
-      -Wdangling-else
-      -Wswitch-enum
-      # Conversions
-      $<${IS_COMPILER_GCC}:
-        -Wsign-conversion
-        -Wfloat-conversion>
-      $<${IS_COMPILER_CLANG}:
-        -Wbitfield-enum-conversion
-        -Wbool-conversion
-        -Wconstant-conversion
-        -Wenum-conversion
-        -Wfloat-conversion
-        -Wint-conversion
-        -Wliteral-conversion
-        -Wnon-literal-null-conversion
-        -Wnull-conversion
-        -Wshorten-64-to-32
-        -Wsign-conversion
-        -Wstring-conversion>
-      -pedantic-errors
+      $<$<COMPILE_LANGUAGE:C,CXX>:
+        -Wall
+        -Wno-missing-braces
+        -Wno-dangling-else
+        #-Wextra
+        #-Wnon-virtual-dtor
+        #-Wunused
+        #-Woverloaded-virtual
+        #-Wdangling-else
+        #-Wswitch-enum
+        ## Conversions
+        #$<${IS_COMPILER_GCC}:
+        #  -Wsign-conversion
+        #  -Wfloat-conversion>
+        #$<${IS_COMPILER_CLANG}:
+        #  -Wbitfield-enum-conversion
+        #  -Wbool-conversion
+        #  -Wconstant-conversion
+        #  -Wenum-conversion
+        #  -Wfloat-conversion
+        #  -Wint-conversion
+        #  -Wliteral-conversion
+        #  -Wnon-literal-null-conversion
+        #  -Wnull-conversion
+        #  -Wshorten-64-to-32
+        #  -Wsign-conversion
+        #  -Wstring-conversion>
+        #-pedantic-errors
 
-      # googletest macro problem
-      # must specify at least one argument for '...' parameter of variadic macro
-      $<${IS_COMPILER_CLANG}:-Wno-gnu-zero-variadic-macro-arguments>
+        # googletest macro problem
+        # must specify at least one argument for '...' parameter of variadic macro
+        $<${IS_COMPILER_CLANG}:-Wno-gnu-zero-variadic-macro-arguments>
+      >
+      $<$<COMPILE_LANGUAGE:Fortran>:-Wall>
     )
 endmacro()

@@ -154,19 +154,6 @@ if(DLA_COVERAGE_TEST)
 endif()
 
 # ---------------------------------------------------------------------------
-# extra options
-# ---------------------------------------------------------------------------
-# TODO fix this
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-missing-braces")
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dangling-else")
-  endif()
-endif()
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -ffree-line-length-0")
-
-
-# ---------------------------------------------------------------------------
 # DLAI library
 # ---------------------------------------------------------------------------
 add_subdirectory(src)

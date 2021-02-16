@@ -18,6 +18,10 @@ add_library(DLAI
   $<$<BOOL:${DLAI_WITH_FORTRAN}>:f_dla_interface.F90>
 )
 
+target_compile_options(DLAI PUBLIC
+  $<$<COMPILE_LANGUAGE:Fortran>:-ffree-line-length-0>
+)
+
 target_compile_definitions(DLAI PUBLIC
   $<$<BOOL:${SCALAPACK_FOUND}>:DLAI_WITH_SCALAPACK>
   $<$<BOOL:${HWLOC_FOUND}>:DLAI_WITH_HWLOC>
