@@ -98,20 +98,22 @@ namespace dla_interface {
 #endif
       return *comm_grid;
     }
+
     Communicator2DGrid& CommunicatorManager::communicator2DGridFromMPIComm(MPI_Comm comm) const {
       try {
         return *comm_grid_map_.at(comm);
       }
-      catch (std::out_of_range) {
+      catch (std::out_of_range const&) {
         throw std::invalid_argument("No communicator2DGrid found with the given MPI_Comm");
       }
     }
+
 #ifdef DLA_HAVE_SCALAPACK
     Communicator2DGrid& CommunicatorManager::communicator2DGridFromBlacsContext(BlacsContextType id) const {
       try {
         return *ictxt_grid_map_.at(id);
       }
-      catch (std::out_of_range) {
+      catch (std::out_of_range const&) {
         throw std::invalid_argument("No communicator2DGrid found with the given BLACS context id");
       }
     }

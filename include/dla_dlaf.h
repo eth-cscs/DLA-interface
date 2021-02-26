@@ -18,6 +18,7 @@
 #include "communicator_grid.h"
 #include "communicator_manager.h"
 #include "distributed_matrix.h"
+#include "internal_error.h"
 
 #include <dlaf/common/index2d.h>
 #include <dlaf/communication/communicator.h>
@@ -50,8 +51,9 @@ namespace dla_interface {
 				dlaf_ordering = dlaf::common::Ordering::ColumnMajor;
 			} else {
 				// Throw something! Ask what!
-				std::cout << "Ordering not recognized!  " << std::endl;
-				exit(1);
+				throw error::InternalError("Unknown ordering");
+				//std::cout << "Ordering not recognized!  " << std::endl;
+				//exit(1);
 			}
 
 			dlaf::comm::IndexT_MPI grid_rows = comm_grid.size2D().first;
@@ -71,8 +73,9 @@ namespace dla_interface {
 				dlaf_ordering = dlaf::common::Ordering::ColumnMajor;
 			else {
 				// Throw something! Ask what!
-				std::cout << "Ordering not recognized!  " << std::endl;
-				exit(1);
+				throw error::InternalError("Unknown ordering");
+				//std::cout << "Ordering not recognized!  " << std::endl;
+				//exit(1);
 			}
 
 
