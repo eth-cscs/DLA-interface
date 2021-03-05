@@ -76,10 +76,15 @@ int main(int argc, char** argv) {
 #ifdef DLA_HAVE_DLAF
   // Takes the ownership of MPI_comm
   dlaf_wrappers::Communicator world(MPI_COMM_WORLD);
-#endif
 
   auto& comm_grid =
-        comm::CommunicatorManager::createCommunicator2DGrid(world, p, q, RowMajor);
+          comm::CommunicatorManager::createCommunicator2DGrid(world, p, q, RowMajor);
+#else
+  auto& comm_grid =
+          comm::CommunicatorManager::createCommunicator2DGrid(MPI_COMM_WORLD, p, q, RowMajor);
+#endif
+
+
 
   std::vector<std::array<double, 3>> point;
   point.reserve(n);
@@ -103,16 +108,13 @@ int main(int argc, char** argv) {
       }
     }
 
-    /*
     if (check) {
       // create a copy for checking.
       mat_copy = std::make_unique<DistributedMatrix<double>>(mat);
     }
-	*/
 
     choleskyFactorization(uplo, mat, solver, 2);
 
-    /*
     if (check) {
       if (uplo == Lower) {
         for (int j = 0; j < mat.localSize().second; ++j) {
@@ -155,7 +157,6 @@ int main(int argc, char** argv) {
         }
       }
     }
-    */
 
   }
   return 0;

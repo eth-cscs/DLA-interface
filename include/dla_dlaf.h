@@ -15,6 +15,7 @@
 
 #include <mpi.h>
 #include <hpx/hpx.hpp>
+#include <hpx/exception.hpp>
 #include <hpx/hpx_start.hpp>
 #include <hpx/hpx_suspend.hpp>
 
@@ -23,6 +24,7 @@
 #include <dlaf/communication/communicator_grid.h>
 #include <dlaf/communication/error.h>
 #include <dlaf/matrix/matrix.h>
+#include <dlaf/matrix/index.h>
 #include <dlaf/factorization/cholesky.h>
 #include "dlaf/types.h"
 #include "dlaf/util_matrix.h"
@@ -71,7 +73,7 @@ namespace dla_interface {
 			hpx::resume();
 			hpx::async([]() { hpx::finalize(); });
 			hpx::wait_all();
-			hpx::stop();
+			//hpx::stop();
 		}
 	} // hpx_wrappers
 
@@ -83,39 +85,16 @@ namespace dla_interface {
 		// Wrapper class to DLA-Future CommunicatorGrid class
 		inline CommunicatorGrid comm_grid(const comm::Communicator2DGrid& comm_grid)
 		{
-			dlaf::common::Ordering dlaf_ordering = dlaf::common::Ordering::RowMajor;
-
-			if(comm_grid.rankOrder() == Ordering::ColMajor) {
-				throw error::InternalError("Not implemented! Only for RowMajor!");
-			}
-
 			dlaf::comm::IndexT_MPI grid_rows = comm_grid.size2D().first;
 			dlaf::comm::IndexT_MPI grid_cols = comm_grid.size2D().second;
 
-			return CommunicatorGrid(comm_grid.rowMPICommunicator(), grid_rows, grid_cols, dlaf_ordering);
-		}
-
-		/*
-		inline CommunicatorGrid comm_grid(MPI_Comm base_comm, int grid_rows, int grid_cols, Ordering comm_ordering)
-		{
-			dlaf::common::Ordering dlaf_ordering = dlaf::common::Ordering::RowMajor;
-			Communicator dlaf_communicator(base_comm);
-
-			if(comm_ordering == Ordering::RowMajor)
-				dlaf_ordering = dlaf::common::Ordering::RowMajor;
-			else if(comm_ordering == Ordering::ColMajor)
-				dlaf_ordering = dlaf::common::Ordering::ColumnMajor;
-			else {
-				// Throw something! Ask what!
+			if(comm_grid.rankOrder() == Ordering::RowMajor)
+				return CommunicatorGrid(comm_grid.rowMPICommunicator(), grid_rows, grid_cols, dlaf::common::Ordering::RowMajor);
+			else if (comm_grid.rankOrder() == Ordering::ColMajor)
+				return CommunicatorGrid(comm_grid.colMPICommunicator(), grid_rows, grid_cols, dlaf::common::Ordering::ColumnMajor);
+			else
 				throw error::InternalError("Unknown ordering");
-				//std::cout << "Ordering not recognized!  " << std::endl;
-				//exit(1);
-			}
-
-
-			return CommunicatorGrid(dlaf_communicator, grid_rows, grid_cols, dlaf_ordering);
 		}
-		*/
 
 		// Distributed matrix wrapper
 		// Device:
@@ -163,7 +142,7 @@ namespace dla_interface {
 		*/
 
 		template <class Type, dlaf::Device Device>
-		inline void cholesky(const CommunicatorGrid& comm_grid, dlaf::Matrix<Type, Device>& mat)
+		inline void cholesky(CommunicatorGrid& comm_grid, dlaf::Matrix<Type, Device>& mat)
 		{
 			// blas:UpLo from blaspp/include/blas/util.hh
 			dlaf::factorization::cholesky<dlaf::Backend::MC>(comm_grid, blas::Uplo::Lower, mat);
