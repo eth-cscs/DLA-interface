@@ -14,22 +14,66 @@
 #ifdef DLA_HAVE_DLAF
 
 #include <mpi.h>
+#include <hpx/hpx.hpp>
+#include <hpx/hpx_start.hpp>
+#include <hpx/hpx_suspend.hpp>
+
+#include <dlaf/common/index2d.h>
+#include <dlaf/communication/communicator.h>
+#include <dlaf/communication/communicator_grid.h>
+#include <dlaf/communication/error.h>
+#include <dlaf/matrix/matrix.h>
+#include <dlaf/factorization/cholesky.h>
+#include "dlaf/types.h"
+#include "dlaf/util_matrix.h"
 
 #include "communicator_grid.h"
 #include "communicator_manager.h"
 #include "distributed_matrix.h"
 #include "internal_error.h"
 
-#include <dlaf/common/index2d.h>
-#include <dlaf/communication/communicator.h>
-#include <dlaf/communication/communicator_grid.h>
-#include <dlaf/matrix/matrix.h>
-#include <dlaf/factorization/cholesky.h>
-#include "dlaf/types.h"
-#include "dlaf/util_matrix.h"
-
 
 namespace dla_interface {
+
+	namespace hpx_wrappers {
+
+		/// Start hpx inside CommunicatorManager
+		inline void start(int argc, char** argv, std::vector<std::string> cfg) {
+			using namespace hpx::program_options;
+			options_description desc_commandline("Usage: " HPX_APPLICATION_STRING " [options]");
+
+			hpx::init_params p;
+			p.desc_cmdline = desc_commandline;
+			p.rp_callback = [](auto& rp, auto) {
+				int ntasks;
+				DLAF_MPI_CALL(MPI_Comm_size(MPI_COMM_WORLD, &ntasks));
+				// if the user has asked for special thread pools for communication
+				// then set them up
+				if (ntasks > 1) {
+					// Create a thread pool with a single core that we will use for all
+					// communication related tasks
+					rp.create_thread_pool("mpi", hpx::resource::scheduling_policy::local_priority_fifo);
+					rp.add_resource(rp.numa_domains()[0].cores()[0].pus()[0], "mpi");
+				}
+			};
+
+			hpx::init_params init_args;
+			init_args.cfg = cfg;
+
+			hpx::start(nullptr, argc, argv, init_args);
+			hpx::runtime* rt = hpx::get_runtime_ptr();
+			hpx::util::yield_while([rt]() { return rt->get_state() < hpx::state_running; });
+			hpx::suspend();
+		}
+
+		/// Stop hpx inside CommunicatorManager
+		inline void stop() {
+			hpx::resume();
+			hpx::async([]() { hpx::finalize(); });
+			hpx::wait_all();
+			hpx::stop();
+		}
+	} // hpx_wrappers
 
 	namespace dlaf_wrappers {
 
@@ -40,28 +84,18 @@ namespace dla_interface {
 		inline CommunicatorGrid comm_grid(const comm::Communicator2DGrid& comm_grid)
 		{
 			dlaf::common::Ordering dlaf_ordering = dlaf::common::Ordering::RowMajor;
-			Communicator dlaf_communicator;
 
-			if(comm_grid.rankOrder() == Ordering::RowMajor) {
-				dlaf_communicator = comm_grid.rowMPICommunicator();
-				dlaf_ordering = dlaf::common::Ordering::RowMajor;
-			}
-			else if(comm_grid.rankOrder() == Ordering::ColMajor) {
-				dlaf_communicator = comm_grid.colMPICommunicator();
-				dlaf_ordering = dlaf::common::Ordering::ColumnMajor;
-			} else {
-				// Throw something! Ask what!
-				throw error::InternalError("Unknown ordering");
-				//std::cout << "Ordering not recognized!  " << std::endl;
-				//exit(1);
+			if(comm_grid.rankOrder() == Ordering::ColMajor) {
+				throw error::InternalError("Not implemented! Only for RowMajor!");
 			}
 
 			dlaf::comm::IndexT_MPI grid_rows = comm_grid.size2D().first;
 			dlaf::comm::IndexT_MPI grid_cols = comm_grid.size2D().second;
 
-			return CommunicatorGrid(dlaf_communicator, grid_rows, grid_cols, dlaf_ordering);
+			return CommunicatorGrid(comm_grid.rowMPICommunicator(), grid_rows, grid_cols, dlaf_ordering);
 		}
 
+		/*
 		inline CommunicatorGrid comm_grid(MPI_Comm base_comm, int grid_rows, int grid_cols, Ordering comm_ordering)
 		{
 			dlaf::common::Ordering dlaf_ordering = dlaf::common::Ordering::RowMajor;
@@ -81,6 +115,7 @@ namespace dla_interface {
 
 			return CommunicatorGrid(dlaf_communicator, grid_rows, grid_cols, dlaf_ordering);
 		}
+		*/
 
 		// Distributed matrix wrapper
 		// Device:

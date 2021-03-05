@@ -24,15 +24,14 @@ namespace dla_interface {
   /// @note
   /// When an element is added to a enum the corresponding
   /// SET and name map (if it exists) have to be updated as well.
-  enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, DLAF = 4, Chameleon = 5, HPX_LINALG = 6};
-  MAYBE_UNUSED constexpr auto SOLVER_SET = {ScaLAPACK, ELPA, DPlasma, DLAF, Chameleon, HPX_LINALG};
+  enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, DLAF = 4, Chameleon = 5};
+  MAYBE_UNUSED constexpr auto SOLVER_SET = {ScaLAPACK, ELPA, DPlasma, DLAF, Chameleon};
 
   const std::map<SolverType, std::string> solver_names = {{ScaLAPACK, "ScaLAPACK"},
                                                           {ELPA, "ELPA"},
                                                           {DPlasma, "DPLASMA"},
-														  {DLAF, "DLAFuture"},
+														  {DLAF, "DLA-Future"},
                                                           {Chameleon, "Chameleon"},
-                                                          {HPX_LINALG, "HPX_LINALG"}
   };
 
   enum OpTrans { NoTrans = 'N', Trans = 'T', ConjTrans = 'C' };

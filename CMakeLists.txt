@@ -31,7 +31,6 @@ include(dla_lapack)
 include(dla_scalapack)
 include(dla_dplasma)
 include(dla_dlaf)
-include(dla_hpx_linalg)
 include(dla_hwloc)
 include(dla_elpa)
 
@@ -48,7 +47,6 @@ dla_find_lapack()
 dla_find_scalapack()
 dla_find_dplasma()
 dla_find_dlaf()
-dla_find_hpx_linalg()
 dla_find_hwloc()
 dla_find_elpa()
 
@@ -102,7 +100,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/libs
     ${MPI_CXX_INCLUDE_PATH}
     ${DLA_LAPACK_INCLUDE_PATH}
-    ${DLA_HPX_LINALG_INCLUDE_DIRS}
     ${HWLOC_INCLUDE_DIRS}
 )
 if (${DLA_WITH_FORTRAN})
@@ -135,7 +132,6 @@ add_subdirectory(src)
 
 set(DLA_LIBS
   dla_interface
-  ${DLA_HPX_LINALG_LIBRARIES}
   ${DLA_ELPA_LIBRARY}
   ${DLA_DPLASMA_LIBS}
   ${DLA_SCALAPACK_LIBRARY}

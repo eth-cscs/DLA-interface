@@ -18,7 +18,6 @@
 #include "dla_dplasma.h"
 #include "dla_elpa.h"
 #include "dla_dlaf.h"
-#include "dla_hpx_linalg.h"
 #include "error_message.h"
 #include "util_cast.h"
 #include "util_check.h"

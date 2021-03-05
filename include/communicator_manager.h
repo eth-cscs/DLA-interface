@@ -168,11 +168,11 @@ namespace dla_interface {
                                std::cref(comm_manager_->dplasma_cpuset_));
       }
 #endif
-#ifdef DLA_HAVE_HPX_LINALG
-      /// Returns the number of threads and cpuset for HPX_LINALG.
-      static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getHPXLinalgConfigInfo() {
-        return std::make_tuple(std::cref(comm_manager_->hpx_linalg_nr_threads_),
-                               std::cref(comm_manager_->hpx_linalg_cpuset_));
+#ifdef DLA_HAVE_DLAF
+      /// Returns the number of threads and cpuset for DLA-Future.
+      static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getDLAFConfigInfo() {
+        return std::make_tuple(std::cref(comm_manager_->dlaf_nr_threads_),
+                               std::cref(comm_manager_->dlaf_cpuset_));
       }
 #endif
 
@@ -242,9 +242,9 @@ namespace dla_interface {
       thread::NumThreads dplasma_nr_threads_;
       thread::CpuSet dplasma_cpuset_;
 #endif
-#ifdef DLA_HAVE_HPX_LINALG
-      thread::NumThreads hpx_linalg_nr_threads_;
-      thread::CpuSet hpx_linalg_cpuset_;
+#ifdef DLA_HAVE_DLAF
+      thread::NumThreads dlaf_nr_threads_;
+      thread::CpuSet dlaf_cpuset_;
 #endif
       FallbackInfo fall_back_info_;
     };

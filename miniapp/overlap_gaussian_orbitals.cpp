@@ -68,12 +68,18 @@ int main(int argc, char** argv) {
   for (size_t i = 0; i < vm.count("dlaf"); ++i)
       solvers.push_back(DLAF);
 
-  std::cout << "p=" << p << ", q=" << q << std::endl;
+ // Run it with DLAF
+ // miniapp/overlap_gaussian_orbitals --dlaf --nr_threads 8 --n 10240 --nb 512
 
   comm::CommunicatorManager::initialize(nr_threads, &argc, &argv, true);
 
+#ifdef DLA_HAVE_DLAF
+  // Takes the ownership of MPI_comm
+  dlaf_wrappers::Communicator world(MPI_COMM_WORLD);
+#endif
+
   auto& comm_grid =
-      comm::CommunicatorManager::createCommunicator2DGrid(MPI_COMM_WORLD, p, q, RowMajor);
+        comm::CommunicatorManager::createCommunicator2DGrid(world, p, q, RowMajor);
 
   std::vector<std::array<double, 3>> point;
   point.reserve(n);
@@ -96,13 +102,17 @@ int main(int argc, char** argv) {
         mat(local_index) = overlapElement(alpha, point[global_index.row], point[global_index.col]);
       }
     }
+
+    /*
     if (check) {
       // create a copy for checking.
       mat_copy = std::make_unique<DistributedMatrix<double>>(mat);
     }
+	*/
 
     choleskyFactorization(uplo, mat, solver, 2);
 
+    /*
     if (check) {
       if (uplo == Lower) {
         for (int j = 0; j < mat.localSize().second; ++j) {
@@ -114,7 +124,7 @@ int main(int argc, char** argv) {
           }
         }
 
-        matrixMultiplication(NoTrans, Trans, -1., mat, mat, 1., *mat_copy, solver, 2);
+        matrixMultiplication(NoTrans, Trans, -1., mat, mat, 1., *mat_copy, (solver==DLAF ? ScaLAPACK: solver), 2);
       }
       else {
         for (int j = 0; j < mat.localSize().second; ++j) {
@@ -145,6 +155,8 @@ int main(int argc, char** argv) {
         }
       }
     }
+    */
+
   }
   return 0;
 }

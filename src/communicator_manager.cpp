@@ -9,13 +9,10 @@
 #include "blacs.h"
 #include "communicator_grid.h"
 #include "communicator_manager.h"
+#include "dla_dlaf.h"
 #include "dla_elpa.h"
 #include "internal_error.h"
 #include "types.h"
-
-#ifdef DLA_HAVE_HPX_LINALG
-#include "hpx_linalg/hpx_linalg.h"
-#endif
 
 namespace dla_interface {
   namespace comm {
@@ -98,23 +95,23 @@ namespace dla_interface {
 #endif
       return *comm_grid;
     }
-
     Communicator2DGrid& CommunicatorManager::communicator2DGridFromMPIComm(MPI_Comm comm) const {
       try {
         return *comm_grid_map_.at(comm);
       }
-      catch (std::out_of_range const&) {
-        throw std::invalid_argument("No communicator2DGrid found with the given MPI_Comm");
+      catch (const std::out_of_range& err) {
+    	  std::string str = "No communicator2DGrid found with the given MPI_Comm: " + std::string(err.what());
+        throw std::invalid_argument(str);
       }
     }
-
 #ifdef DLA_HAVE_SCALAPACK
     Communicator2DGrid& CommunicatorManager::communicator2DGridFromBlacsContext(BlacsContextType id) const {
       try {
         return *ictxt_grid_map_.at(id);
       }
-      catch (std::out_of_range const&) {
-        throw std::invalid_argument("No communicator2DGrid found with the given BLACS context id");
+      catch (const std::out_of_range& err) {
+		  std::string str = "No communicator2DGrid found with the given BLACS context id: " + std::string(err.what());
+		  throw std::invalid_argument(str);
       }
     }
 #endif
@@ -189,7 +186,7 @@ namespace dla_interface {
       topo_.setCpuBind(application_cpuset);
 #endif
 
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLA_HAVE_DLAF
       std::vector<std::string> cfg = {"hpx.commandline.allow_unknown=1",
                                       "hpx.commandline.aliasing=0"};
       if (nr_cores > 0) {
@@ -197,17 +194,17 @@ namespace dla_interface {
       }
 
       if (argc == nullptr || argv == nullptr) {
-        char name[] = "dla_interface_hpx_linalg";
-        char* argv_hpx_linalg[] = {name, nullptr};
-        int argc_hpx_linalg = 1;
-        hpx_linalg::start(argc_hpx_linalg, argv_hpx_linalg, cfg);
+        char name[] = "dla_interface_dlaf";
+        char* argv_dlaf[] = {name, nullptr};
+        int argc_dlaf = 1;
+        hpx_wrappers::start(argc_dlaf, argv_dlaf, cfg);
       }
       else {
-        hpx_linalg::start(*argc, *argv, cfg);
+        hpx_wrappers::start(*argc, *argv, cfg);
       }
 
-      hpx_linalg_cpuset_ = application_cpuset;
-      hpx_linalg_nr_threads_ = thread::NumThreads(1);
+      dlaf_cpuset_ = application_cpuset;
+      dlaf_nr_threads_ = thread::NumThreads(1);
 
       // Restore main thread binding in case it has been modified.
       topo_.setCpuBind(application_cpuset);
@@ -233,8 +230,8 @@ namespace dla_interface {
 #ifdef DLA_HAVE_DPLASMA
       parsec_fini(&parsec_handle_);
 #endif
-#ifdef DLA_HAVE_HPX_LINALG
-      hpx_linalg::stop();
+#ifdef DLA_HAVE_DLAF
+      hpx_wrappers::stop();
 #endif
 
       if (init_mpi_) {
