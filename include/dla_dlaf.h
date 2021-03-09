@@ -63,7 +63,7 @@ namespace dla_interface {
 
     inline void stop() {
       hpx::resume();
-      hpx::async([]() { hpx::finalize(); });
+      hpx::apply([]() { hpx::finalize(); });
       hpx::stop();
     }
   }

@@ -157,38 +157,38 @@ namespace dla_interface {
 #ifdef DLA_HAVE_SCALAPACK
       /// Returns the number of threads and cpuset for Scalapack.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getScalapackConfigInfo() {
-        return std::make_tuple(std::cref(comm_manager_->scalapack_nr_threads_),
-                               std::cref(comm_manager_->scalapack_cpuset_));
+        return std::make_tuple(std::cref(commManager()->scalapack_nr_threads_),
+                               std::cref(commManager()->scalapack_cpuset_));
       }
 #endif
 #ifdef DLA_HAVE_DPLASMA
       /// Returns the number of threads and cpuset for DPlasma.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getDPlasmaConfigInfo() {
-        return std::make_tuple(std::cref(comm_manager_->dplasma_nr_threads_),
-                               std::cref(comm_manager_->dplasma_cpuset_));
+        return std::make_tuple(std::cref(commManager()->dplasma_nr_threads_),
+                               std::cref(commManager()->dplasma_cpuset_));
       }
 #endif
 #ifdef DLA_HAVE_DLAF
       /// Returns the number of threads and cpuset for DLA-Future.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getDLAFConfigInfo() {
-        return std::make_tuple(std::cref(comm_manager_->dlaf_nr_threads_),
-                               std::cref(comm_manager_->dlaf_cpuset_));
+        return std::make_tuple(std::cref(commManager()->dlaf_nr_threads_),
+                               std::cref(commManager()->dlaf_cpuset_));
       }
 #endif
 
       /// Returns the thread CpuSet binding.
       static thread::CpuSet getCpuBind() {
-        return comm_manager_->getCpuBindInternal();
+        return commManager()->getCpuBindInternal();
       }
 
       /// Sets the thread CpuSet binding.
       static void setCpuBind(const thread::CpuSet& cpuset) {
-        comm_manager_->setCpuBindInternal(cpuset);
+        commManager()->setCpuBindInternal(cpuset);
       }
 
       /// Returns the Fall back information.
       static FallbackInfo& getFallbackInfo() {
-        return comm_manager_->fall_back_info_;
+        return commManager()->fall_back_info_;
       }
 
       protected:
@@ -221,7 +221,10 @@ namespace dla_interface {
       private:
       enum Status { non_initialized = 0, initialized = 1, finalized = 2 };
       static Status status_;
-      static std::unique_ptr<CommunicatorManager> comm_manager_;
+      static std::unique_ptr<CommunicatorManager>& commManager() {
+        static std::unique_ptr<CommunicatorManager> comm_manager_;
+        return comm_manager_;
+      }
 
       bool init_mpi_;
 #ifdef DLA_HAVE_DPLASMA
