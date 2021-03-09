@@ -38,10 +38,9 @@ namespace dla_interface {
   namespace hpx_wrappers {
     inline void start(int argc, char** argv, std::vector<std::string> cfg) {
       using namespace hpx::program_options;
-      options_description desc_commandline("Usage: " HPX_APPLICATION_STRING " [options]");
 
       hpx::init_params p;
-      p.desc_cmdline = desc_commandline;
+      p.cfg = std::move(cfg);
       p.rp_callback = [](auto& rp, auto) {
         int ntasks;
         DLAF_MPI_CALL(MPI_Comm_size(MPI_COMM_WORLD, &ntasks));
@@ -55,9 +54,7 @@ namespace dla_interface {
         }
       };
 
-      hpx::start(nullptr, argc, argv, cfg);
-      hpx::runtime* rt = hpx::get_runtime_ptr();
-      hpx::util::yield_while([rt]() { return rt->get_state() < hpx::state_running; });
+      hpx::start(nullptr, argc, argv, p);
       hpx::suspend();
     }
 
