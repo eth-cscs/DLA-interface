@@ -101,8 +101,6 @@ namespace dla_interface {
 			dlaf::SizeType ld = mat.size().first;
 			Type* mem_ptr = mat.ptr();
 
-			//dlaf::Matrix<Type, Device> dlaf_matrix(matrix_size, block_size, comm_grid);
-
 			dlaf::Matrix<Type, Device> dlaf_matrix = dlaf::matrix::createMatrixFromColMajor<Device, Type>(
 					matrix_size,
 					block_size,
@@ -136,7 +134,7 @@ namespace dla_interface {
 		template <class Type, dlaf::Device Device>
 		inline void cholesky(CommunicatorGrid& comm_grid, dlaf::Matrix<Type, Device>& mat)
 		{
-			// blas:UpLo from blaspp/include/blas/util.hh
+			// blas:UpLo defined in blaspp/include/blas/util.hh
 			dlaf::factorization::cholesky<dlaf::Backend::MC>(comm_grid, blas::Uplo::Lower, mat);
 		}
 
