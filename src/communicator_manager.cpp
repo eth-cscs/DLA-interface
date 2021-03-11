@@ -18,7 +18,6 @@ namespace dla_interface {
   namespace comm {
     // static members:
     CommunicatorManager::Status CommunicatorManager::status_(CommunicatorManager::non_initialized);
-    std::unique_ptr<CommunicatorManager> CommunicatorManager::comm_manager_(nullptr);
 
     void CommunicatorManager::initialize(bool initialize_mpi) {
       initialize(-1, initialize_mpi);
@@ -27,46 +26,49 @@ namespace dla_interface {
       initialize(nr_cores, nullptr, nullptr, initialize_mpi);
     }
     void CommunicatorManager::initialize(int nr_cores, int* argc, char*** argv, bool initialize_mpi) {
-      comm_manager_.reset(new CommunicatorManager(nr_cores, argc, argv, initialize_mpi));
+      // Initialize HPX before static CommunicatorManager,
+      // such that HPX can stopped by the destructor before its static members are destructed.
+      auto tmp = new CommunicatorManager(nr_cores, argc, argv, initialize_mpi);
+      commManager().reset(tmp);
       status_ = initialized;
     }
 
     void CommunicatorManager::finalize() {
       status_ = finalized;
-      comm_manager_ = nullptr;
+      commManager() = nullptr;
     }
 
 #ifdef DLA_HAVE_DPLASMA
     ParsecContext CommunicatorManager::getParsecContext() {
-      return comm_manager_->parsec_handle_;
+      return commManager()->parsec_handle_;
     }
 #endif
 
     Communicator2DGrid& CommunicatorManager::createCommunicator2DGrid(  //
         MPI_Comm base_comm, int nr_rows, int nr_cols, Ordering comm_ordering) {
-      return comm_manager_->communicator2DGrid(base_comm, nr_rows, nr_cols, comm_ordering);
+      return commManager()->communicator2DGrid(base_comm, nr_rows, nr_cols, comm_ordering);
     }
 
 #ifdef DLA_HAVE_SCALAPACK
     Communicator2DGrid& CommunicatorManager::createCommunicator2DGridBlacs(  //
         int blacs_handle, int nr_rows, int nr_cols, Ordering comm_ordering) {
-      return comm_manager_->communicator2DGrid(blacs::Cblacs2sys_handle(blacs_handle), nr_rows,
+      return commManager()->communicator2DGrid(blacs::Cblacs2sys_handle(blacs_handle), nr_rows,
                                                nr_cols, comm_ordering);
     }
 #endif
 
     Communicator2DGrid& CommunicatorManager::getCommunicator2DGridFromMPIComm(MPI_Comm comm) {
-      return comm_manager_->communicator2DGridFromMPIComm(comm);
+      return commManager()->communicator2DGridFromMPIComm(comm);
     }
 
 #ifdef DLA_HAVE_SCALAPACK
     Communicator2DGrid& CommunicatorManager::getCommunicator2DGridFromBlacsContext(BlacsContextType id) {
-      return comm_manager_->communicator2DGridFromBlacsContext(id);
+      return commManager()->communicator2DGridFromBlacsContext(id);
     }
 #endif
 
     void CommunicatorManager::free2DGrid(Communicator2DGrid& grid) {
-      return comm_manager_->destroy2DGrid(grid);
+      return commManager()->destroy2DGrid(grid);
     }
     void CommunicatorManager::free2DGridFromMPIComm(MPI_Comm comm) {
       free2DGrid(getCommunicator2DGridFromMPIComm(comm));
@@ -100,8 +102,8 @@ namespace dla_interface {
         return *comm_grid_map_.at(comm);
       }
       catch (const std::out_of_range& err) {
-    	  std::string str = "No communicator2DGrid found with the given MPI_Comm: " + std::string(err.what());
-        throw std::invalid_argument(str);
+    	  std::string msg = "No communicator2DGrid found with the given MPI_Comm. Err: " + std::string(err.what());
+        throw std::invalid_argument(msg);
       }
     }
 #ifdef DLA_HAVE_SCALAPACK
@@ -110,8 +112,8 @@ namespace dla_interface {
         return *ictxt_grid_map_.at(id);
       }
       catch (const std::out_of_range& err) {
-		  std::string str = "No communicator2DGrid found with the given BLACS context id: " + std::string(err.what());
-		  throw std::invalid_argument(str);
+          	  std::string msg = "No communicator2DGrid found with the given BLACS context id. Err: " + std::string(err.what());
+              throw std::invalid_argument(msg);
       }
     }
 #endif
@@ -194,10 +196,10 @@ namespace dla_interface {
       }
 
       if (argc == nullptr || argv == nullptr) {
-        char name[] = "dla_interface_dlaf";
-        char* argv_dlaf[] = {name, nullptr};
-        int argc_dlaf = 1;
-        hpx_wrappers::start(argc_dlaf, argv_dlaf, cfg);
+        char name[] = "dla_interface_hpx_linalg";
+        char* argv_hpx_linalg[] = {name, nullptr};
+        int argc_hpx_linalg = 1;
+        hpx_wrappers::start(argc_hpx_linalg, argv_hpx_linalg, cfg);
       }
       else {
         hpx_wrappers::start(*argc, *argv, cfg);

@@ -13,18 +13,18 @@
 
 #ifdef DLA_HAVE_DLAF
 
+#include <string>
+#include <vector>
+
 #include <mpi.h>
 #include <hpx/hpx.hpp>
-#include <hpx/exception.hpp>
 #include <hpx/hpx_start.hpp>
 #include <hpx/hpx_suspend.hpp>
 
 #include <dlaf/common/index2d.h>
 #include <dlaf/communication/communicator.h>
 #include <dlaf/communication/communicator_grid.h>
-#include <dlaf/communication/error.h>
 #include <dlaf/matrix/matrix.h>
-#include <dlaf/matrix/index.h>
 #include <dlaf/factorization/cholesky.h>
 #include "dlaf/types.h"
 #include "dlaf/util_matrix.h"
@@ -34,7 +34,6 @@
 #include "distributed_matrix.h"
 #include "internal_error.h"
 
-
 namespace dla_interface {
 
 	namespace hpx_wrappers {
@@ -42,38 +41,31 @@ namespace dla_interface {
 		/// Start hpx inside CommunicatorManager
 		inline void start(int argc, char** argv, std::vector<std::string> cfg) {
 			using namespace hpx::program_options;
-			options_description desc_commandline("Usage: " HPX_APPLICATION_STRING " [options]");
 
 			hpx::init_params p;
-			p.desc_cmdline = desc_commandline;
+			p.cfg = std::move(cfg);
 			p.rp_callback = [](auto& rp, auto) {
 				int ntasks;
 				DLAF_MPI_CALL(MPI_Comm_size(MPI_COMM_WORLD, &ntasks));
 				// if the user has asked for special thread pools for communication
 				// then set them up
 				if (ntasks > 1) {
-					// Create a thread pool with a single core that we will use for all
-					// communication related tasks
-					rp.create_thread_pool("mpi", hpx::resource::scheduling_policy::local_priority_fifo);
-					rp.add_resource(rp.numa_domains()[0].cores()[0].pus()[0], "mpi");
+				  // Create a thread pool with a single core that we will use for all
+				  // communication related tasks
+				  rp.create_thread_pool("mpi", hpx::resource::scheduling_policy::local_priority_fifo);
+				  rp.add_resource(rp.numa_domains()[0].cores()[0].pus()[0], "mpi");
 				}
 			};
 
-			hpx::init_params init_args;
-			init_args.cfg = cfg;
-
-			hpx::start(nullptr, argc, argv, init_args);
-			hpx::runtime* rt = hpx::get_runtime_ptr();
-			hpx::util::yield_while([rt]() { return rt->get_state() < hpx::state_running; });
+			hpx::start(nullptr, argc, argv, p);
 			hpx::suspend();
 		}
 
 		/// Stop hpx inside CommunicatorManager
 		inline void stop() {
 			hpx::resume();
-			hpx::async([]() { hpx::finalize(); });
-			hpx::wait_all();
-			//hpx::stop();
+			hpx::apply([]() { hpx::finalize(); });
+			hpx::stop();
 		}
 	} // hpx_wrappers
 
