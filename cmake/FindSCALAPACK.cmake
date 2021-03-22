@@ -1,5 +1,5 @@
 #
-# Distributed Linear Algebra with Future (DLAF)
+# Distributed Linear Algebra Interface (DLAI)
 #
 # Copyright (c) 2018-2021, ETH Zurich
 # All rights reserved.

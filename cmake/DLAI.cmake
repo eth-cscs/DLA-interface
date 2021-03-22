@@ -1,5 +1,5 @@
 #
-# Distributed Linear Algebra with Future (DLAF)
+# Distributed Linear Algebra Interface (DLAI)
 #
 # Copyright (c) 2018-2021, ETH Zurich
 # All rights reserved.
@@ -8,7 +8,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-# Loads all scripts available in CMAKE_MODULE_PATH with filename "DLAF_*.cmake"
+# Loads all scripts available in CMAKE_MODULE_PATH with filename "DLAI_*.cmake"
 foreach(module_folder IN LISTS CMAKE_MODULE_PATH)
   file(GLOB cmake_modules "${module_folder}/DLAI_*.cmake")
 
