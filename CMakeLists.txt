@@ -45,26 +45,22 @@ option(DLA_ALL_TESTS_USE_RUNNER "Specify if the single rank tests has to use the
 # ---------------------------------------------------------------------------
 # Languages
 # ---------------------------------------------------------------------------
-# ----- Fortran
+enable_language(C)
+
+enable_language(CXX)
+set(CMAKE_CXX_STANDARD 14)
+
 if (DLAI_WITH_FORTRAN)
   enable_language(Fortran)
 endif()
 
-# ----- C
-enable_language(C)
-
-# ----- CXX
-enable_language(CXX)
-set(CMAKE_CXX_STANDARD 14)
-
 # ---------------------------------------------------------------------------
 # Libraries configuration
 # ---------------------------------------------------------------------------
-# ----- HWLOC
-find_package(HWLOC)
 
-# ----- MPI
+find_package(HWLOC)
 find_package(MPI REQUIRED)
+find_package(OpenMP REQUIRED)
 
 # ----- LAPACK/SCALAPACK
 if (DLAI_WITH_MKL)
@@ -72,6 +68,9 @@ if (DLAI_WITH_MKL)
 
   set(LAPACK_TARGET "mkl::mkl_intel_32bit_seq_dyn")
   set(SCALAPACK_TARGET "mkl::scalapack_mpich_intel_32bit_seq_dyn")
+
+  # Note:
+  # If specified targets are found, "standardize" them
 
   if (TARGET ${LAPACK_TARGET})
     set(LAPACK_FOUND TRUE)
@@ -87,6 +86,10 @@ if (DLAI_WITH_MKL)
     target_link_libraries(SCALAPACK::SCALAPACK INTERFACE ${SCALAPACK_TARGET})
   endif()
 else()
+  # Note:
+  # Since FindLAPACK has been added to CMake official repository, here our custom one
+  # is called in case the user has specified manually anything (cmake/lapack.cmake),
+  # otherwise the default FindLAPACK is used.
   if (LAPACK_TYPE OR LAPACK_INCLUDE_DIR OR LAPACK_LIBRARY)
     include(lapack)
   else()
@@ -96,24 +99,15 @@ else()
   find_package(SCALAPACK)
 endif()
 
-if (DLAI_WITH_FORTRAN)
-  if (NOT SCALAPACK_FOUND)
-    message(FATAL_ERROR "Cannot build Fortran bindings without Scalapack. Set DLAI_WITH_FORTRAN to OFF")
-  endif()
+if (DLAI_WITH_FORTRAN AND NOT SCALAPACK_FOUND)
+  message(FATAL_ERROR "Cannot build Fortran bindings without Scalapack. Set DLAI_WITH_FORTRAN to OFF")
 endif()
-
-# ----- OpenMP
-find_package(OpenMP REQUIRED)
-
-# ----- EXTERNAL
-add_subdirectory(external)
 
 # ----- BACKENDs
 if (DLAI_WITH_DLAF)
   find_package(DLAF REQUIRED)
 endif()
 
-# TODO fix these
 if (DLAI_WITH_DPLASMA)
   find_package(DPLASMA REQUIRED)
 endif()
@@ -121,6 +115,9 @@ endif()
 if (DLAI_WITH_ELPA)
   find_package(ELPA REQUIRED)
 endif()
+
+# ----- EXTERNAL
+add_subdirectory(external)
 
 # ---- setup
 # TODO fix these
@@ -162,7 +159,7 @@ endif()
 add_subdirectory(src)
 
 # ---------------------------------------------------------------------------
-# mini Apps
+# Miniapps
 # ---------------------------------------------------------------------------
 if (DLAI_BUILD_MINIAPPS)
   add_subdirectory(miniapp)
