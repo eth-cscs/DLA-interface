@@ -35,12 +35,11 @@ option(DLAI_WITH_ELPA "Enable ELPA backend" OFF)
 # TODO this is going to be replaced by DLAF
 option(DLAI_WITH_HPXLINALG "Enable HPXLINALG backend" OFF)
 
-# ----- other
-# TODO fix these
-option(DLA_PRINT_DEBUG_INFO "Enables extra output for debugging purpose." OFF)
-option(DLA_PRINT_DEBUG_CALL_PARAM "Enables call parameters output for debugging purpose." OFF)
-option(DLA_COVERAGE_TEST "Enables coverage test." OFF)
+# ----- others
+option(DLAI_PRINT_DEBUG_INFO "Enables extra output for debugging purpose." OFF)
+option(DLAI_PRINT_DEBUG_CALL_PARAM "Enables call parameters output for debugging purpose." OFF)
 
+# TODO fix this
 option(DLA_ALL_TESTS_USE_RUNNER "Specify if the single rank tests has to use the runner as well" OFF)
 
 # ---------------------------------------------------------------------------
