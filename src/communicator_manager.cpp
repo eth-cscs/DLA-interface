@@ -149,7 +149,7 @@ namespace dla_interface {
       scalapack_cpuset_ = application_cpuset;
       scalapack_nr_threads_ = thread::getOmpBlasThreads();
 #endif
-#ifdef DLA_HAVE_ELPA
+#ifdef DLAI_WITH_ELPA
       elpa::init();
 #endif
 
@@ -225,7 +225,7 @@ namespace dla_interface {
 #ifdef DLAI_WITH_SCALAPACK
       ictxt_grid_map_.clear();
 #endif
-#ifdef DLA_HAVE_ELPA
+#ifdef DLAI_WITH_ELPA
       elpa_uninit();
 #endif
 #ifdef DLAI_WITH_DPLASMA

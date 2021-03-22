@@ -33,7 +33,7 @@ bool hermitianEigenvectorsTestThrows(SolverType solver) {
   if (solver == ScaLAPACK)
     return false;
 #endif
-#ifdef DLA_HAVE_ELPA
+#ifdef DLAI_WITH_ELPA
   if (solver == ELPA)
     return false;
 #endif

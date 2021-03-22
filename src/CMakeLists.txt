@@ -39,15 +39,11 @@ target_include_directories(DLAI PUBLIC
   $<$<BOOL:${DLAI_WITH_FORTRAN}>:${CMAKE_CURRENT_BINARY_DIR}>
 )
 
-# Suppress warnings for ELPA headers.
-target_include_directories(DLAI PUBLIC SYSTEM ${ELPA_INCLUDE_DIRS})
-
 target_link_libraries(DLAI PUBLIC
   # backends
   $<$<BOOL:${DLAI_WITH_DLAF}>:DLAF::DLAF>
   $<$<BOOL:${DLAI_WITH_DPLASMA}>:DPlasma::dplasma>
-  # TODO fix these
-  ${DLA_ELPA_LIBRARY}
+  $<$<BOOL:${DLAI_WITH_ELPA}>:ELPA::ELPA>
 
   $<$<BOOL:${HWLOC_FOUND}>:HWLOC::HWLOC>
 

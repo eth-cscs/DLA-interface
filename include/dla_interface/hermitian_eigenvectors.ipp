@@ -17,7 +17,7 @@ void hermitianEigenvectors(UpLo uplo, DistributedMatrix<ElType>& mat, BaseType<E
   dlai__util__checkBlocksAreSquare(mat);
   dlai__util__checkBaseIndexAtBlock(mat);
 
-#ifdef DLA_HAVE_ELPA
+#ifdef DLAI_WITH_ELPA
   if (solver == ELPA) {
     solver =
         dlai__util__fallbackScaLAPACKCondition(mat.baseIndex() != Global2DIndex(0, 0), comm_grid,
@@ -70,7 +70,7 @@ void hermitianEigenvectors(UpLo uplo, DistributedMatrix<ElType>& mat, BaseType<E
       break;
     }
 #endif
-#ifdef DLA_HAVE_ELPA
+#ifdef DLAI_WITH_ELPA
     case ELPA: {
       std::array<int, 6> timer_index;
       util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);
