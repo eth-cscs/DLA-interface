@@ -13,7 +13,7 @@
 #include "internal_error.h"
 #include "types.h"
 
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
 #include "hpx_linalg/hpx_linalg.h"
 #endif
 
@@ -187,7 +187,7 @@ namespace dla_interface {
       topo_.setCpuBind(application_cpuset);
 #endif
 
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
       std::vector<std::string> cfg = {"hpx.commandline.allow_unknown=1",
                                       "hpx.commandline.aliasing=0"};
       if (nr_cores > 0) {
@@ -231,7 +231,7 @@ namespace dla_interface {
 #ifdef DLAI_WITH_DPLASMA
       parsec_fini(&parsec_handle_);
 #endif
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
       hpx_linalg::stop();
 #endif
 

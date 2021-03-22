@@ -30,9 +30,10 @@ option(DLAI_BUILD_MINIAPPS "Build miniapps" ON)
 option(DLAI_BUILD_TESTING "Build tests" ON)
 
 # ----- BACKENDs
-option(DLAI_HAVE_DPLASMA "DPLASMA" OFF)
-option(DLAI_HAVE_ELPA "ELPA" OFF)
-option(DLAI_HAVE_HPXLINALG "HPXLINALG" OFF)
+option(DLAI_WITH_DPLASMA "Enable DPLASMA backend" OFF)
+option(DLAI_WITH_ELPA "Enable ELPA backend" OFF)
+# TODO this is going to be replaced by DLAF
+option(DLAI_WITH_HPXLINALG "Enable HPXLINALG backend" OFF)
 
 # ----- other
 # TODO fix these
@@ -118,40 +119,6 @@ endif()
 
 # ----- EXTERNAL
 add_subdirectory(external)
-
-# ---- setup
-# TODO fix these
-if(DLA_PRINT_DEBUG_INFO)
-  add_definitions("-DDLA_THREAD_DEBUG_INFO")
-endif()
-if(DLA_PRINT_DEBUG_CALL_PARAM)
-  add_definitions("-DDLA_PRINT_DEBUG_CALL_PARAM")
-endif()
-if(DLA_COVERAGE_TEST)
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-    set(CMAKE_LD_FLAGS "${CMAKE_LD_FLAGS} --coverage")
-
-    set(DLA_COVERAGE_SRC_DIRS
-        ${CMAKE_SOURCE_DIR}/include/*
-        ${CMAKE_SOURCE_DIR}/include/*/*
-        ${CMAKE_SOURCE_DIR}/src/*
-        ${CMAKE_SOURCE_DIR}/test/include/*
-        ${CMAKE_SOURCE_DIR}/test/src/*
-        ${CMAKE_SOURCE_DIR}/test/unit/*
-        )
-
-    add_custom_target("coverage"
-      COMMAND lcov --capture --directory ${CMAKE_BINARY_DIR} --output-file coverage.info
-      COMMAND lcov --extract coverage.info ${DLA_COVERAGE_SRC_DIRS} --output-file coverage-filt.info
-      COMMAND genhtml coverage-filt.info --output-directory ${CMAKE_BINARY_DIR}/coverage
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-
-  else ()
-    message(WARNING "Coverage test can be used only with GCC.")
-    set(DLA_COVERAGE_TEST "OFF" FORCE)
-  endif()
-endif()
 
 # ---------------------------------------------------------------------------
 # DLAI library

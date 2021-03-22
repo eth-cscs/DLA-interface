@@ -94,7 +94,7 @@ namespace dla_interface {
                                std::cref(comm_manager_->dplasma_cpuset_));
       }
 #endif
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
       // Returns the number of threads and cpuset for HPX_LINALG.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getHPXLinalgConfigInfo() {
         return std::make_tuple(std::cref(comm_manager_->hpx_linalg_nr_threads_),
@@ -165,7 +165,7 @@ namespace dla_interface {
       thread::NumThreads dplasma_nr_threads_;
       thread::CpuSet dplasma_cpuset_;
 #endif
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
       thread::NumThreads hpx_linalg_nr_threads_;
       thread::CpuSet hpx_linalg_cpuset_;
 #endif

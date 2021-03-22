@@ -36,7 +36,7 @@ bool choleskyFactorizationTestThrows(SolverType solver) {
   if (solver == DPlasma)
     return false;
 #endif
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
   if (solver == HPX_LINALG)
     return false;
 #endif
