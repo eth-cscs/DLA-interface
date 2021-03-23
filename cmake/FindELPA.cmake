@@ -10,8 +10,8 @@
 
 # Find ELPA library
 #
-# This module finds the ELPA library specified with ELPA_VERSION variable with pkg-config.
-# If you don't know how to set the ELPA_VERSION variable, please check the output of
+# This module finds the ELPA library specified with ELPA_PACKAGE_NAME variable with pkg-config.
+# If you don't know how to set the ELPA_PACKAGE_NAME variable, please check the output of
 #
 # pkg-config --list-all | grep elpa
 #
@@ -26,11 +26,11 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package(PkgConfig)
 
-if (NOT DEFINED ELPA_VERSION)
-  message(SEND_ERROR "You should set ELPA_VERSION to pkg-config library name (see pkg-config --list-all | grep elpa)")
+if (NOT DEFINED ELPA_PACKAGE_NAME)
+  message(SEND_ERROR "You should set ELPA_PACKAGE_NAME to pkg-config library name (see pkg-config --list-all | grep elpa)")
 endif()
 
-pkg_search_module(ELPA ${ELPA_VERSION})
+pkg_search_module(ELPA ${ELPA_PACKAGE_NAME})
 
 ### TEST
 include(CheckSymbolExists)
@@ -42,6 +42,9 @@ set(CMAKE_REQUIRED_INCLUDES ${ELPA_INCLUDE_DIRS})
 set(CMAKE_REQUIRED_LIBRARIES ${ELPA_LINK_LIBRARIES} SCALAPACK::SCALAPACK)
 
 unset(ELPA_CHECK CACHE)
+# Note:
+# If the project does not enable the C language, this check may fail because the compiler,
+# by looking at the file extension of the test, may decide to build it as CXX
 check_symbol_exists(elpa_allocate "elpa/elpa.h" ELPA_CHECK)
 
 cmake_pop_check_state()
