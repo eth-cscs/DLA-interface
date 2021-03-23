@@ -3,8 +3,11 @@
 #include <mpi.h>
 #include <stdexcept>
 #include <vector>
-#include "gtest/gtest.h"
+
+#include <gtest/gtest.h>
+
 #include "communicator_grid.h"
+#include "gtest_mpi_listener.h"
 #include "util_mpi.h"
 
 #ifdef DLAI_WITH_SCALAPACK
@@ -207,11 +210,12 @@ int main(int argc, char** argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
 
-//#ifdef COMM_INITS_MPI
-//  ::testing::setMPIListener("results_test_communicator_manager_init");
-//#else
-//  ::testing::setMPIListener("results_test_communicator_manager");
-//#endif
+  // Gets hold of the event listener list.
+  ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
+
+  // Adds MPIListener to the end. googletest takes the ownership.
+  auto default_listener = listeners.Release(listeners.default_result_printer());
+  listeners.Append(new MPIListener(argc, argv, default_listener));
 
   auto ret = RUN_ALL_TESTS();
 

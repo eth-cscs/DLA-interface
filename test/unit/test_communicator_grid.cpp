@@ -5,7 +5,9 @@
 #include <vector>
 #include "blacs.h"
 #include "gtest/gtest.h"
+
 #include "util_mpi.h"
+#include "gtest_mpi_listener.h"
 
 // This tests have to be execuuted using 6 MPI ranks.
 
@@ -217,8 +219,12 @@ int main(int argc, char** argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
 
-  // set up a custom listener that prints messages in an MPI-friendly way
-  //::testing::setMPIListener("results_test_communicator_grid");
+  // Gets hold of the event listener list.
+  ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
+
+  // Adds MPIListener to the end. googletest takes the ownership.
+  auto default_listener = listeners.Release(listeners.default_result_printer());
+  listeners.Append(new MPIListener(argc, argv, default_listener));
 
   auto ret = RUN_ALL_TESTS();
 

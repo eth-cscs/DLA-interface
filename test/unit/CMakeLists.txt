@@ -51,13 +51,13 @@ DLAI_addTest(test_util_thread
 
 DLAI_addTest(test_communicator_grid
   SOURCES test_communicator_grid.cpp
-  LIBRARIES DLAI
+  LIBRARIES DLAI gtest_mpi_listener
   USE_MAIN MPI
   MPIRANKS 6)
 
 DLAI_addTest(test_communicator_manager
   SOURCES test_communicator_manager.cpp
-  LIBRARIES DLAI
+  LIBRARIES DLAI gtest_mpi_listener
   USE_MAIN MPI
   MPIRANKS 6)
 
