@@ -1,5 +1,5 @@
 #
-# Distributed Linear Algebra with Future (DLAI)
+# Distributed Linear Algebra Interface (DLAI)
 #
 # Copyright (c) 2018-2021, ETH Zurich
 # All rights reserved.
@@ -8,13 +8,71 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
+# MPI_PRESET_SETUP
+#
+# Helper macro enabling preset selection for MPI
+macro(mpi_preset_setup)
+  set(MPIEXEC_PRESET "custom" CACHE STRING "Select a preset to use")
+  set_property(CACHE MPIEXEC_PRESET PROPERTY STRINGS "custom" "slurm")
+
+  if (NOT MPIEXEC_PRESET OR MPIEXEC_PRESET STREQUAL "custom")
+    # Classic, it uses default from MPI
+  elseif (MPIEXEC_PRESET STREQUAL "slurm")
+    execute_process(COMMAND which srun
+      OUTPUT_VARIABLE SLURM_EXECUTABLE
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    set(MPIEXEC_EXECUTABLE ${SLURM_EXECUTABLE} CACHE STRING "" FORCE)
+    set(MPIEXEC_NUMPROC_FLAG "-n" CACHE STRING "" FORCE)
+    set(MPIEXEC_NUMCORE_FLAG "-c" CACHE STRING "" FORCE)
+    set(MPIEXEC_NUMCORES "1" CACHE STRING "")
+
+    message(STATUS "MPI preset: ${MPIEXEC_PRESET}")
+  else()
+    message(FATAL_ERROR "Preset ${MPIEXEC_PRESET} is not supported")
+  endif()
+endmacro()
+
+# MPIEXEC_RUNLINE
+#
+# Returns in OUT_COMMAND the correct command line to run it with MPIEXEC_EXECUTABLE
+# In particular, it will run EXECUTABLE_NAME on MPIRANKS, and in case MPIEXEC_NUMCORES
+# is set (e.g. by the slurm MPI preset), it also computes the correct number of cores
+# to assign to each rank (assuming single node allocation)
+function(mpiexec_runline OUT_COMMAND EXECUTABLE_NAME MPIRANKS)
+  if (MPIEXEC_NUMCORE_FLAG)
+    if (MPIEXEC_NUMCORES)
+      set(_NCORES ${MPIEXEC_NUMCORES})
+    else()
+      set(_NCORES 1)
+    endif()
+
+    math(EXPR CORE_PER_RANK "${_NCORES}/${MPIRANKS}")
+
+    if (NOT CORE_PER_RANK)
+      set(CORE_PER_RANK 1)
+    endif()
+
+    set(_MPI_CORE_ARGS ${MPIEXEC_NUMCORE_FLAG} ${CORE_PER_RANK})
+  else()
+    set(_MPI_CORE_ARGS "")
+  endif()
+
+  set(${OUT_COMMAND}
+    ${MPIEXEC_EXECUTABLE}
+    ${MPIEXEC_NUMPROC_FLAG} ${MPIRANKS}
+    ${_MPI_CORE_ARGS}
+    ${MPIEXEC_PREFLAGS} ${EXECUTABLE_NAME} ${MPIEXEC_POSTFLAGS}
+    PARENT_SCOPE)
+endfunction()
+
 # DLAI_addTest(test_target_name
 #   SOURCES <source1> [<source2> ...]
 #   [COMPILE_DEFINITIONS <arguments for target_compile_definitions>]
 #   [INCLUDE_DIRS <arguments for target_include_directories>]
 #   [LIBRARIES <arguments for target_link_libraries>]
 #   [MPIRANKS <number of rank>]
-#   [USE_MAIN {PLAIN | HPX | MPI | MPIHPX}]
+#   [USE_MAIN {PLAIN | MPI | FTN_MPI}]
 # )
 #
 # At least one source file has to be specified, while other parameters are optional.
@@ -39,12 +97,15 @@
 #     PRIVATE
 #       boost::boost
 # )
-
 function(DLAI_addTest test_target_name)
   set(options "")
   set(oneValueArgs MPIRANKS USE_MAIN)
   set(multiValueArgs SOURCES COMPILE_DEFINITIONS INCLUDE_DIRS LIBRARIES ARGUMENTS)
   cmake_parse_arguments(DLAI_AT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  option(DLAI_TEST_RUNALL_WITH_MPIEXEC "Run all tests using the workload manager." OFF)
+  option(DLAI_CI_RUNNER_USES_MPIRUN "Remove mpiexec command for tests executed by ctest. This option is to be used if the CI runner executes the tests with <mpiexec + options> ctest -L RANK_<spawned MPI ranks>" OFF)
+  option(DLAI_INSTALL_TESTS "If tests are built, it controls if they will be installed" OFF)
 
   ### Checks
   if (DLAI_AT_UNPARSED_ARGUMENTS)
@@ -56,21 +117,10 @@ function(DLAI_addTest test_target_name)
   endif()
 
   set(IS_AN_MPI_TEST FALSE)
-  set(IS_AN_HPX_TEST FALSE)
   if (NOT DLAI_AT_USE_MAIN)
     set(_gtest_tgt gtest)
   elseif (DLAI_AT_USE_MAIN STREQUAL PLAIN)
     set(_gtest_tgt gtest_main)
-#  elseif (DLAI_AT_USE_MAIN STREQUAL HPX)
-#    set(_gtest_tgt DLAI_gtest_hpx_main)
-#    set(IS_AN_HPX_TEST TRUE)
-#  elseif (DLAI_AT_USE_MAIN STREQUAL MPI)
-#    set(_gtest_tgt DLAI_gtest_mpi_main)
-#    set(IS_AN_MPI_TEST TRUE)
-#  elseif (DLAI_AT_USE_MAIN STREQUAL MPIHPX)
-#    set(_gtest_tgt DLAI_gtest_mpihpx_main)
-#    set(IS_AN_MPI_TEST TRUE)
-#    set(IS_AN_HPX_TEST TRUE)
   elseif (DLAI_AT_USE_MAIN STREQUAL MPI)
     set(_gtest_tgt test_dlai_main)
     set(IS_AN_MPI_TEST TRUE)
@@ -103,56 +153,20 @@ function(DLAI_addTest test_target_name)
   endif()
 
   ### Test target
-  set(DLAI_TEST_RUNALL_WITH_MPIEXEC OFF CACHE BOOL "Run all tests using the workload manager.")
-
   set(_TEST_ARGUMENTS ${DLAI_AT_ARGUMENTS})
 
   if (DLAI_TEST_RUNALL_WITH_MPIEXEC OR IS_AN_MPI_TEST)
-    if (MPIEXEC_NUMCORE_FLAG)
-      if (MPIEXEC_NUMCORES)
-        set(_CORES_PER_RANK ${MPIEXEC_NUMCORES})
-      else()
-        set(_CORES_PER_RANK 1)
-      endif()
-
-      math(EXPR DLAI_CORE_PER_RANK "${_CORES_PER_RANK}/${DLAI_AT_MPIRANKS}")
-
-      if (NOT DLAI_CORE_PER_RANK)
-        set(DLAI_CORE_PER_RANK 1)
-      endif()
-
-      set(_MPI_CORE_ARGS ${MPIEXEC_NUMCORE_FLAG} ${DLAI_CORE_PER_RANK})
-    else()
-      set(_MPI_CORE_ARGS "")
-    endif()
-
     if(DLAI_CI_RUNNER_USES_MPIRUN)
       set(_TEST_COMMAND $<TARGET_FILE:${test_target_name}>)
     else()
-      set(_TEST_COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${DLAI_AT_MPIRANKS} ${_MPI_CORE_ARGS}
-          ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${test_target_name}> ${MPIEXEC_POSTFLAGS})
+      mpiexec_runline(_TEST_COMMAND $<TARGET_FILE:${test_target_name}> ${DLAI_AT_MPIRANKS})
     endif()
     set(_TEST_LABEL "RANK_${DLAI_AT_MPIRANKS}")
 
   # ----- Classic test
   else()
-    set(_TEST_COMMAND ${test_target_name})
+    set(_TEST_COMMAND $<TARGET_FILE:${test_target_name}>)
     set(_TEST_LABEL "RANK_1")
-  endif()
-
-  if (IS_AN_HPX_TEST)
-    separate_arguments(_HPX_EXTRA_ARGS_LIST UNIX_COMMAND ${DLAI_HPXTEST_EXTRA_ARGS})
-
-    # APPLE platform does not support thread binding
-    if (NOT APPLE)
-      list(APPEND _TEST_ARGUMENTS "--hpx:use-process-mask")
-    endif()
-
-    if(NOT DLAI_TEST_THREAD_BINDING_ENABLED)
-      list(APPEND _TEST_ARGUMENTS "--hpx:bind=none")
-    endif()
-
-    list(APPEND _TEST_ARGUMENTS ${_HPX_EXTRA_ARGS_LIST})
   endif()
 
   ### Test executable target
@@ -166,25 +180,20 @@ function(DLAI_addTest test_target_name)
   target_compile_definitions(${test_target_name}
     PRIVATE
       ${DLAI_AT_COMPILE_DEFINITIONS}
-      $<$<BOOL:${IS_AN_MPI_TEST}>: NUM_MPI_RANKS=${DLAI_AT_MPIRANKS}>
-  )
+      $<$<BOOL:${IS_AN_MPI_TEST}>: NUM_MPI_RANKS=${DLAI_AT_MPIRANKS}>)
   target_include_directories(${test_target_name} PRIVATE ${DLAI_AT_INCLUDE_DIRS})
   target_add_warnings(${test_target_name})
   add_test(
     NAME ${test_target_name}
-    COMMAND ${_TEST_COMMAND} ${_TEST_ARGUMENTS}
-  )
+    COMMAND ${_TEST_COMMAND} ${_TEST_ARGUMENTS})
   set_tests_properties(${test_target_name} PROPERTIES LABELS "${_TEST_LABEL}")
 
   ### DEPLOY
   include(GNUInstallDirs)
 
-  set(DLAI_INSTALL_TESTS OFF CACHE BOOL "If tests are built, it controls if they will be installed")
   if (DLAI_INSTALL_TESTS)
     install(TARGETS
       ${test_target_name}
-      # EXPORT DLAI-tests
-      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    )
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   endif()
 endfunction()

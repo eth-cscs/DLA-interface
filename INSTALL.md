@@ -20,22 +20,6 @@ For the MKL case the following options apply:
   - `"GNU OpenMP"` (Default)
   - `"Intel OpenMP"` (Default with Apple)
 
-## MPI
-
-Options:
-- `TEST_RUNNER` The command used to run the tests. (e.g. mpirun, srun, ...)
-- `TEST_RUNNER_NP_OPT` The name of the option used to specify the number of ranks.
-- `DLA_ALL_TESTS_USE_RUNNER` default `OFF`: If `ON` single rank tests are invoked with `TEST_RUNNER` too.
-
-If compiler wrappers which include mpi are used (e.g. `mpicc` and `mpicxx`, Cray's `cc` and `CC`)
-no libraries and include paths are added and the following default are used:
-- `TEST_RUNNER = mpirun`
-- `TEST_RUNNER_NP_OPT = -n`
-
-Otherwise `FindMPI` is used to finde the MPI libraries, and the following defaults are used:
-- `TEST_RUNNER = ${MPIEXEC}`
-- `TEST_RUNNER_NP_OPT = ${MPIEXEC_NUMPROC_FLAG}`
-
 ## Scalapack
 
 ScaLAPACK can be configured in 3 ways setting `DLA_SCALAPACK_TYPE`

@@ -150,7 +150,7 @@ cd $BUILD_DIR
 OPT_CMAKE=(\
   -DCMAKE_BUILD_TYPE=$build_type \
   -DTEST_RUNNER="srun" \
-  -DDLA_ALL_TESTS_USE_RUNNER=ON \
+  -DDLAI_TEST_RUNALL_WITH_MPIEXEC=on \
   "${OPT_LAPACK[@]}" \
   "${OPT_SCALAPACK[@]}" \
   "${OPT_ELPA[@]}" \

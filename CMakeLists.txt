@@ -39,9 +39,6 @@ option(DLAI_WITH_HPXLINALG "Enable HPXLINALG backend" OFF)
 option(DLAI_PRINT_DEBUG_INFO "Enables extra output for debugging purpose." OFF)
 option(DLAI_PRINT_DEBUG_CALL_PARAM "Enables call parameters output for debugging purpose." OFF)
 
-# TODO fix this
-option(DLA_ALL_TESTS_USE_RUNNER "Specify if the single rank tests has to use the runner as well" OFF)
-
 # ---------------------------------------------------------------------------
 # Languages
 # ---------------------------------------------------------------------------
@@ -59,8 +56,10 @@ endif()
 # ---------------------------------------------------------------------------
 
 find_package(HWLOC)
-find_package(MPI REQUIRED)
 find_package(OpenMP REQUIRED)
+
+find_package(MPI REQUIRED)
+mpi_preset_setup()
 
 # ----- LAPACK/SCALAPACK
 if (DLAI_WITH_MKL)
