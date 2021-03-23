@@ -64,9 +64,9 @@ DLAI_addTest(test_communicator_manager
 DLAI_addTest(test_communicator_manager_init
   SOURCES test_communicator_manager.cpp
   LIBRARIES DLAI
+  COMPILE_DEFINITIONS COMM_INITS_MPI
   USE_MAIN MPI
   MPIRANKS 6)
-target_compile_definitions(test_communicator_manager_init PUBLIC -DCOMM_INITS_MPI)
 
 DLAI_addTest(test_distributed_matrix
   SOURCES test_distributed_matrix.cpp
