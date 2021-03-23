@@ -35,8 +35,12 @@ target_compile_definitions(DLAI PUBLIC
 )
 
 target_include_directories(DLAI PUBLIC
-  ${PROJECT_SOURCE_DIR}/include
-  ${PROJECT_SOURCE_DIR}/libs
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+
+  # TODO this folder contains just cxxopts includes, and it will be installed in "include" path
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/libs>
+  $<INSTALL_INTERFACE:include>
 
   # *.mod files
   $<$<BOOL:${DLAI_WITH_FORTRAN}>:${CMAKE_CURRENT_BINARY_DIR}>
@@ -58,4 +62,51 @@ target_link_libraries(DLAI PUBLIC
 
   OpenMP::OpenMP_CXX
   $<$<BOOL:${DLAI_WITH_FORTRAN}>:OpenMP::OpenMP_Fortran>
+)
+
+# ----- DEPLOY
+include(GNUInstallDirs)
+
+install(TARGETS
+  DLAI
+  EXPORT DLAI-Targets
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# install includes
+install(DIRECTORY ../include/
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY ../libs/
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# install custom FindModules
+install(DIRECTORY ../cmake/
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
+  FILES_MATCHING PATTERN "Find*.cmake" # TODO problem with lapack.cmake
+  PATTERN "template" EXCLUDE
+)
+
+# ----- CMake INTEGRATION
+include(CMakePackageConfigHelpers)
+
+# install targets configuration
+install(EXPORT
+  DLAI-Targets
+  NAMESPACE DLAI::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
+)
+
+# Config-file preparation and install
+configure_package_config_file(
+  ${CMAKE_CURRENT_LIST_DIR}/../cmake/template/DLAIConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/DLAIConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
+)
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/DLAIConfig.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
 )
