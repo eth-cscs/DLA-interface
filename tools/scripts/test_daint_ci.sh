@@ -104,7 +104,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ELPA_LIB_DIR/lib
 
 case $elpa in
   No|no)   OPT_ELPA=() ;;
-  Yes|yes) OPT_ELPA=(-DELPA_ROOT="${ELPA_LIB_DIR}" -DELPA_VERSION="${ELPA_VERS}") ;;
+  Yes|yes) OPT_ELPA=(-D DLAI_WITH_ELPA=on -D ELPA_VERSION="${ELPA_VERS}") ;;
   *)  echo "Wrong --elpa option: $elpa" ; print_help ; exit 1 ;;
 esac
 
@@ -113,7 +113,7 @@ PSEC_LIB_DIR=/apps/daint/UES/sandbox/rasolca/parsec-${partition}
 
 case $dplasma in
   No|no)   OPT_DPLASMA=() ;;
-  Yes|yes) OPT_DPLASMA=(-DParsec_DIR="${PSEC_LIB_DIR}/lib/cmake/" -DPLASMA_DIR="${PLASMA_LIB_DIR}") ;;
+  Yes|yes) OPT_DPLASMA=(-D DLAI_WITH_DPLASMA=on -DParsec_DIR="${PSEC_LIB_DIR}/lib/cmake/" -DPLASMA_DIR="${PLASMA_LIB_DIR}") ;;
   *)  echo "Wrong --dplasma option: $dplasma" ; print_help ; exit 1 ;;
 esac
 
@@ -121,7 +121,7 @@ HPX_LINALG_DIR=/apps/daint/UES/simbergm/jenkins/DLA-interface/hpx_linalg/lib/cma
 
 case $hpx_linalg in
     No|no)   OPT_HPX_LINALG=() ;;
-    Yes|yes) OPT_HPX_LINALG=(-DHPX_LINALG_DIR="${HPX_LINALG_DIR}") ;;
+    Yes|yes) OPT_HPX_LINALG=(-D DLAI_WITH_HPXLINALG=on -DHPX_LINALG_DIR="${HPX_LINALG_DIR}") ;;
     *)  echo "Wrong --hpx_linalg option: $hpx_linalg" ; print_help ; exit 1 ;;
 esac
 
@@ -149,7 +149,7 @@ cd $BUILD_DIR
 
 OPT_CMAKE=(\
   -DCMAKE_BUILD_TYPE=$build_type \
-  -DTEST_RUNNER="srun" \
+  -DMPI_PRESET="slurm" \
   -DDLAI_TEST_RUNALL_WITH_MPIEXEC=on \
   "${OPT_LAPACK[@]}" \
   "${OPT_SCALAPACK[@]}" \

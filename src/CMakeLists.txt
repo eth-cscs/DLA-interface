@@ -45,7 +45,7 @@ target_include_directories(DLAI PUBLIC
 target_link_libraries(DLAI PUBLIC
   # backends
   $<$<BOOL:${DLAI_WITH_DLAF}>:DLAF::DLAF>
-  $<$<BOOL:${DLAI_WITH_DPLASMA}>:DPlasma::dplasma>
+  $<$<BOOL:${DLAI_WITH_DPLASMA}>:DPLASMA::dplasma>
   $<$<BOOL:${DLAI_WITH_ELPA}>:ELPA::ELPA>
 
   $<$<BOOL:${HWLOC_FOUND}>:HWLOC::HWLOC>
