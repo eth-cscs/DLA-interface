@@ -65,8 +65,10 @@ mpi_preset_setup()
 if (DLAI_WITH_MKL)
   find_package(MKL REQUIRED)
 
-  set(LAPACK_TARGET "mkl::mkl_intel_32bit_seq_dyn")
-  set(SCALAPACK_TARGET "mkl::scalapack_mpich_intel_32bit_seq_dyn")
+  set(LAPACK_TARGET "mkl::mkl_intel_32bit_seq_dyn"
+    CACHE STRING "MKL LAPACK target (see FindMKL for details)")
+  set(SCALAPACK_TARGET "mkl::scalapack_mpich_intel_32bit_seq_dyn"
+    CACHE STRING "MKL ScaLAPACK target (see FindMKL for details)")
 
   # Note:
   # If specified targets are found, "standardize" them
