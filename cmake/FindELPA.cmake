@@ -18,11 +18,20 @@
 # and pick the one you want.
 # If found, this module create the CMake target ELPA::ELPA
 
-### REQUIREMENTS
-if (NOT SCALAPACK_FOUND)
-  message(FATAL_ERROR "SCALAPACK is a requirement")
+### Requirements
+include(CheckLanguage)
+
+check_language(Fortran)
+if (CMAKE_Fortran_COMPILER)
+  enable_language(Fortran)
+else()
+  message(FATAL_ERROR "Fortran is a requirement for ELPA")
 endif()
 
+find_package(SCALAPACK REQUIRED QUIET)
+find_package(MPI REQUIRED QUIET COMPONENTS Fortran)
+
+### Detect
 include(FindPackageHandleStandardArgs)
 find_package(PkgConfig)
 
@@ -33,19 +42,20 @@ endif()
 pkg_search_module(ELPA ${ELPA_PACKAGE_NAME})
 
 ### TEST
-include(CheckSymbolExists)
+include(CheckFunctionExists)
 include(CMakePushCheckState)
 
 cmake_push_check_state(RESET)
 
 set(CMAKE_REQUIRED_INCLUDES ${ELPA_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_LIBRARIES ${ELPA_LINK_LIBRARIES} SCALAPACK::SCALAPACK)
+set(CMAKE_REQUIRED_LIBRARIES ${ELPA_LINK_LIBRARIES} MPI::MPI_Fortran SCALAPACK::SCALAPACK)
 
 unset(ELPA_CHECK CACHE)
 # Note:
-# If the project does not enable the C language, this check may fail because the compiler,
-# by looking at the file extension of the test, may decide to build it as CXX
-check_symbol_exists(elpa_allocate "elpa/elpa.h" ELPA_CHECK)
+# If the project does not enable the C language, this check_symbol_exists may fail because the compiler,
+# by looking at the file extension of the test, may decide to build it as CXX and not as C.
+# For this reason, here it is just checkde that the symbol is available at linking.
+check_function_exists(elpa_allocate ELPA_CHECK)
 
 cmake_pop_check_state()
 

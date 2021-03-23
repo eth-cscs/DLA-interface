@@ -33,9 +33,8 @@
 # It creates target SCALAPACK::SCALAPACK
 
 # ===== Requirements
-if (NOT MPI_FOUND OR NOT LAPACK_FOUND)
-  message(FATAL_ERROR "MPI and LAPACK are requirements for ScaLAPACK")
-endif()
+find_package(MPI REQUIRED QUIET)
+find_package(LAPACK REQUIRED QUIET)
 
 # ===== Detection
 set(SCALAPACK_TYPE_OPTIONS "Compiler" "Custom")
