@@ -59,7 +59,7 @@ if (DLAI_WITH_DPLASMA)
 endif()
 
 if (DLAI_WITH_ELPA)
-  set(ELPA_PACKAGE_NAME @ELPA_PACKAGE_NAME@)
+  set(ELPA_MODULE_SPEC @ELPA_MODULE_SPEC@)
   find_dependency(ELPA)
 endif()
 

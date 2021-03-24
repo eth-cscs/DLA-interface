@@ -97,14 +97,14 @@ case $scalapack in
   *) echo "Wrong --scalapack option: $scalapack" ; print_help ; exit 1 ;;
 esac
 
-ELPA_VERS=2018.05.001 # TODO ELPA_PACKAGE_NAME EXPECTS THE FULL NAME OF THE PKGCONFIG MODULE
+ELPA_VERS=2018.05.001 # TODO ELPA_MODULE_SPEC EXPECTS THE FULL NAME OF THE PKGCONFIG MODULE
 ELPA_LIB_DIR=/apps/daint/UES/sandbox/rasolca/elpa
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ELPA_LIB_DIR/lib
 
 case $elpa in
   No|no)   OPT_ELPA=() ;;
-  Yes|yes) OPT_ELPA=(-D DLAI_WITH_ELPA=on -D ELPA_PACKAGE_NAME="${ELPA_VERS}") ;;
+  Yes|yes) OPT_ELPA=(-D DLAI_WITH_ELPA=on -D ELPA_MODULE_SPEC="${ELPA_VERS}") ;;
   *)  echo "Wrong --elpa option: $elpa" ; print_help ; exit 1 ;;
 esac
 

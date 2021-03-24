@@ -1,31 +1,29 @@
 #
-# Distributed Linear Algebra Interface (DLAI)
+# CMake recipes
 #
 # Copyright (c) 2018-2021, ETH Zurich
-# All rights reserved.
+# BSD 3-Clause License. All rights reserved.
 #
-# Please, refer to the LICENSE file in the root directory.
-# SPDX-License-Identifier: BSD-3-Clause
+# author: Alberto Invernizzi (a.invernizzi@cscs.ch)
 #
 
 # Find ELPA library
 #
-# This module finds the ELPA library specified with ELPA_PACKAGE_NAME variable with pkg-config.
-# If you don't know how to set the ELPA_PACKAGE_NAME variable, please check the output of
+# This module finds the ELPA library specified with ELPA_MODULE_SPEC variable with pkg-config.
+# If you don't know how to set the ELPA_MODULE_SPEC variable, please check the output of
 #
 # pkg-config --list-all | grep elpa
 #
 # and pick the one you want.
-# If found, this module create the CMake target ELPA::ELPA
+# If found, this module creates the CMake target ELPA::ELPA
 
 ### Detect
-find_package(PkgConfig)
-
-if (NOT DEFINED ELPA_PACKAGE_NAME)
-  message(SEND_ERROR "You should set ELPA_PACKAGE_NAME to pkg-config library name (see pkg-config --list-all | grep elpa)")
+if (NOT DEFINED ELPA_MODULE_SPEC)
+  message(SEND_ERROR "You should set ELPA_MODULE_SPEC to pkg-config module name")
 endif()
 
-pkg_search_module(PC_ELPA ${ELPA_PACKAGE_NAME})
+find_package(PkgConfig)
+pkg_search_module(PC_ELPA ${ELPA_MODULE_SPEC})
 
 find_path(ELPA_INCLUDE_DIR
   NAMES elpa/elpa.h
@@ -38,18 +36,21 @@ find_library(ELPA_LIBRARY
 )
 
 ### TEST
-include(CheckFunctionExists)
 include(CMakePushCheckState)
-
 cmake_push_check_state(RESET)
 
-set(CMAKE_REQUIRED_LIBRARIES ${ELPA_LIBRARY} ${PC_ELPA_LDFLAGS} ${PC_ELPA_LDFLAGS_OTHER})
+# Note:
+# If the project does not enable the C language, check_symbol_exists may fail because the compiler,
+# by looking at the file extension of the test, may decide to build it as CXX and not as C.
+# For this reason, here it just checks that the symbol is available at linking.
+set(CMAKE_REQUIRED_LIBRARIES
+  ${ELPA_LIBRARY}
+  ${PC_ELPA_LDFLAGS}
+  ${PC_ELPA_LDFLAGS_OTHER})
+
+include(CheckFunctionExists)
 
 unset(ELPA_CHECK CACHE)
-# Note:
-# If the project does not enable the C language, this check_symbol_exists may fail because the compiler,
-# by looking at the file extension of the test, may decide to build it as CXX and not as C.
-# For this reason, here it is just checkde that the symbol is available at linking.
 check_function_exists(elpa_allocate ELPA_CHECK)
 
 cmake_pop_check_state()
