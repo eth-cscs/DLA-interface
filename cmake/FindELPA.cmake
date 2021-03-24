@@ -18,28 +18,24 @@
 # and pick the one you want.
 # If found, this module create the CMake target ELPA::ELPA
 
-### Requirements
-include(CheckLanguage)
-
-check_language(Fortran)
-if (CMAKE_Fortran_COMPILER)
-  enable_language(Fortran)
-else()
-  message(FATAL_ERROR "Fortran is a requirement for ELPA")
-endif()
-
-find_package(SCALAPACK REQUIRED QUIET)
-find_package(MPI REQUIRED QUIET COMPONENTS Fortran)
-
 ### Detect
-include(FindPackageHandleStandardArgs)
 find_package(PkgConfig)
 
 if (NOT DEFINED ELPA_PACKAGE_NAME)
   message(SEND_ERROR "You should set ELPA_PACKAGE_NAME to pkg-config library name (see pkg-config --list-all | grep elpa)")
 endif()
 
-pkg_search_module(ELPA ${ELPA_PACKAGE_NAME})
+pkg_search_module(PC_ELPA ${ELPA_PACKAGE_NAME})
+
+find_path(ELPA_INCLUDE_DIR
+  NAMES elpa/elpa.h
+  PATHS ${PC_ELPA_INCLUDE_DIRS}
+)
+
+find_library(ELPA_LIBRARY
+  NAMES elpa elpa_openmp
+  PATHS ${PC_ELPA_LIBRARY_DIRS}
+)
 
 ### TEST
 include(CheckFunctionExists)
@@ -47,8 +43,7 @@ include(CMakePushCheckState)
 
 cmake_push_check_state(RESET)
 
-set(CMAKE_REQUIRED_INCLUDES ${ELPA_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_LIBRARIES ${ELPA_LINK_LIBRARIES} MPI::MPI_Fortran SCALAPACK::SCALAPACK)
+set(CMAKE_REQUIRED_LIBRARIES ${ELPA_LIBRARY} ${PC_ELPA_LDFLAGS} ${PC_ELPA_LDFLAGS_OTHER})
 
 unset(ELPA_CHECK CACHE)
 # Note:
@@ -62,19 +57,21 @@ cmake_pop_check_state()
 ### Package
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(ELPA DEFAULT_MSG
-  ELPA_LINK_LIBRARIES
-  ELPA_INCLUDE_DIRS
+  ELPA_LIBRARY
+  ELPA_INCLUDE_DIR
   ELPA_CHECK
 )
 
 ### CMake Target
 if (ELPA_FOUND)
   if (NOT TARGET ELPA::ELPA)
-    add_library(ELPA::ELPA INTERFACE IMPORTED GLOBAL)
+    add_library(ELPA::ELPA UNKNOWN IMPORTED)
   endif()
 
-  target_include_directories(ELPA::ELPA
-    INTERFACE ${ELPA_INCLUDE_DIRS})
-  target_link_libraries(ELPA::ELPA
-    INTERFACE ${ELPA_LINK_LIBRARIES})
+  set_target_properties(ELPA::ELPA PROPERTIES
+    IMPORTED_LOCATION ${ELPA_LIBRARY}
+    INTERFACE_COMPILE_OPTIONS ${PC_ELPA_CFLAGS_OTHER}
+    INTERFACE_INCLUDE_DIRECTORIES ${ELPA_INCLUDE_DIR}
+    INTERFACE_LINK_LIBRARIES "${PC_ELPA_LDFLAGS};${PC_ELPA_LDFLAGS_OTHER}"
+  )
 endif()
