@@ -81,7 +81,7 @@ endif()
 include(GNUInstallDirs)
 
 install(TARGETS
-  DLAI_CXX DLAI_Fortran
+  DLAI_CXX
   EXPORT DLAI-Targets
   INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
@@ -95,10 +95,16 @@ install(DIRECTORY ../libs/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# Fortran modules
-install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fortran
-)
+if (DLAI_WITH_FORTRAN)
+  install(TARGETS
+    DLAI_Fortran
+    EXPORT DLAI-Targets
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+  # Fortran modules
+  install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fortran)
+endif()
 
 # install custom FindModules
 install(DIRECTORY ../cmake/
