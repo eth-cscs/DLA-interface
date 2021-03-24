@@ -53,6 +53,7 @@ target_link_libraries(DLAI_CXX
 )
 
 if (DLAI_WITH_FORTRAN)
+  set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/fortran_modules)
   add_library(DLAI_Fortran SHARED
     f_dla_interface.F90
   )
@@ -63,8 +64,8 @@ if (DLAI_WITH_FORTRAN)
 
   target_include_directories(DLAI_Fortran PUBLIC
     # *.mod files
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/fortran_modules>
+    $<INSTALL_INTERFACE:include/fortran>
   )
 
   target_link_libraries(DLAI_Fortran
@@ -92,6 +93,11 @@ install(DIRECTORY ../include/
 
 install(DIRECTORY ../libs/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# Fortran modules
+install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fortran
 )
 
 # install custom FindModules
