@@ -17,9 +17,11 @@
 # and pick the one you want.
 # If found, this module creates the CMake target ELPA::ELPA
 
+cmake_minimum_required(VERSION 3.12)
+
 ### Detect
 if (NOT DEFINED ELPA_MODULE_SPEC)
-  message(SEND_ERROR "You should set ELPA_MODULE_SPEC to pkg-config module name")
+  message(FATAL_ERROR "You should set ELPA_MODULE_SPEC to pkg-config module name")
 endif()
 
 find_package(PkgConfig)
@@ -61,6 +63,11 @@ find_package_handle_standard_args(ELPA DEFAULT_MSG
   ELPA_LIBRARY
   ELPA_INCLUDE_DIR
   ELPA_CHECK
+)
+
+mark_as_advanced(
+  ELPA_INCLUDE_DIR
+  ELPA_LIBRARY
 )
 
 ### CMake Target
