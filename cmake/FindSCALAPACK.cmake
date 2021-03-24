@@ -32,37 +32,16 @@
 #
 # It creates target SCALAPACK::SCALAPACK
 
-# ===== Requirements
-find_package(MPI REQUIRED QUIET)
-find_package(LAPACK REQUIRED QUIET)
+cmake_minimum_required(VERSION 3.12)
 
-# ===== Detection
-set(SCALAPACK_TYPE_OPTIONS "Compiler" "Custom")
-set(SCALAPACK_TYPE "Compiler" CACHE STRING "")
-set_property(CACHE SCALAPACK_TYPE PROPERTY STRINGS ${SCALAPACK_TYPE_OPTIONS})
+### Detect
 
-if(SCALAPACK_TYPE STREQUAL "Custom")
-  # user specifies values with
-  # SCALAPACK_INCLUDE_DIR
-  # SCALAPACK_LIBRARY
-  if (NOT (DEFINED SCALAPACK_INCLUDE_DIR AND DEFINED SCALAPACK_LIBRARY))
-    message(WARNING
-      "You have not specified both variables for ScaLAPACK. "
-      "SCALAPACK_INCLUDE_DIR, SCALAPACK_LIBRARY")
-  endif()
-elseif(SCALAPACK_TYPE STREQUAL "Compiler")
-  if (SCALAPACK_INCLUDE_DIR OR SCALAPACK_LIBRARY)
-    message(FATAL_ERROR "You are not supposed to specify anything if SCALAPACK_TYPE=${SCALAPACK_TYPE}")
-  endif()
-else()
-  message(FATAL_ERROR
-    "Unknown ScaLAPACK type: ${SCALAPACK_TYPE}. "
-    "Available options: ${SCALAPACK_TYPE_OPTIONS}")
-endif()
+find_library(SCALAPACK_LIBRARY
+  NAMES
+    scalapack # netlib-scalapack
+)
 
 mark_as_advanced(
-  SCALAPACK_TYPE
-  SCALAPACK_INCLUDE_DIR
   SCALAPACK_LIBRARY
 )
 
@@ -70,9 +49,9 @@ mark_as_advanced(
 include(CMakePushCheckState)
 cmake_push_check_state(RESET)
 
-include(CheckFunctionExists)
+set(CMAKE_REQUIRED_LIBRARIES ${SCALAPACK_LIBRARY})
 
-set(CMAKE_REQUIRED_LIBRARIES MPI::MPI_CXX LAPACK::LAPACK ${SCALAPACK_LIBRARY})
+include(CheckFunctionExists)
 
 unset(_SCALAPACK_CHECK CACHE)
 check_function_exists(pdpotrf_ _SCALAPACK_CHECK)
@@ -83,24 +62,20 @@ check_function_exists(Cblacs_exit _SCALAPACK_CHECK_BLACS)
 cmake_pop_check_state()
 
 ### Package
-if (SCALAPACK_TYPE STREQUAL "Compiler")
-  set(SCALAPACK_FOUND TRUE)
-else()
-  include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(SCALAPACK DEFAULT_MSG
-    SCALAPACK_LIBRARY
-    _SCALAPACK_CHECK_BLACS
-    _SCALAPACK_CHECK
-  )
-endif()
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(SCALAPACK DEFAULT_MSG
+  _SCALAPACK_CHECK_BLACS
+  _SCALAPACK_CHECK
+)
 
 if (SCALAPACK_FOUND)
   if (NOT TARGET SCALAPACK::SCALAPACK)
-    add_library(SCALAPACK::SCALAPACK INTERFACE IMPORTED GLOBAL)
+    add_library(SCALAPACK::SCALAPACK INTERFACE IMPORTED)
   endif()
 
-  target_include_directories(SCALAPACK::SCALAPACK
-    INTERFACE ${SCALAPACK_INCLUDE_DIR})
-  target_link_libraries(SCALAPACK::SCALAPACK
-    INTERFACE ${SCALAPACK_LIBRARY})
+  if (SCALAPACK_LIBRARY)
+    set_target_properties(SCALAPACK::SCALAPACK PROPERTIES
+      IMPORTED_LOCATION "${SCALAPACK_LIBRARY}"
+    )
+  endif()
 endif()
