@@ -87,16 +87,7 @@ if (DLAI_WITH_MKL)
     target_link_libraries(SCALAPACK::SCALAPACK INTERFACE ${SCALAPACK_TARGET})
   endif()
 else()
-  # Note:
-  # Since FindLAPACK has been added to CMake official repository, here our custom one
-  # is called in case the user has specified manually anything (cmake/lapack.cmake),
-  # otherwise the default FindLAPACK is used.
-  if (LAPACK_TYPE OR LAPACK_INCLUDE_DIR OR LAPACK_LIBRARY)
-    include(lapack)
-  else()
-    find_package(LAPACK REQUIRED)
-  endif()
-
+  find_package(LAPACK REQUIRED)
   find_package(SCALAPACK)
 endif()
 
