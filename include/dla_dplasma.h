@@ -11,36 +11,36 @@
 namespace dla_interface {
   namespace dplasma_wrappers {
 
-    inline PLASMA_enum plasmaUpLo(UpLo uplo) {
+    inline dplasma_enum_t plasmaUpLo(UpLo uplo) {
       switch (uplo) {
         case Lower:
-          return PlasmaLower;
+          return dplasmaLower;
         case Upper:
-          return PlasmaUpper;
+          return dplasmaUpper;
         default:
           throw(std::invalid_argument(errorMessage("Invalid UpLo element.", uplo)));
       }
     }
 
-    inline PLASMA_enum plasmaTrans(OpTrans trans) {
+    inline dplasma_enum_t plasmaTrans(OpTrans trans) {
       switch (trans) {
         case NoTrans:
-          return PlasmaNoTrans;
+          return dplasmaNoTrans;
         case Trans:
-          return PlasmaTrans;
+          return dplasmaTrans;
         case ConjTrans:
-          return PlasmaConjTrans;
+          return dplasmaConjTrans;
         default:
           throw(std::invalid_argument(errorMessage("Invalid OpTrans element.", trans)));
       }
     }
 
-    inline PLASMA_enum plasmaDiag(Diag diag) {
+    inline dplasma_enum_t plasmaDiag(Diag diag) {
       switch (diag) {
         case Unit:
-          return PlasmaUnit;
+          return dplasmaUnit;
         case NonUnit:
-          return PlasmaNonUnit;
+          return dplasmaNonUnit;
         default:
           throw(std::invalid_argument(errorMessage("Invalid Diag element.", diag)));
       }
@@ -113,7 +113,7 @@ namespace dla_interface {
     struct pgetrf<float> {
       template <class... Args>
       static auto run(Args... args) {
-        return dplasma_sgetrf(args...);
+        return dplasma_sgetrf_1d(args...);
       }
     };
 
@@ -121,7 +121,7 @@ namespace dla_interface {
     struct pgetrf<double> {
       template <class... Args>
       static auto run(Args... args) {
-        return dplasma_dgetrf(args...);
+        return dplasma_dgetrf_1d(args...);
       }
     };
 
@@ -129,7 +129,7 @@ namespace dla_interface {
     struct pgetrf<std::complex<float>> {
       template <class... Args>
       static auto run(Args... args) {
-        return dplasma_cgetrf(args...);
+        return dplasma_cgetrf_1d(args...);
       }
     };
 
@@ -137,7 +137,7 @@ namespace dla_interface {
     struct pgetrf<std::complex<double>> {
       template <class... Args>
       static auto run(Args... args) {
-        return dplasma_zgetrf(args...);
+        return dplasma_zgetrf_1d(args...);
       }
     };
 

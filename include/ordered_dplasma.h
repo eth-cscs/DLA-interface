@@ -10,8 +10,8 @@
 #include <mpi.h>
 
 #define operator op
-#include "dplasma.h"
-#include "data_dist/matrix/two_dim_rectangle_cyclic.h"
+#include <dplasma.h>
+#include <parsec/data_dist/matrix/two_dim_rectangle_cyclic.h>
 #undef operator
 
 // complex.h (included by core_blas.h included by dplasma.h)

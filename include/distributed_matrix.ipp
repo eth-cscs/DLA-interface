@@ -346,10 +346,18 @@ DPlasmaDescriptor DistributedMatrix<ElType>::getDPlasmaDescriptionInternal() con
       ((leading_nr_blocks_ - 1) * comm_grid_->size2D().first + comm_grid_->id2D().first + 1) *
           block_size_.first);
 
-  two_dim_block_cyclic_init(&desc, TypeInfo<ElType>::dplasma_type, matrix_Tile, size, rank,
-                            block_size_.first, block_size_.second, m_full_estimate,
-                            base_index_.col + size_.second, base_index_.row, base_index_.col,
-                            size_.first, size_.second, 1, 1, comm_grid_->size2D().first);
+  two_dim_block_cyclic_init(
+      &desc,
+      TypeInfo<ElType>::dplasma_type,
+      matrix_Tile,
+      rank,
+      block_size_.first, block_size_.second,
+      m_full_estimate, base_index_.col + size_.second,
+      base_index_.row, base_index_.col,
+      size_.first, size_.second,
+      comm_grid_->size2D().first, comm_grid_->size2D().second,
+      1, 1,
+      0, 0);
   return desc;
 }
 
