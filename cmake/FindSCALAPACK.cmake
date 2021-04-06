@@ -28,96 +28,65 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-macro(_scalapack_find_dependency dep)
-  set(_scalapack_quiet_arg)
-  if(SCALAPACK_FIND_QUIETLY)
-    set(_scalapack_quiet_arg QUIET)
-  endif()
-  set(_scalapack_required_arg)
-  if(SCALAPACK_FIND_REQUIRED)
-    set(_scalapack_required_arg REQUIRED)
-  endif()
-  find_package(${dep} ${ARGN}
-    ${_scalapack_quiet_arg}
-    ${_scalapack_required_arg})
-  if (NOT ${dep}_FOUND)
-    set(SCALAPACK_NOT_FOUND_MESSAGE "SCALAPACK could not be found because dependency ${dep} could not be found.")
-  endif()
+find_package(LAPACK QUIET REQUIRED) # inherently depends on BLAS
+find_package(MPI QUIET REQUIRED)
 
-  set(_scalapack_required_arg)
-  set(_scalapack_quiet_arg)
-endmacro()
+set(_DEPS "LAPACK::LAPACK")
 
-macro(_scalapack_check_symbols _PREFIX)
-  include(CMakePushCheckState)
-  cmake_push_check_state(RESET)
+# Enable MPI Target for all enabled languages
+get_property(_ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+foreach(_LANG ${_ENABLED_LANGUAGES})
+  list(APPEND _DEPS "MPI::MPI_${_LANG}")
+endforeach()
 
-  set(_libraries ${${_PREFIX}_LIBRARY})
+### Detect
 
-  set(CMAKE_REQUIRED_QUIET TRUE)
-  set(CMAKE_REQUIRED_LIBRARIES "${_libraries}")
+find_library(SCALAPACK_LIBRARY
+  NAMES
+    scalapack # netlib-scalapack
+)
 
-  include(CheckFunctionExists)
+mark_as_advanced(
+  SCALAPACK_LIBRARY
+)
 
-  unset(_SCALAPACK_CHECK CACHE)
-  check_function_exists(pdpotrf_ _SCALAPACK_CHECK)
+# ===== TEST
+include(CMakePushCheckState)
+cmake_push_check_state(RESET)
 
-  unset(_SCALAPACK_CHECK_BLACS CACHE)
-  check_function_exists(Cblacs_exit _SCALAPACK_CHECK_BLACS)
+set(CMAKE_REQUIRED_LIBRARIES ${SCALAPACK_LIBRARY} ${_DEPS})
 
-  cmake_pop_check_state()
+include(CheckFunctionExists)
 
-  if (_SCALAPACK_CHECK AND _SCALAPACK_CHECK_BLACS)
-    if (_libraries)
-      set(SCALAPACK_LIBRARY ${_libraries})
-    else()
-      set(SCALAPACK_LIBRARY "SCALAPACK-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
-    endif()
-  else()
-    set(SCALAPACK_LIBRARY FALSE)
-  endif()
+unset(_SCALAPACK_CHECK CACHE)
+check_function_exists(pdpotrf_ _SCALAPACK_CHECK)
 
-  unset(_libraries)
-endmacro()
+unset(_SCALAPACK_CHECK_BLACS CACHE)
+check_function_exists(Cblacs_exit _SCALAPACK_CHECK_BLACS)
 
+cmake_pop_check_state()
 
-_scalapack_find_dependency(LAPACK)
-
-if (NOT SCALAPACK_NOT_FOUND_MESSAGE)
-  # check if compiler implicitly links to SCALAPACK...
-  # ... or use what the users specified in SCALAPACK_LIBRARY
-  _scalapack_check_symbols("SCALAPACK")
-
-  # netlib-scalapack
-  if (NOT SCALAPACK_LIBRARY)
-    find_library(netlib_LIBRARY NAMES scalapack)
-    _scalapack_check_symbols("netlib")
-  endif()
-endif()
-
-if (SCALAPACK_NOT_FOUND_MESSAGE)
-  set(SCALAPACK_NOT_FOUND_MESSAGE REASON_FAILURE_MESSAGE "${SCALAPACK_NOT_FOUND_MESSAGE}")
-endif()
-
+### Package
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(SCALAPACK
-  REQUIRED_VARS SCALAPACK_LIBRARY
-  ${SCALAPACK_NOT_FOUND_MESSAGE})
+find_package_handle_standard_args(SCALAPACK DEFAULT_MSG
+  _SCALAPACK_CHECK_BLACS
+  _SCALAPACK_CHECK
+  LAPACK_FOUND
+  MPI_FOUND
+)
 
-# In case compiler implicitly links, remove empty variable placeholder
-if (SCALAPACK_LIBRARY MATCHES "SCALAPACK-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
-  set(SCALAPACK_LIBRARY)
-endif()
-
-# Create the CMake target
 if (SCALAPACK_FOUND)
   if (NOT TARGET SCALAPACK::SCALAPACK)
     add_library(SCALAPACK::SCALAPACK INTERFACE IMPORTED)
   endif()
 
-  # note: if the compiler implicitly link to SCALAPACK
   if (SCALAPACK_LIBRARY)
     set_target_properties(SCALAPACK::SCALAPACK PROPERTIES
-      IMPORTED_LOCATION ${SCALAPACK_LIBRARY})
+      IMPORTED_LOCATION ${SCALAPACK_LIBRARY}
+    )
+    target_link_libraries(SCALAPACK::SCALAPACK INTERFACE
+      ${SCALAPACK_LIBRARY}
+      ${_DEPS}
+    )
   endif()
 endif()
