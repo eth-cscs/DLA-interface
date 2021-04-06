@@ -46,7 +46,8 @@ if (DLAI_WITH_MKL)
     target_link_libraries(SCALAPACK::SCALAPACK INTERFACE ${SCALAPACK_TARGET})
   endif()
 else()
-  # TODO
+  find_dependency(LAPACK)
+  find_dependency(SCALAPACK)
 endif()
 
 # ----- BACKENDs

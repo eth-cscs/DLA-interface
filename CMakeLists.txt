@@ -88,11 +88,7 @@ if (DLAI_WITH_MKL)
   endif()
 else()
   find_package(LAPACK REQUIRED)
-  find_package(SCALAPACK)
-endif()
-
-if (DLAI_WITH_FORTRAN AND NOT SCALAPACK_FOUND)
-  message(FATAL_ERROR "Cannot build Fortran bindings without Scalapack. Set DLAI_WITH_FORTRAN to OFF")
+  find_package(SCALAPACK REQUIRED)
 endif()
 
 # ----- BACKENDs
