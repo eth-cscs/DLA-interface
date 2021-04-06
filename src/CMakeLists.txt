@@ -58,7 +58,7 @@ if (DLAI_WITH_FORTRAN)
   )
 
   target_compile_options(DLAI_Fortran PUBLIC
-    $<$<COMPILE_LANGUAGE:Fortran>:-ffree-line-length-0>
+    $<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<Fortran_COMPILER_ID:GNU>>:-ffree-line-length-0>
   )
 
   target_include_directories(DLAI_Fortran PUBLIC
