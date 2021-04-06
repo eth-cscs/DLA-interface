@@ -47,9 +47,8 @@ target_link_libraries(DLAI_CXX
     LAPACK::LAPACK
     $<$<BOOL:${SCALAPACK_FOUND}>:SCALAPACK::SCALAPACK>
 
-  PRIVATE
-    MPI::MPI_CXX
     OpenMP::OpenMP_CXX
+    MPI::MPI_CXX
 )
 
 if (DLAI_WITH_FORTRAN)
@@ -71,9 +70,9 @@ if (DLAI_WITH_FORTRAN)
   target_link_libraries(DLAI_Fortran
     PUBLIC
       MPI::MPI_Fortran
+      OpenMP::OpenMP_Fortran
     PRIVATE
       DLAI_CXX
-      OpenMP::OpenMP_Fortran
   )
 endif()
 
