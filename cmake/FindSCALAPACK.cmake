@@ -9,12 +9,9 @@
 
 # Find SCALAPACK library
 #
-# !!! WARNING !!!
-# It is up to the user to ensure the compatibility between the ScaLAPACK library and any
-# other BLAS/LAPACK and MPI implementations used in the project.
-#
-# This module checks if `netlib-scalapack` is available or if the compiler implicitly links
-# to a ScaLAPACK implementation.
+# ScaLAPACK depends on MPI and LAPACK, so it depends on other modules for their respective
+# targets LAPACK::LAPACK and MPI::MPI_<LANG>. In particular, for the latter one, this module checks
+# which language is enabled in the project and it adds all needed dependencies.
 #
 # Users can manually specify next variables (even by setting them empty to force use of
 # the compiler implicit linking) to control which implementation they want to use:
@@ -28,23 +25,23 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-find_package(LAPACK QUIET REQUIRED) # inherently depends on BLAS
+set(_PLACEHOLDER "SCALAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
+if (SCALAPACK_LIBRARY STREQUAL "")
+  set(SCALAPACK_LIBRARY ${_PLACEHOLDER})
+endif()
+
+# Dependencies
+set(_DEPS "")
+
+find_package(LAPACK QUIET REQUIRED)
+list(APPEND _DEPS "LAPACK::LAPACK")
+
 find_package(MPI QUIET REQUIRED)
-
-set(_DEPS "LAPACK::LAPACK")
-
 # Enable MPI Target for all enabled languages
 get_property(_ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 foreach(_LANG ${_ENABLED_LANGUAGES})
   list(APPEND _DEPS "MPI::MPI_${_LANG}")
 endforeach()
-
-### Detect
-
-find_library(SCALAPACK_LIBRARY
-  NAMES
-    scalapack # netlib-scalapack
-)
 
 mark_as_advanced(
   SCALAPACK_LIBRARY
@@ -54,7 +51,10 @@ mark_as_advanced(
 include(CMakePushCheckState)
 cmake_push_check_state(RESET)
 
-set(CMAKE_REQUIRED_LIBRARIES ${SCALAPACK_LIBRARY} ${_DEPS})
+set(CMAKE_REQUIRED_LIBRARIES ${_DEPS})
+if (NOT SCALAPACK_LIBRARY STREQUAL ${_PLACEHOLDER})
+  list(APPEND CMAKE_REQUIRED_LIBRARIES ${SCALAPACK_LIBRARY})
+endif()
 
 include(CheckFunctionExists)
 
@@ -69,11 +69,17 @@ cmake_pop_check_state()
 ### Package
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SCALAPACK DEFAULT_MSG
+  SCALAPACK_LIBRARY
   _SCALAPACK_CHECK_BLACS
   _SCALAPACK_CHECK
   LAPACK_FOUND
   MPI_FOUND
 )
+
+# Remove the placeholder
+if (SCALAPACK_LIBRARY STREQUAL _PLACEHOLDER)
+  set(SCALAPACK_LIBRARY "")
+endif()
 
 if (SCALAPACK_FOUND)
   if (NOT TARGET SCALAPACK::SCALAPACK)
