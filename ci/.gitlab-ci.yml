@@ -3,11 +3,12 @@ include:
 
 stages:
   - build
-  - test
-  - notify
+
+variables:
+  FORCE_BUILD_IMAGE: "OFF"
 
 ##
-## BUILDS
+## BUILD
 ##
 
 .build_common:
@@ -15,13 +16,16 @@ stages:
   stage: build
   only:
     - master
+    - staging
+    - trying
+
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   before_script:
     - docker login -u $CSCS_REGISTRY_USER -p $CSCS_REGISTRY_PASSWORD $CSCS_REGISTRY
   script:
     - TAG=`sha256sum $BUILD_DOCKER_FILE | head -c 64`
-    - docker build -t $BUILD_IMAGE:$TAG -t $BUILD_IMAGE:latest --cache-from $BUILD_IMAGE:$TAG --cache-from $BUILD_IMAGE:latest --build-arg BASE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg HPX_WITH_CUDA -f $BUILD_DOCKER_FILE --network=host .
+    - if [ "$FORCE_BUILD_IMAGE" == "ON" ]; then docker build -t $BUILD_IMAGE:$TAG -t $BUILD_IMAGE:latest --cache-from $BUILD_IMAGE:$TAG --cache-from $BUILD_IMAGE:latest --build-arg BASE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg HPX_WITH_CUDA -f $BUILD_DOCKER_FILE --network=host .; fi
     - docker push $BUILD_IMAGE:$TAG
     - docker push $BUILD_IMAGE:latest
 
