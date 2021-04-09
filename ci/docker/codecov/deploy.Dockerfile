@@ -29,9 +29,7 @@ RUN mkdir ${BUILD} && cd ${BUILD} && \
       -DCMAKE_EXE_LINKER_FLAGS="-fprofile-arcs -ftest-coverage" \
       -DDLAI_CI_RUNNER_USES_MPIRUN=ON \
       -DDLAI_WITH_MKL=0 \
-      -DLAPACK_CUSTOM_TYPE=Custom \
-      -DLAPACK_CUSTOM_INCLUDE_DIR=${OPENBLAS_PATH}/include \
-      -DLAPACK_CUSTOM_LIBRARY="-L${OPENBLAS_PATH}/lib;openblas" \
+      -DLAPACK_LIBRARY="-L${OPENBLAS_PATH}/lib;openblas" \
       -DSCALAPACK_LIBRARY="-L${SCALAPACK_PATH}/lib;scalapack" \
       -DHWLOC_ROOT=${HWLOC_PATH} \
       -DDLAI_BUILD_TESTING=ON \
