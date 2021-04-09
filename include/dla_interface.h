@@ -1,3 +1,13 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2019, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_DLA_INTERFACE_H
 #define DLA_INTERFACE_DLA_INTERFACE_H
 
@@ -18,10 +28,11 @@
 
 namespace dla_interface {
 
-  // print_timers <= 0: do not print any timer info,
-  // print_timers >= 1: print routine total time info,
-  // print_timers >= 2: print convertion time and solver time as well.
-  // Note: enabled timers add MPI barriers.
+  /// print_timers <= 0: do not print any timer info,
+  /// print_timers >= 1: print routine total time info,
+  /// print_timers >= 2: print convertion time and solver time as well.
+  ///
+  /// @note enabled timers add MPI barriers.
 
   template <class ElType>
   void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,

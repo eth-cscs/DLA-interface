@@ -1,10 +1,25 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2019, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_C_DLA_INTERFACE_H
 #define DLA_INTERFACE_C_DLA_INTERFACE_H
 
 #include <mpi.h>
 
-// Note the routines for the complex case are declared using the pointer to the real part of the
-// first element.
+	/** DLAINT C Interface.
+	 *
+	 * The DLAINT C Interface is a layer in DLAINT to enable communication with C compilers.
+	 *
+	 * Note the routines for the complex case are declared using the pointer
+	 * to the real part of the first element.
+	 */
 
 #ifdef __cplusplus
 extern "C" {
