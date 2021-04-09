@@ -19,8 +19,6 @@ specify how to link to the specific implementation with the variables:
 - `LAPACK_LIBRARY` (for both BLAS and LAPACK)
 - `SCALAPACK_LIBRARY`
 
-It must be highlighted that if you want to use the compiler implicit implementation, you have to pass an empty string for the variable.
-
 ## Parsec/DPlasma
 
 `PARSEC_DIR` has to point to the directory where `ParsecConfig.cmake` is,

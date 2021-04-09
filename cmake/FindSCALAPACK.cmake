@@ -46,7 +46,7 @@ macro(_scalapack_check_is_working)
   cmake_pop_check_state()
 endmacro()
 
-if (SCALAPACK_LIBRARY STREQUAL "")
+if (SCALAPACK_LIBRARY STREQUAL "" OR NOT SCALAPACK_LIBRARY)
   set(SCALAPACK_LIBRARY "SCALAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
 endif()
 
