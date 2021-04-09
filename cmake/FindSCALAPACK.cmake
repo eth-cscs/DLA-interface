@@ -25,9 +25,29 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-set(_PLACEHOLDER "SCALAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
+macro(_scalapack_check_is_working)
+  include(CMakePushCheckState)
+  cmake_push_check_state(RESET)
+
+  set(CMAKE_REQUIRED_QUIET TRUE)
+  set(CMAKE_REQUIRED_LIBRARIES ${_DEPS})
+  if (NOT SCALAPACK_LIBRARY STREQUAL "SCALAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES ${SCALAPACK_LIBRARY})
+  endif()
+
+  include(CheckFunctionExists)
+
+  unset(_SCALAPACK_CHECK CACHE)
+  check_function_exists(pdpotrf_ _SCALAPACK_CHECK)
+
+  unset(_SCALAPACK_CHECK_BLACS CACHE)
+  check_function_exists(Cblacs_exit _SCALAPACK_CHECK_BLACS)
+
+  cmake_pop_check_state()
+endmacro()
+
 if (SCALAPACK_LIBRARY STREQUAL "")
-  set(SCALAPACK_LIBRARY ${_PLACEHOLDER})
+  set(SCALAPACK_LIBRARY "SCALAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
 endif()
 
 # Dependencies
@@ -47,24 +67,7 @@ mark_as_advanced(
   SCALAPACK_LIBRARY
 )
 
-# ===== TEST
-include(CMakePushCheckState)
-cmake_push_check_state(RESET)
-
-set(CMAKE_REQUIRED_LIBRARIES ${_DEPS})
-if (NOT SCALAPACK_LIBRARY STREQUAL ${_PLACEHOLDER})
-  list(APPEND CMAKE_REQUIRED_LIBRARIES ${SCALAPACK_LIBRARY})
-endif()
-
-include(CheckFunctionExists)
-
-unset(_SCALAPACK_CHECK CACHE)
-check_function_exists(pdpotrf_ _SCALAPACK_CHECK)
-
-unset(_SCALAPACK_CHECK_BLACS CACHE)
-check_function_exists(Cblacs_exit _SCALAPACK_CHECK_BLACS)
-
-cmake_pop_check_state()
+_scalapack_check_is_working()
 
 ### Package
 include(FindPackageHandleStandardArgs)
@@ -77,7 +80,7 @@ find_package_handle_standard_args(SCALAPACK DEFAULT_MSG
 )
 
 # Remove the placeholder
-if (SCALAPACK_LIBRARY STREQUAL _PLACEHOLDER)
+if (SCALAPACK_LIBRARY STREQUAL "SCALAPACK_LIBRARIES-PLACEHOLDER-FOR-EMPTY-LIBRARIES")
   set(SCALAPACK_LIBRARY "")
 endif()
 
@@ -87,9 +90,6 @@ if (SCALAPACK_FOUND)
   endif()
 
   if (SCALAPACK_LIBRARY)
-    set_target_properties(SCALAPACK::SCALAPACK PROPERTIES
-      IMPORTED_LOCATION ${SCALAPACK_LIBRARY}
-    )
     target_link_libraries(SCALAPACK::SCALAPACK INTERFACE
       ${SCALAPACK_LIBRARY}
       ${_DEPS}
