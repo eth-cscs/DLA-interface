@@ -7,29 +7,16 @@
 
 # Cmake options:
 
-## BLAS / LAPACK
+## BLAS, LAPACK and SCALAPACK
 
-BLAS and LAPACK can be configured in 3 ways setting `DLA_LAPACK_TYPE`
-- `"Compiler"`: The compiler already link with the correct libraries.
-- `"MKL"`: MKL located in `MKL_ROOT` (or env variable `MKLROOT` if not defined) is used.
-- `"Custom"`: Link the libraries specified by `DLA_BLAS_LAPACK_LIB`.
+Using MKL as provider for all of them is possible by specifying the CMake option `DLAI_WITH_MKL=on`. (see FindMKL module for more options)
 
-For the MKL case the following options apply:
-- `MKL_THREADING`:
-  - `"Sequential"`
-  - `"GNU OpenMP"` (Default)
-  - `"Intel OpenMP"` (Default with Apple)
+Otherwise, if you want to use implementations provided implicitly by the compiler, or you want to use a specific implementation, you can
+specify how to link to the specific implementation with the variables:
+- `LAPACK_LIBRARY` (for both BLAS and LAPACK)
+- `SCALAPACK_LIBRARY`
 
-## Scalapack
-
-ScaLAPACK can be configured in 3 ways setting `DLA_SCALAPACK_TYPE`
-- `"Compiler"`: The compiler already link with the correct libraries
-- `"MKL"`: MKL ScaLAPACK is used (Only if `DLA_LAPACK_TYPE="MKL"` as well).
-- `"Custom"`: Link the libraries specified by `DLA_SCALAPACK_LIB`
-
-For the MKL case the MPI interface has to be defined iwith `MKL_MPI_TYPE` as well:
-- `"IntelMPI"`: Supports IntelMPI, MPICH, MVAPICH
-- `"OpenMPI"`: Supports OpenMPI
+It must be highlighted that if you want to use the compiler implicit implementation, you have to pass an empty string for the variable.
 
 ## Parsec/DPlasma
 
