@@ -65,26 +65,26 @@ mpi_preset_setup()
 if (DLAI_WITH_MKL)
   find_package(MKL REQUIRED)
 
-  set(LAPACK_TARGET "mkl::mkl_intel_32bit_seq_dyn"
+  set(MKL_LAPACK_TARGET "mkl::mkl_intel_32bit_seq_dyn"
     CACHE STRING "MKL LAPACK target (see FindMKL for details)")
-  set(SCALAPACK_TARGET "mkl::scalapack_mpich_intel_32bit_seq_dyn"
+  set(MKL_SCALAPACK_TARGET "mkl::scalapack_mpich_intel_32bit_seq_dyn"
     CACHE STRING "MKL ScaLAPACK target (see FindMKL for details)")
 
   # Note:
   # If specified targets are found, "standardize" them
 
-  if (TARGET ${LAPACK_TARGET})
+  if (TARGET ${MKL_LAPACK_TARGET})
     set(LAPACK_FOUND TRUE)
     add_library(LAPACK::LAPACK INTERFACE IMPORTED GLOBAL)
-    target_link_libraries(LAPACK::LAPACK INTERFACE ${LAPACK_TARGET})
+    target_link_libraries(LAPACK::LAPACK INTERFACE ${MKL_LAPACK_TARGET})
   else()
     message(FATAL_ERROR "not available")
   endif()
 
-  if (TARGET ${SCALAPACK_TARGET})
+  if (TARGET ${MKL_SCALAPACK_TARGET})
     set(SCALAPACK_FOUND TRUE)
     add_library(SCALAPACK::SCALAPACK INTERFACE IMPORTED GLOBAL)
-    target_link_libraries(SCALAPACK::SCALAPACK INTERFACE ${SCALAPACK_TARGET})
+    target_link_libraries(SCALAPACK::SCALAPACK INTERFACE ${MKL_SCALAPACK_TARGET})
   endif()
 else()
   find_package(LAPACK REQUIRED)

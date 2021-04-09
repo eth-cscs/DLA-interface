@@ -87,13 +87,13 @@ case $partition in
 esac
 
 case $lapack in
-  MKLst) OPT_LAPACK=(-D DLAI_WITH_MKL=on -D LAPACK_TARGET="mkl::mkl_intel_32bit_seq_dyn") ;;
-  MKLmt) OPT_LAPACK=(-D DLAI_WIHT_MKL=on -D LAPACK_TARGET="mkl::mkl_intel_32bit_omp_dyn") ;;
+  MKLst) OPT_LAPACK=(-D DLAI_WITH_MKL=on -D MKL_LAPACK_TARGET="mkl::mkl_intel_32bit_seq_dyn") ;;
+  MKLmt) OPT_LAPACK=(-D DLAI_WIHT_MKL=on -D MKL_LAPACK_TARGET="mkl::mkl_intel_32bit_omp_dyn") ;;
   *) echo "Wrong --lapack option: $lapack" ; print_help ; exit 1 ;;
 esac
 
 case $scalapack in
-  MKL)   OPT_SCALAPACK=(-D DLAI_WIHT_MKL=on -D SCALAPACK_TARGET="mkl::scalapack_mpich_intel_32bit_seq_dyn") ;;
+  MKL)   OPT_SCALAPACK=(-D DLAI_WIHT_MKL=on -D MKL_SCALAPACK_TARGET="mkl::scalapack_mpich_intel_32bit_seq_dyn") ;;
   *) echo "Wrong --scalapack option: $scalapack" ; print_help ; exit 1 ;;
 esac
 

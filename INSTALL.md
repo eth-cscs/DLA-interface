@@ -9,7 +9,10 @@
 
 ## BLAS, LAPACK and SCALAPACK
 
-Using MKL as provider for all of them is possible by specifying the CMake option `DLAI_WITH_MKL=on`. (see FindMKL module for more options)
+Using MKL as provider for all of them is possible by specifying the CMake option `DLAI_WITH_MKL=on`.
+See FindMKL module for more options, moreover you can select the specific variant of MKL via the variables:
+- `MKL_LAPACK_TARGET`
+- `MKL_SCALAPACK_TARGET`
 
 Otherwise, if you want to use implementations provided implicitly by the compiler, or you want to use a specific implementation, you can
 specify how to link to the specific implementation with the variables:
