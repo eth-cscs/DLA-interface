@@ -1,7 +1,7 @@
 #ifndef DLA_INTERFACE_DLA_HPX_LINALG_H
 #define DLA_INTERFACE_DLA_HPX_LINALG_H
 
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
 
 #include "hpx_linalg/hpx_linalg.h"
 

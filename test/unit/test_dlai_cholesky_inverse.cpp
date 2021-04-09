@@ -17,11 +17,11 @@ using namespace dla_interface;
 using namespace testing;
 
 bool choleskyInverseTestThrows(SolverType solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
   if (solver == ScaLAPACK)
     return false;
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
   if (solver == DPlasma)
     return false;
 #endif

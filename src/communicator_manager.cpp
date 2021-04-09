@@ -13,7 +13,7 @@
 #include "internal_error.h"
 #include "types.h"
 
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
 #include "hpx_linalg/hpx_linalg.h"
 #endif
 
@@ -39,7 +39,7 @@ namespace dla_interface {
       comm_manager_ = nullptr;
     }
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     ParsecContext CommunicatorManager::getParsecContext() {
       return comm_manager_->parsec_handle_;
     }
@@ -50,7 +50,7 @@ namespace dla_interface {
       return comm_manager_->communicator2DGrid(base_comm, nr_rows, nr_cols, comm_ordering);
     }
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     Communicator2DGrid& CommunicatorManager::createCommunicator2DGridBlacs(  //
         int blacs_handle, int nr_rows, int nr_cols, Ordering comm_ordering) {
       return comm_manager_->communicator2DGrid(blacs::Cblacs2sys_handle(blacs_handle), nr_rows,
@@ -62,7 +62,7 @@ namespace dla_interface {
       return comm_manager_->communicator2DGridFromMPIComm(comm);
     }
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     Communicator2DGrid& CommunicatorManager::getCommunicator2DGridFromBlacsContext(BlacsContextType id) {
       return comm_manager_->communicator2DGridFromBlacsContext(id);
     }
@@ -74,7 +74,7 @@ namespace dla_interface {
     void CommunicatorManager::free2DGridFromMPIComm(MPI_Comm comm) {
       free2DGrid(getCommunicator2DGridFromMPIComm(comm));
     }
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     void CommunicatorManager::free2DGridFromBlacsContext(BlacsContextType id) {
       free2DGrid(getCommunicator2DGridFromBlacsContext(id));
     }
@@ -92,7 +92,7 @@ namespace dla_interface {
         throw error::InternalError("Cannot insert column commmunicator in the map");
       if (!comm_grid_map_.insert(std::make_pair(comm_grid->rowOrderedMPICommunicator(), comm_grid)).second)
         throw error::InternalError("Cannot insert row ordered commmunicator in the map");
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       if (!ictxt_grid_map_.insert(std::make_pair(comm_grid->blacsContext(), comm_grid)).second)
         throw error::InternalError("Cannot insert BLACS context id in the map");
 #endif
@@ -106,7 +106,7 @@ namespace dla_interface {
         throw std::invalid_argument("No communicator2DGrid found with the given MPI_Comm");
       }
     }
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     Communicator2DGrid& CommunicatorManager::communicator2DGridFromBlacsContext(BlacsContextType id) const {
       try {
         return *ictxt_grid_map_.at(id);
@@ -118,7 +118,7 @@ namespace dla_interface {
 #endif
 
     void CommunicatorManager::destroy2DGrid(Communicator2DGrid& grid) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       // Internal Check of the number of shared pointer
       assert(comm_grid_map_.at(grid.rowOrderedMPICommunicator()).use_count() == 4);
       ictxt_grid_map_.erase(grid.blacsContext());
@@ -145,15 +145,15 @@ namespace dla_interface {
       }
 
       thread::CpuSet application_cpuset = topo_.getCpuBind();
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       scalapack_cpuset_ = application_cpuset;
       scalapack_nr_threads_ = thread::getOmpBlasThreads();
 #endif
-#ifdef DLA_HAVE_ELPA
+#ifdef DLAI_WITH_ELPA
       elpa::init();
 #endif
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
       if (argc == nullptr) {
         parsec_handle_ = parsec_init(nr_cores, nullptr, nullptr);
       }
@@ -187,7 +187,7 @@ namespace dla_interface {
       topo_.setCpuBind(application_cpuset);
 #endif
 
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
       std::vector<std::string> cfg = {"hpx.commandline.allow_unknown=1",
                                       "hpx.commandline.aliasing=0"};
       if (nr_cores > 0) {
@@ -222,16 +222,16 @@ namespace dla_interface {
         std::cerr << s.str() << std::endl;
 
       comm_grid_map_.clear();
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       ictxt_grid_map_.clear();
 #endif
-#ifdef DLA_HAVE_ELPA
+#ifdef DLAI_WITH_ELPA
       elpa_uninit();
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
       parsec_fini(&parsec_handle_);
 #endif
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
       hpx_linalg::stop();
 #endif
 

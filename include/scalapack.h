@@ -4,7 +4,7 @@
 #include <mpi.h>
 #include "blacs.h"
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 namespace scalapack {
 
   extern "C" {

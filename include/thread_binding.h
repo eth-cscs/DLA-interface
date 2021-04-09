@@ -1,7 +1,7 @@
 #ifndef DLA_INTERFACE_THREAD_BINDING_H
 #define DLA_INTERFACE_THREAD_BINDING_H
 
-#ifdef DLA_HAVE_HWLOC
+#ifdef DLAI_WITH_HWLOC
 #include <hwloc.h>
 #endif
 #include <cstdlib>
@@ -11,7 +11,7 @@
 namespace dla_interface {
   namespace thread {
 
-#ifdef DLA_HAVE_HWLOC
+#ifdef DLAI_WITH_HWLOC
     class CpuSet {
       public:
       CpuSet() : cpuset_(hwloc_bitmap_alloc()) {}

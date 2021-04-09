@@ -1,7 +1,7 @@
 #ifndef DLA_INTERFACE_UTIL_DEBUG_OUTPUT_H
 #define DLA_INTERFACE_UTIL_DEBUG_OUTPUT_H
 
-#ifdef DLA_PRINT_DEBUG_CALL_PARAM
+#ifdef DLAI_PRINT_DEBUG_CALL_PARAM
 #include <iostream>
 #include "util_output.h"
 #include "util_types.h"
@@ -10,7 +10,7 @@
 namespace dla_interface {
   namespace util {
 
-#ifdef DLA_PRINT_DEBUG_CALL_PARAM
+#ifdef DLAI_PRINT_DEBUG_CALL_PARAM
     template <class T>
     void debug_print(std::stringstream& out, T arg1) {
       out << arg1;

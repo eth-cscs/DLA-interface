@@ -18,7 +18,7 @@ void triangularInverse(UpLo uplo, Diag diag, DistributedMatrix<ElType>& mat, Sol
   double n3 = n * n * n;
   double flop = util::nrOps<ElType>(n3 / 6, n3 / 6);
   switch (solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
     case ScaLAPACK: {
       std::array<int, 4> timer_index;
       util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);
@@ -53,7 +53,7 @@ void triangularInverse(UpLo uplo, Diag diag, DistributedMatrix<ElType>& mat, Sol
     }
 #endif
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
     case DPlasma: {
       std::array<int, 4> timer_index;
       util::Timer<> timer_part(comm_grid.rowOrderedMPICommunicator(), print_timers > 1);

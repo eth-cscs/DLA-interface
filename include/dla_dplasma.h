@@ -1,7 +1,7 @@
 #ifndef DLA_INTERFACE_DLA_DPLASMA_H
 #define DLA_INTERFACE_DLA_DPLASMA_H
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
 
 #include <mpi.h>
 #include "communicator_manager.h"

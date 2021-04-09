@@ -28,15 +28,15 @@ TEST_FTN_CHOLESKY_FACTORIZATION(test_ftn_z_cholesky_factorization);
 }
 
 bool choleskyFactorizationTestThrows(SolverType solver) {
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
   if (solver == ScaLAPACK)
     return false;
 #endif
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
   if (solver == DPlasma)
     return false;
 #endif
-#ifdef DLA_HAVE_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
   if (solver == HPX_LINALG)
     return false;
 #endif

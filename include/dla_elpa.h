@@ -3,7 +3,7 @@
 
 #include <unistd.h>
 
-#ifdef DLA_HAVE_ELPA
+#ifdef DLAI_WITH_ELPA
 
 #include <complex>
 #include <mpi.h>

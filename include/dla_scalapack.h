@@ -7,7 +7,7 @@
 #include "error_message.h"
 #include "util_thread.h"
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 namespace dla_interface {
   namespace scalapack_wrappers {
 

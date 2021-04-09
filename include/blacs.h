@@ -3,7 +3,7 @@
 
 #include <mpi.h>
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 namespace blacs {
   extern "C" {
     // Initialization

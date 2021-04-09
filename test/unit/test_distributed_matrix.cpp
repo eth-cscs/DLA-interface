@@ -2,16 +2,17 @@
 
 #include <memory>
 #include <stdexcept>
+#include <gtest/gtest.h>
+
 #include "communicator_grid.h"
 #include "communicator_manager.h"
 #include "local_matrix.h"
-#include "gtest/gtest.h"
-#include "mpi_listener.h"
 #include "null_stream.h"
 #include "util_local_matrix.h"
 #include "util_distributed_matrix.h"
 #include "ref_scalapack_tools.h"
 #include "tile_matrix_tools.h"
+#include "gtest_mpi_listener.h"
 
 using namespace dla_interface;
 using namespace testing;
@@ -1618,7 +1619,7 @@ TEST(DistributedMatrixTest, Copy) {
   }
 }
 
-#ifdef DLA_HAVE_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
 TEST(DistributedMatrixTest, ScalapackDescriptor) {
   using Type = double;
   int m = 17;
@@ -1808,7 +1809,7 @@ TEST(DistributedMatrixTest, ConvertConstScalapack) {
 }
 #endif
 
-#ifdef DLA_HAVE_DPLASMA
+#ifdef DLAI_WITH_DPLASMA
 TEST(DistributedMatrixTest, DPlasmaDescriptor) {
   using Type = double;
   int m = 17;
@@ -1928,7 +1929,12 @@ int main(int argc, char** argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
 
-  ::testing::setMPIListener("results_test_distributed_matrix");
+  // Gets hold of the event listener list.
+  ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
+
+  // Adds MPIListener to the end. googletest takes the ownership.
+  auto default_listener = listeners.Release(listeners.default_result_printer());
+  listeners.Append(new MPIListener(argc, argv, default_listener));
 
   auto ret = RUN_ALL_TESTS();
 

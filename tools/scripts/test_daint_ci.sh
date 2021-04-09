@@ -87,24 +87,24 @@ case $partition in
 esac
 
 case $lapack in
-  MKLst) OPT_LAPACK=(-DDLA_LAPACK_TYPE=MKL -DMKL_THREADING=Sequential) ;;
-  MKLmt) OPT_LAPACK=(-DDLA_LAPACK_TYPE=MKL -DMKL_THREADING="Intel OpenMP") ;;
+  MKLst) OPT_LAPACK=(-D DLAI_WITH_MKL=on -D MKL_LAPACK_TARGET="mkl::mkl_intel_32bit_seq_dyn") ;;
+  MKLmt) OPT_LAPACK=(-D DLAI_WIHT_MKL=on -D MKL_LAPACK_TARGET="mkl::mkl_intel_32bit_omp_dyn") ;;
   *) echo "Wrong --lapack option: $lapack" ; print_help ; exit 1 ;;
 esac
 
 case $scalapack in
-  MKL)   OPT_SCALAPACK=(-DDLA_SCALAPACK_TYPE=MKL) ;;
+  MKL)   OPT_SCALAPACK=(-D DLAI_WIHT_MKL=on -D MKL_SCALAPACK_TARGET="mkl::scalapack_mpich_intel_32bit_seq_dyn") ;;
   *) echo "Wrong --scalapack option: $scalapack" ; print_help ; exit 1 ;;
 esac
 
-ELPA_VERS=2018.05.001
+ELPA_VERS=2018.05.001 # TODO ELPA_MODULE_SPEC EXPECTS THE FULL NAME OF THE PKGCONFIG MODULE
 ELPA_LIB_DIR=/apps/daint/UES/sandbox/rasolca/elpa
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ELPA_LIB_DIR/lib
 
 case $elpa in
   No|no)   OPT_ELPA=() ;;
-  Yes|yes) OPT_ELPA=(-DELPA_ROOT="${ELPA_LIB_DIR}" -DELPA_VERSION="${ELPA_VERS}") ;;
+  Yes|yes) OPT_ELPA=(-D DLAI_WITH_ELPA=on -D ELPA_MODULE_SPEC="${ELPA_VERS}") ;;
   *)  echo "Wrong --elpa option: $elpa" ; print_help ; exit 1 ;;
 esac
 
@@ -113,7 +113,7 @@ PSEC_LIB_DIR=/apps/daint/UES/sandbox/rasolca/parsec-${partition}
 
 case $dplasma in
   No|no)   OPT_DPLASMA=() ;;
-  Yes|yes) OPT_DPLASMA=(-DParsec_DIR="${PSEC_LIB_DIR}/lib/cmake/" -DPLASMA_DIR="${PLASMA_LIB_DIR}") ;;
+  Yes|yes) OPT_DPLASMA=(-D DLAI_WITH_DPLASMA=on -DParsec_DIR="${PSEC_LIB_DIR}/lib/cmake/" -DPLASMA_DIR="${PLASMA_LIB_DIR}") ;;
   *)  echo "Wrong --dplasma option: $dplasma" ; print_help ; exit 1 ;;
 esac
 
@@ -121,7 +121,7 @@ HPX_LINALG_DIR=/apps/daint/UES/simbergm/jenkins/DLA-interface/hpx_linalg/lib/cma
 
 case $hpx_linalg in
     No|no)   OPT_HPX_LINALG=() ;;
-    Yes|yes) OPT_HPX_LINALG=(-DHPX_LINALG_DIR="${HPX_LINALG_DIR}") ;;
+    Yes|yes) OPT_HPX_LINALG=(-D DLAI_WITH_HPXLINALG=on -DHPX_LINALG_DIR="${HPX_LINALG_DIR}") ;;
     *)  echo "Wrong --hpx_linalg option: $hpx_linalg" ; print_help ; exit 1 ;;
 esac
 
@@ -149,8 +149,8 @@ cd $BUILD_DIR
 
 OPT_CMAKE=(\
   -DCMAKE_BUILD_TYPE=$build_type \
-  -DTEST_RUNNER="srun" \
-  -DDLA_ALL_TESTS_USE_RUNNER=ON \
+  -DMPI_PRESET="slurm" \
+  -DDLAI_TEST_RUNALL_WITH_MPIEXEC=on \
   "${OPT_LAPACK[@]}" \
   "${OPT_SCALAPACK[@]}" \
   "${OPT_ELPA[@]}" \

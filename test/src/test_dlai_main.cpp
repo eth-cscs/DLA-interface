@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include "gtest/gtest.h"
-#include "mpi_listener.h"
+#include "gtest_mpi_listener.h"
 #include "communicator_grid.h"
 #include "communicator_manager.h"
 #include "test_dlai_main.h"
@@ -38,12 +38,12 @@ int main(int argc, char** argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
 
-  const char* name = strrchr(argv[0], '/');
-  if (name == nullptr)
-    name = argv[0];
-  else
-    ++name;
-  outstream = &::testing::setMPIListener(std::string("results_") + name);
+  // Gets hold of the event listener list.
+  ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
+
+  // Adds MPIListener to the end. googletest takes the ownership.
+  auto default_listener = listeners.Release(listeners.default_result_printer());
+  listeners.Append(new MPIListener(argc, argv, default_listener));
 
   auto ret = RUN_ALL_TESTS();
 
