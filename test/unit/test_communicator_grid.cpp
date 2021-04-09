@@ -14,6 +14,7 @@ std::vector<MPI_Comm> mpi_comms;
 using namespace dla_interface;
 using namespace testing;
 
+/*
 TEST(Communicato2DGridTest, ConstructorColMajor) {
   for (const auto& mpi_comm : mpi_comms) {
     auto id_size_pair = commInfo(mpi_comm);
@@ -47,6 +48,7 @@ TEST(Communicato2DGridTest, ConstructorColMajor) {
     }
   }
 }
+*/
 
 TEST(Communicato2DGridTest, ConstructorRowMajor) {
   for (const auto& mpi_comm : mpi_comms) {
@@ -153,6 +155,7 @@ TEST(Communicato2DGridTest, MPIRowOrderedCommunicator) {
     }
   }
 }
+
 
 #ifdef DLA_HAVE_SCALAPACK
 TEST(Communicato2DGridTest, BlacsContext) {

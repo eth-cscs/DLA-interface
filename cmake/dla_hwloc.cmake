@@ -4,7 +4,8 @@ include(CheckFunctionExists)
 
 function(dla_find_hwloc)
   unset(HWLOC_FOUND CACHE)
-  setoption(HWLOC_ROOT PATH "" "HWLOC root directory")
+  setoption(HWLOC_ROOT PATH ${HWLOCROOT} "HWLOC root directory")
+  
   if (HWLOC_ROOT)
     set(CMAKE_PREFIX_PATH ${HWLOC_ROOT})
     find_package(PkgConfig REQUIRED)
@@ -15,4 +16,5 @@ function(dla_find_hwloc)
   else()
     message(WARNING "Configurations without HWLOC may have bad performance due to bad thread binding. Please refers to the DLA interface documentation.")
   endif()
+
 endfunction()

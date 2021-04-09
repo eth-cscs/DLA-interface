@@ -1,3 +1,12 @@
+#
+# Distributed Linear Algebra Interface (DLA)
+#
+# Copyright (c) 2018-2019, ETH Zurich
+# All rights reserved.
+#
+# Please, refer to the LICENSE file in the root directory.
+# SPDX-License-Identifier: BSD-3-Clause
+#
 cmake_minimum_required(VERSION 3.8)
 project(DLA_interface CXX C)
 
@@ -8,16 +17,20 @@ if(NOT CMAKE_BUILD_TYPE)
       "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
       FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
+
+cmake_policy(SET "CMP0074" NEW)
+
 # ---------------------------------------------------------------------------
 # CMake module path
 # ---------------------------------------------------------------------------
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+# Set libs detection files ...
 include(dla_utils)
 include(dla_lapack)
 include(dla_scalapack)
 include(dla_dplasma)
-include(dla_hpx_linalg)
+include(dla_dlaf)
 include(dla_hwloc)
 include(dla_elpa)
 
@@ -29,16 +42,12 @@ endif()
 include(dla_openmp)
 include(dla_mpi)
 
+# Find libs ...
 dla_find_lapack()
-
 dla_find_scalapack()
-
 dla_find_dplasma()
-
-dla_find_hpx_linalg()
-
+dla_find_dlaf()
 dla_find_hwloc()
-
 dla_find_elpa()
 
 if (${DLA_WITH_FORTRAN})
@@ -91,7 +100,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/libs
     ${MPI_CXX_INCLUDE_PATH}
     ${DLA_LAPACK_INCLUDE_PATH}
-    ${DLA_HPX_LINALG_INCLUDE_DIRS}
     ${HWLOC_INCLUDE_DIRS}
 )
 if (${DLA_WITH_FORTRAN})
@@ -102,9 +110,9 @@ if (${DLA_WITH_FORTRAN})
   )
 endif()
 # Suppress warnings for DPLASMA headers.
-include_directories(SYSTEM ${DLA_DPLASMA_INCLUDE_DIRS})
+#include_directories(SYSTEM ${DLA_DPLASMA_INCLUDE_DIRS})
 # Suppress warnings for ELPA headers.
-include_directories(SYSTEM ${DLA_ELPA_INCLUDE_DIRS})
+#include_directories(SYSTEM ${DLA_ELPA_INCLUDE_DIRS})
 
 # ---------------------------------------------------------------------------
 # extra options
@@ -121,23 +129,44 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -ffree-line-length-0")
 # setup libraries
 # ---------------------------------------------------------------------------
 add_subdirectory(src)
-set(DLA_LIBS
-    dla_interface
-    ${DLA_HPX_LINALG_LIBRARIES}
-    ${DLA_ELPA_LIBRARY}
-    ${DLA_DPLASMA_LIBS}
-    ${DLA_SCALAPACK_LIBRARY}
-    ${DLA_LAPACK_LIBRARY}
-    ${MPI_Fortran_LIBRARIES}
-    ${MPI_CXX_LIBRARIES}
-    ${DLA_HWLOC_LIBS}
-)
 
-message(${DLA_LIBS})
+set(DLA_LIBS
+  dla_interface
+  ${DLA_ELPA_LIBRARY}
+  ${DLA_DPLASMA_LIBS}
+  ${DLA_SCALAPACK_LIBRARY}
+  ${DLA_LAPACK_LIBRARY}
+  ${MPI_Fortran_LIBRARIES}
+  ${MPI_CXX_LIBRARIES}
+  ${DLA_HWLOC_LIBS}
+)
 
 # ---------------------------------------------------------------------------
 # Add sub directories
 # ---------------------------------------------------------------------------
 add_subdirectory(miniapp)
-add_subdirectory(test)
+
+# ---------------------------------------------------------------------------
+# Test
+# ---------------------------------------------------------------------------
+set(DLA_WITH_TEST ON CACHE BOOL "Enables tests")
+if (DLA_WITH_TEST)
+  include(CTest)
+  enable_testing()
+
+  add_subdirectory(test)
+endif()
+
+# ---------------------------------------------------------------------------
+# Internal Documetation - Doxygen
+# ---------------------------------------------------------------------------
+# ***!!! By default should be OFF, for testing it is set to ON !!!***
+# ---------------------------------------------------------------------------
+#
+option(DLA_INTERNAL_DOCUMENTATION "Build internal documentation" OFF)
+#option(DLA_INTERNAL_DOCUMENTATION "Build internal documentation" ON)
+
+if (DLA_INTERNAL_DOCUMENTATION)
+  add_subdirectory(doc)
+endif()
 

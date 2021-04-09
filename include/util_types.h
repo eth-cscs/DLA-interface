@@ -1,3 +1,13 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2019, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_UTIL_TYPES_H
 #define DLA_INTERFACE_UTIL_TYPES_H
 
@@ -7,8 +17,8 @@
 
 namespace dla_interface {
   namespace util {
-    // Returns the number of flop needed
-    // to perform 'add' additions and 'mul' multiplications of type T elements.
+    /// Returns the number of flop needed
+    /// to perform 'add' additions and 'mul' multiplications of type T elements.
     template <class T>
     constexpr double nrOps(double add, double mul) {
       return TypeInfo<T>::ops_add * add + TypeInfo<T>::ops_mult * mul;
@@ -68,12 +78,12 @@ namespace dla_interface {
       throw(std::invalid_argument(errorMessage("Wrong Ordering char ", ordering)));
     }
 
-    // Return a string with the name of the solver.
+    /// Return a string with the name of the solver.
     inline std::string getSolverString(SolverType solver) {
       return solver_names.at(solver);
     }
 
-    // Return a string with the name of the distribution.
+    /// Return a string with the name of the distribution.
     inline std::string getDistributionString(DistributionType dist) {
       return dist_names.at(dist);
     }
@@ -89,15 +99,17 @@ namespace dla_interface {
       }
     }
 
-    // Return the solver which has name str.
-    // Throws if str do not correspond to any solver.
+    /// Return the solver which has name str.
+    ///
+    /// @throws if str do not correspond to any solver.
     inline SolverType getSolverType(std::string str) {
       static std::map<std::string, SolverType> inv_map = internal::get_inverse_map(solver_names);
       return inv_map.at(str);
     }
 
-    // Return the distribution which has name str.
-    // Throws if str do not correspond to any distribution.
+    /// Return the distribution which has name str.
+    ///
+    /// @throws if str do not correspond to any distribution.
     inline DistributionType getDistributionType(std::string str) {
       static std::map<std::string, DistributionType> inv_map = internal::get_inverse_map(dist_names);
       return inv_map.at(str);

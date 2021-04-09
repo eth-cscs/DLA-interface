@@ -1,3 +1,9 @@
+// Define to have a normal view of source file in Eclipse CDT!
+#ifdef VIEW_IPP
+	#include "dla_interface.h"
+	namespace dla_interface {
+#endif
+
 template <class ElType>
 void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
                           const DistributedMatrix<ElType>& mat_a,
@@ -151,6 +157,14 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
     }
 #endif
 
+#ifdef DLA_HAVE_DLAF
+	case DLAF: {
+		std::cout << "DLA-Future: matrix-matrix product not implemented!" << std::endl;
+
+		break;
+	}
+#endif
+
     default:
       throw std::invalid_argument(
           errorMessage("Matrix multiplication is not available for solver ", solver));
@@ -161,3 +175,8 @@ void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,
     timer_full.print_elapsed(0, timer_index_end, "DLA Matrix Matrix Multiplication time: ", flop);
   }
 }
+
+#ifdef VIEW_IPP
+  } //namespace dla_interface {
+#endif
+

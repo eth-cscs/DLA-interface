@@ -26,10 +26,13 @@ function(dla_find_lapack)
     endif()
     setoption(MKL_THREADING STRING "${MKL_THREADING_DEFAULT}" "MKL Threading support")
     set_property(CACHE MKL_THREADING PROPERTY STRINGS ${MKL_THREADING_OPTIONS})
+
     # find the MKL library
     # If the variable MKL_ROOT is not defined
     # it is defined with the value of the env. variable MKLROOT
+    # 
     setoption(MKL_ROOT PATH $ENV{MKLROOT} "Intel MKL path")
+    
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
       set(MKL_LIB_DIR "-L${MKL_ROOT}/lib -Wl,-rpath,${MKL_ROOT}/lib")
     else()

@@ -5,11 +5,13 @@ set(DLA_SRC
 )
 
 # C/Fortran interface enabled only if ScaLAPACK is available
+
 if(DLA_HAVE_SCALAPACK)
 list(APPEND DLA_SRC
      c_dla_interface.cpp
 )
 endif()
+
 if(DLA_WITH_FORTRAN)
 list(APPEND DLA_SRC
      f_dla_interface.F90

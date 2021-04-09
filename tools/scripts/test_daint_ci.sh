@@ -1,7 +1,7 @@
 OPTIONS=dfo:v
 LONGOPTIONS=debug,force,output:,verbose
 
-OPTIONS=`getopt -o h::b:p:l:s:e:d:x: -l help::,build-type,partition:,lapack:,scalapack:,elpa:,dplasma:,hpx_linalg: --name "$0" -- "$@"`
+OPTIONS=`getopt -o h::b:p:l:s:e:d:x: -l help::,build-type,partition:,lapack:,scalapack:,elpa:,dplasma:,dlaf: --name "$0" -- "$@"`
 ret=$?
 if [ $ret -ne 0 ]; then
     exit 1
@@ -14,7 +14,7 @@ lapack="MKLst"
 scalapack="MKL"
 elpa="Yes"
 dplasma="Yes"
-hpx_linalg="No"
+dlaf="No"
 
 # Print help statement and exit.
 print_help()
@@ -52,10 +52,10 @@ print_help()
     "-d, --dplasma [No|Yes]" \
     "Build with DPlasma [default: ${dplasma}]."
 
-  # --hpx_linalg
+  # --dlaf
   printf "  %-35s %s\n" \
-         "-x, --hpx_linalg [No|Yes]" \
-         "Build with HPX_LINALG [default: ${hpx_linalg}]."
+         "-x, --dlaf [No|Yes]" \
+         "Build with DLAF [default: ${dlaf}]."
 
   # --help
   printf "  %-35s %s\n" \
@@ -75,7 +75,7 @@ while true; do
     -s|--scalapack)  scalapack="$2"  ; shift 2 ;;
     -e|--elpa)       elpa="$2"       ; shift 2 ;;
     -d|--dplasma)    dplasma="$2"    ; shift 2 ;;
-    -x|--hpx_linalg) hpx_linalg="$2" ; shift 2 ;;
+    -x|--dlaf)       dlaf="$2" ; shift 2 ;;
     --) shift ; break ;;
     *) echo "Options internal error. $1" ; exit 1 ;;
   esac
@@ -117,12 +117,12 @@ case $dplasma in
   *)  echo "Wrong --dplasma option: $dplasma" ; print_help ; exit 1 ;;
 esac
 
-HPX_LINALG_DIR=/apps/daint/UES/simbergm/jenkins/DLA-interface/hpx_linalg/lib/cmake/HPX_LINALG/
+DLAF_DIR=/apps/daint/UES/simbergm/jenkins/DLA-interface/dlaf/lib/cmake/DLAF/
 
-case $hpx_linalg in
-    No|no)   OPT_HPX_LINALG=() ;;
-    Yes|yes) OPT_HPX_LINALG=(-DHPX_LINALG_DIR="${HPX_LINALG_DIR}") ;;
-    *)  echo "Wrong --hpx_linalg option: $hpx_linalg" ; print_help ; exit 1 ;;
+case $dlaf in
+    No|no)   OPT_DLAF=() ;;
+    Yes|yes) OPT_DLAF=(-DDLAF_DIR="${DLAF_DIR}") ;;
+    *)  echo "Wrong --dlaf option: $dlaf" ; print_help ; exit 1 ;;
 esac
 
 echo -n "Running with options:"
@@ -132,7 +132,7 @@ echo -n " lapack: ${lapack},"
 echo -n " scalapack: ${scalapack},"
 echo -n " elpa: ${elpa},"
 echo -n " dplasma: ${dplasma}"
-echo    " hpx_linalg: ${hpx_linalg}"
+echo    " dlaf: ${dlaf}"
 
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 SRC_DIR=$SCRIPT_DIR/../..
@@ -155,7 +155,7 @@ OPT_CMAKE=(\
   "${OPT_SCALAPACK[@]}" \
   "${OPT_ELPA[@]}" \
   "${OPT_DPLASMA[@]}" \
-  "${OPT_HPX_LINALG[@]}" \
+  "${OPT_DLAF[@]}" \
   -DHWLOC_ROOT=$EBROOTHWLOC \
   ..)
 echo -n "executing cmake with options: ${OPT_CMAKE[@]}"

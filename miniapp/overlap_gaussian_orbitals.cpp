@@ -33,6 +33,7 @@ int main(int argc, char** argv) {
       ("U,upper", "Use upper triangular part of the matrix. (If not specified the lower triangular part is used.)")
       ("scalapack", "Run test with ScaLAPACK.")
       ("dplasma", "Run test with DPlasma.")
+	  ("dlaf", "Run test with DLA Future.")
       ("p,row_procs", "The number of rows in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
       ("q,col_procs", "The number of cols in the 2D communicator.", cxxopts::value<int>()->default_value("1"))
       ("nr_threads", "The number of threads per rank.", cxxopts::value<int>()->default_value("1"))
@@ -64,11 +65,26 @@ int main(int argc, char** argv) {
     solvers.push_back(ScaLAPACK);
   for (size_t i = 0; i < vm.count("dplasma"); ++i)
     solvers.push_back(DPlasma);
+  for (size_t i = 0; i < vm.count("dlaf"); ++i)
+      solvers.push_back(DLAF);
+
+ // Run it with DLAF
+ // miniapp/overlap_gaussian_orbitals --dlaf --nr_threads 8 --n 10240 --nb 512
 
   comm::CommunicatorManager::initialize(nr_threads, &argc, &argv, true);
 
+#ifdef DLA_HAVE_DLAF
+  // Takes the ownership of MPI_comm
+  dlaf_wrappers::Communicator world(MPI_COMM_WORLD);
+
   auto& comm_grid =
-      comm::CommunicatorManager::createCommunicator2DGrid(MPI_COMM_WORLD, p, q, RowMajor);
+          comm::CommunicatorManager::createCommunicator2DGrid(world, p, q, RowMajor);
+#else
+  auto& comm_grid =
+          comm::CommunicatorManager::createCommunicator2DGrid(MPI_COMM_WORLD, p, q, RowMajor);
+#endif
+
+
 
   std::vector<std::array<double, 3>> point;
   point.reserve(n);
@@ -91,6 +107,7 @@ int main(int argc, char** argv) {
         mat(local_index) = overlapElement(alpha, point[global_index.row], point[global_index.col]);
       }
     }
+
     if (check) {
       // create a copy for checking.
       mat_copy = std::make_unique<DistributedMatrix<double>>(mat);
@@ -109,7 +126,7 @@ int main(int argc, char** argv) {
           }
         }
 
-        matrixMultiplication(NoTrans, Trans, -1., mat, mat, 1., *mat_copy, solver, 2);
+        matrixMultiplication(NoTrans, Trans, -1., mat, mat, 1., *mat_copy, (solver==DLAF ? ScaLAPACK: solver), 2);
       }
       else {
         for (int j = 0; j < mat.localSize().second; ++j) {
@@ -140,6 +157,7 @@ int main(int argc, char** argv) {
         }
       }
     }
+
   }
   return 0;
 }
