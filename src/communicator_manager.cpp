@@ -226,7 +226,7 @@ namespace dla_interface {
       ictxt_grid_map_.clear();
 #endif
 #ifdef DLAI_WITH_ELPA
-      elpa_uninit();
+      elpa::uninit();
 #endif
 #ifdef DLAI_WITH_DPLASMA
       parsec_fini(&parsec_handle_);

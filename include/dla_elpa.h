@@ -12,19 +12,27 @@ extern "C" {
 // include only some ELPA headers.
 #include <limits.h>
 
+#include <elpa/elpa_version.h>
+
 struct elpa_struct;
 typedef struct elpa_struct* elpa_t;
 
 struct elpa_autotune_struct;
 typedef struct elpa_autotune_struct* elpa_autotune_t;
 
+
 #include <elpa/elpa_constants.h>
+#include <elpa/elpa_generated_c_api.h>
 #define complex _Complex
 #include <elpa/elpa_generated.h>
 #undef complex
 
 const char* elpa_strerr(int elpa_error);
 }
+
+#if ELPA_API_VERSION != 20200417
+#warning ELPA VERSION ELPA_API_VERSION MIGHT NOT BE SUPPORTED
+#endif
 
 namespace dla_interface {
   namespace elpa {
@@ -67,13 +75,13 @@ namespace dla_interface {
     }
 
     inline void init() {
-      // We support the 20170403 ELPA API.
-      // which is currently compatible with API version V, where
-      // 20170403 <= V <= 20180525
-      // Newer ELPA releases may be compatible. (if elpa_init doesn't return an error the used
-      // version is.)
-      if (elpa_init(20170403) != ELPA_OK)
+      if (elpa_init(ELPA_API_VERSION) != ELPA_OK)
         throw std::invalid_argument("Error: ELPA API version not supported");
+    }
+
+    inline void uninit() {
+      int error;
+      elpa_uninit(&error);
     }
 
     class Handle {
@@ -105,7 +113,8 @@ namespace dla_interface {
       Handle& operator=(Handle&&) = delete;
 
       ~Handle() {
-        elpa_deallocate(handle_);
+        int error;
+        elpa_deallocate(handle_, &error);
       }
 
       auto& getElpaHandle() {

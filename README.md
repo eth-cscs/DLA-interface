@@ -1,3 +1,5 @@
+[![pipeline status](https://gitlab.com/cscs-ci/eth-cscs/DLA-interface/badges/master/pipeline.svg)](https://gitlab.com/cscs-ci/eth-cscs/DLA-interface/-/commits/master) [![codecov](https://codecov.io/gl/cscs-ci:eth-cscs/DLA-interface/branch/master/graph/badge.svg)](https://codecov.io/gl/cscs-ci:eth-cscs/DLA-interface)
+
 # DLA interface
 
 This is the repository for the DLA (Distributed Linear Algebra) interface code.

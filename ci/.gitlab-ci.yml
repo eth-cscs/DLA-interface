@@ -3,12 +3,14 @@ include:
 
 stages:
   - build
+  - test
+  - notify
 
 variables:
   FORCE_BUILD_IMAGE: "OFF"
 
 ##
-## BUILD
+## BUILDS
 ##
 
 .build_common:
@@ -18,7 +20,6 @@ variables:
     - master
     - staging
     - trying
-
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   before_script:
@@ -26,25 +27,97 @@ variables:
   script:
     - TAG=`sha256sum $BUILD_DOCKER_FILE | head -c 64`
     - if [ "$FORCE_BUILD_IMAGE" == "ON" ]; then docker build -t $BUILD_IMAGE:$TAG -t $BUILD_IMAGE:latest --cache-from $BUILD_IMAGE:$TAG --cache-from $BUILD_IMAGE:latest --build-arg BASE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg HPX_WITH_CUDA -f $BUILD_DOCKER_FILE --network=host .; fi
+    - if [ "$FORCE_BUILD_IMAGE" != "ON" ]; then (docker pull $BUILD_IMAGE:$TAG && docker tag $BUILD_IMAGE:$TAG $BUILD_IMAGE:latest) || docker build -t $BUILD_IMAGE:$TAG -t $BUILD_IMAGE:latest --cache-from $BUILD_IMAGE:latest --build-arg BASE_IMAGE --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg HPX_WITH_CUDA -f $BUILD_DOCKER_FILE --network=host .; fi
     - docker push $BUILD_IMAGE:$TAG
     - docker push $BUILD_IMAGE:latest
+    - docker build -t $DEPLOY_IMAGE --build-arg BUILD_IMAGE=$BUILD_IMAGE:$TAG --build-arg DLAI_WITH_CUDA -f $DEPLOY_DOCKER_FILE --network=host .
+    - docker push $DEPLOY_IMAGE
+    - docker run -v $PWD/ci/ctest_to_gitlab.sh:/ctest_to_gitlab.sh $DEPLOY_IMAGE /ctest_to_gitlab.sh "$DEPLOY_IMAGE" "$USE_CODECOV" "$THREADS_PER_NODE" "$SLURM_CONSTRAINT" > pipeline.yml
+  artifacts:
+    paths:
+      - pipeline.yml
 
 # Builds a Docker image for the current commit
 cpu release build:
   extends: .build_common
   variables:
     BUILD_DOCKER_FILE: ci/docker/release/build.Dockerfile
+    DEPLOY_DOCKER_FILE: ci/docker/release/deploy.Dockerfile
     BUILD_IMAGE: $CSCS_REGISTRY_IMAGE/release-cpu/build
+    DEPLOY_IMAGE: $CSCS_REGISTRY_IMAGE/release-cpu/deploy:$CI_COMMIT_SHA
     DLAI_WITH_CUDA: 'OFF'
     BASE_IMAGE: ubuntu:20.04
+    SLURM_CONSTRAINT: mc
+    THREADS_PER_NODE: 72
+    USE_CODECOV: "false"
     HPX_WITH_CUDA: "OFF"
 
 cpu codecov build:
   extends: .build_common
   variables:
     BUILD_DOCKER_FILE: ci/docker/codecov/build.Dockerfile
+    DEPLOY_DOCKER_FILE: ci/docker/codecov/deploy.Dockerfile
     BUILD_IMAGE: $CSCS_REGISTRY_IMAGE/codecov-cpu/build
+    DEPLOY_IMAGE: $CSCS_REGISTRY_IMAGE/codecov-cpu/deploy:$CI_COMMIT_SHA
     DLAI_WITH_CUDA: 'OFF'
     BASE_IMAGE: ubuntu:20.04
+    SLURM_CONSTRAINT: mc
+    THREADS_PER_NODE: 72
+    USE_CODECOV: "true"
     HPX_WITH_CUDA: "OFF"
 
+notify_github_start:
+  stage: build
+  allow_failure: true
+  only: ['master', 'staging', 'trying']
+  tags: ['kubernetes']
+  image: stabbles/git-curl
+  script: ./ci/set_github_status.sh pending
+
+##
+## RUNS
+##
+
+.run_common:
+  stage: test
+  only:
+    - master
+    - staging
+    - trying
+  trigger:
+    strategy: depend
+
+cpu release test:
+  extends: .run_common
+  needs:
+    - cpu release build
+  trigger:
+    include:
+      - artifact: pipeline.yml
+        job: cpu release build
+
+cpu codecov test:
+  extends: .run_common
+  needs:
+    - cpu codecov build
+  trigger:
+    strategy: depend
+    include:
+      - artifact: pipeline.yml
+        job: cpu codecov build
+
+notify_github_success:
+  stage: notify
+  when: on_success
+  only: ['master', 'staging', 'trying']
+  tags: ['kubernetes']
+  image: stabbles/git-curl
+  script: ./ci/set_github_status.sh success
+
+notify_github_failure:
+  stage: notify
+  when: on_failure
+  only: ['master', 'staging', 'trying']
+  tags: ['kubernetes']
+  image: stabbles/git-curl
+  script: ./ci/set_github_status.sh failure
