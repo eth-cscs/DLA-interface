@@ -194,8 +194,7 @@ ARG DLAF_VERSION=19b83c0
 ARG DLAF_PATH=/usr/local/dlaf
 ENV DLAF_PATH=${DLAF_PATH}
 ARG DLAF_WITH_CUDA=OFF
-RUN source /opt/intel/compilers_and_libraries/linux/mkl/bin/mklvars.sh intel64 && \
-    wget -q https://github.com/eth-cscs/DLA-Future/tarball/${DLAF_VERSION} -O dlaf.tar.gz && \
+RUN wget -q https://github.com/eth-cscs/DLA-Future/tarball/${DLAF_VERSION} -O dlaf.tar.gz && \
     tar -xzf dlaf.tar.gz && \
     cd eth-cscs-DLA-Future-${DLAF_VERSION} && \
     mkdir build && cd build && \
@@ -205,7 +204,7 @@ RUN source /opt/intel/compilers_and_libraries/linux/mkl/bin/mklvars.sh intel64 &
       -DCMAKE_INSTALL_PREFIX=${DLAF_PATH} \
       -DLAPACK_CUSTOM_TYPE=Custom \
       -DLAPACK_CUSTOM_INCLUDE_DIR=/usr/local/include \
-      -DLAPACK_CUSTOM_LIBRARY=openblas \
+      -DLAPACK_CUSTOM_LIBRARY="-L/${OPENBLAS_PATH}/lib;openblas" \
       -DDLAF_WITH_CUDA=${DLAF_WITH_CUDA} \
       -DCMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES=/usr/local/cuda/targets/x86_64-linux/include \
       -DCMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES="/usr/local/cuda/targets/x86_64-linux/lib/stubs;/usr/local/cuda/targets/x86_64-linux/lib;/usr/lib/gcc/x86_64-linux-gnu/7;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib;/usr/local/cuda/lib64/stubs" \
