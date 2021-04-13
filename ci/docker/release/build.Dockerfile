@@ -55,7 +55,8 @@ RUN wget -q https://download.open-mpi.org/release/hwloc/v${HWLOC_MAJOR}.${HWLOC_
     rm -rf /root/hwloc.tar.gz /root/hwloc-${HWLOC_VERSION}
 
 # Install ELPA
-ENV ELPA_VERSION=2020.05.001
+ARG ELPA_VERSION=2020.05.001
+ENV ELPA_VERSION=${ELPA_VERSION}
 ARG ELPA_PATH=/usr/local/elpa
 ENV ELPA_PATH=${ELPA_PATH}
 RUN wget -q https://elpa.mpcdf.mpg.de/software/tarball-archive/Releases/${ELPA_VERSION}/elpa-${ELPA_VERSION}.tar.gz && \
@@ -163,7 +164,7 @@ RUN source /opt/intel/compilers_and_libraries/linux/mkl/bin/mklvars.sh intel64 &
     rm -rf /root/lapackpp.tar.gz /root/lapackpp-${LAPACKPP_VERSION}
 
 # Install DLA-Future
-ARG DLAF_VERSION=05362d3
+ARG DLAF_VERSION=19b83c0
 ARG DLAF_PATH=/usr/local/dlaf
 ENV DLAF_PATH=${DLAF_PATH}
 ARG DLAF_WITH_CUDA=OFF

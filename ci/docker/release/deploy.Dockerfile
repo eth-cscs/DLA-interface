@@ -28,11 +28,13 @@ RUN mkdir ${BUILD} && cd ${BUILD} && \
       -DDLAI_CI_RUNNER_USES_MPIRUN=ON \
       -DDLAI_WITH_MKL=1 \
       -DHWLOC_ROOT=${HWLOC_PATH} \
+      -DDLAI_WITH_ELPA=ON \
+      -DELPA_MODULE_SPEC=$ELPA_PATH/lib/pkgconfig/elpa-${ELPA_VERSION}.pc \
+      -DDLAI_WITH_DLAF=ON \
+      -DDLAF_ROOT=$DLAF_PATH \
       -DDLAI_BUILD_TESTING=ON \
       -DDLAI_BUILD_MINIAPPS=ON && \
       make -j$(nproc)
-# TODO: To enable ELPA
-#      -DELPA_ROOT=$ELPA_PATH -DELPA_VERSION=$ELPA_VERSION \
 
 # Prune and bundle binaries
 RUN mkdir ${BUILD}-tmp && cd ${BUILD} && \
