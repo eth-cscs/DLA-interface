@@ -86,7 +86,6 @@ RUN wget -q https://elpa.mpcdf.mpg.de/software/tarball-archive/Releases/${ELPA_V
     tar -xzf elpa-${ELPA_VERSION}.tar.gz && \
     rm elpa-${ELPA_VERSION}.tar.gz && \
     cd elpa-${ELPA_VERSION} && \
-    source /opt/intel/compilers_and_libraries/linux/mkl/bin/mklvars.sh intel64 && \
     CC=/usr/local/mpich/bin/mpicc FC=/usr/local/mpich/bin/mpif90 ./configure \
       FCFLAGS="-g3 -mavx2 -mavx -mfma" \
       CFLAGS="-g3 -mavx2 -mavx -mfma -funsafe-loop-optimizations -funsafe-math-optimizations -ftree-vect-loop-version -ftree-vectorize" \
