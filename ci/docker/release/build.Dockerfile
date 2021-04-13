@@ -65,12 +65,13 @@ RUN wget -q https://elpa.mpcdf.mpg.de/software/tarball-archive/Releases/${ELPA_V
     cd elpa-${ELPA_VERSION} && \
     source /opt/intel/compilers_and_libraries/linux/mkl/bin/mklvars.sh intel64 && \
     CC=/usr/local/mpich/bin/mpicc FC=/usr/local/mpich/bin/mpif90 ./configure \
-      FCFLAGS="-O3 -march=native -mavx512f -mavx2 -mavx -mfma" \
-      CFLAGS="-O3 -march=native -mavx512f -mavx2 -mavx -mfma -funsafe-loop-optimizations -funsafe-math-optimizations -ftree-vect-loop-version -ftree-vectorize" \
+      FCFLAGS="-O3 -mavx2 -mavx -mfma" \
+      CFLAGS="-O3 -mavx2 -mavx -mfma -funsafe-loop-optimizations -funsafe-math-optimizations -ftree-vect-loop-version -ftree-vectorize" \
       --enable-option-checking=fatal \
       SCALAPACK_LDFLAGS="-L${MKLROOT}/lib/intel64 -Wl,--no-as-needed -lmkl_scalapack_lp64 -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lmkl_blacs_intelmpi_lp64 -lpthread -lm -ldl" \
       MPI_BINARY=/usr/local/mpich/bin/mpirun \
       --enable-single-precision \
+      --disable-avx512 \
       --prefix=$ELPA_PATH && \
     make install -j$(nproc) && \
     rm -rf /root/elpa-${ELPA_VERSION} && \
