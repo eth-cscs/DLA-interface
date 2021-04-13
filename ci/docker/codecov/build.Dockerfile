@@ -162,6 +162,7 @@ RUN wget -q https://bitbucket.org/icl/blaspp/downloads/blaspp-${BLASPP_VERSION}.
     cd build && \
     cmake .. \
       -Dbuild_tests=OFF \
+      -DBLAS_LIBRARIES="-L${OPENBLAS_PATH}/lib;-lopenblas" \
       -Dblas=OpenBLAS \
       -DCMAKE_BUILD_TYPE=Debug \
       -Duse_openmp=OFF \
