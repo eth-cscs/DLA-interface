@@ -52,7 +52,8 @@ RUN mkdir ${BUILD}-tmp && cd ${BUILD} && \
     echo "$TEST_BINARIES" | xargs -I{file} find -samefile {file} -exec cp --parents '{}' ${BUILD}-tmp ';' && \
     find '(' -name CTestTestfile.cmake -o -iname "*.gcno" ')' -exec cp --parent '{}' ${BUILD}-tmp ';' && \
     rm -rf ${BUILD} && \
-    mv ${BUILD}-tmp ${BUILD}
+    mv ${BUILD}-tmp ${BUILD} && \
+    rm -rf ${SOURCE}/.git
 
 # Multistage build, this is the final small image
 FROM ubuntu:20.04
