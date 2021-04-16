@@ -195,7 +195,7 @@ RUN wget -q https://bitbucket.org/icl/lapackpp/downloads/lapackpp-$LAPACKPP_VERS
     rm -rf /root/lapackpp.tar.gz /root/lapackpp-${LAPACKPP_VERSION}
 
 # Install DLA-Future
-ARG DLAF_VERSION=56894bc
+ARG DLAF_VERSION=1312dfc
 ARG DLAF_PATH=/usr/local/dlaf
 ENV DLAF_PATH=${DLAF_PATH}
 ARG DLAF_WITH_CUDA=OFF

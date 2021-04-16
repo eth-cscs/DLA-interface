@@ -165,7 +165,7 @@ RUN source /opt/intel/compilers_and_libraries/linux/mkl/bin/mklvars.sh intel64 &
     rm -rf /root/lapackpp.tar.gz /root/lapackpp-${LAPACKPP_VERSION}
 
 # Install DLA-Future
-ARG DLAF_VERSION=19b83c0
+ARG DLAF_VERSION=1312dfc
 ARG DLAF_PATH=/usr/local/dlaf
 ENV DLAF_PATH=${DLAF_PATH}
 ARG DLAF_WITH_CUDA=OFF
