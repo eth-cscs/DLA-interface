@@ -29,7 +29,7 @@ allocate:
   extends: .daint_alloc
   variables:
     PULL_IMAGE: 'YES'
-    SLURM_TIMELIMIT: '15:00'
+    SLURM_TIMELIMIT: '20:00'
 
 {{JOBS}}
 
@@ -39,7 +39,7 @@ upload_reports:
   variables:
     PULL_IMAGE: 'NO'
     SLURM_NTASKS: 1
-    SLURM_TIMELIMIT: '15:00'
+    SLURM_TIMELIMIT: '5:00'
     DISABLE_AFTER_SCRIPT: 'YES'
   script: upload_codecov
 
@@ -55,7 +55,7 @@ JOB_TEMPLATE="
   variables:
     SLURM_CPUS_PER_TASK: {{CPUS_PER_TASK}}
     SLURM_NTASKS: {{NTASKS}}
-    SLURM_TIMELIMIT: '15:00'
+    SLURM_TIMELIMIT: '5:00'
     PULL_IMAGE: 'NO'
     USE_MPI: 'YES'
     DISABLE_AFTER_SCRIPT: 'YES'
@@ -102,7 +102,7 @@ JOB_TEMPLATE="
   variables:
     SLURM_CPUS_PER_TASK: {{CPUS_PER_TASK}}
     SLURM_NTASKS: {{NTASKS}}
-    SLURM_TIMELIMIT: '15:00'
+    SLURM_TIMELIMIT: '5:00'
     PULL_IMAGE: 'NO'
     USE_MPI: 'YES'
     DISABLE_AFTER_SCRIPT: 'YES'
