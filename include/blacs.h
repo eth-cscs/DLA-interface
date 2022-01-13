@@ -1,3 +1,13 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2021, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_BLACS_H
 #define DLA_INTERFACE_BLACS_H
 
@@ -5,6 +15,11 @@
 
 #ifdef DLAI_WITH_SCALAPACK
 namespace blacs {
+
+	/// DLAI to BLACS (ScaLAPACK).
+    ///
+    /// The BLACS (Basic Linear Algebra Communication Subprograms) are used as the communication layer of ScaLAPACK.
+
   extern "C" {
     // Initialization
     void Cblacs_pinfo(int* mypnum, int* nprocs);

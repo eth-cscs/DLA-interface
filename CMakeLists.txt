@@ -127,3 +127,17 @@ endif()
 if (DLAI_BUILD_TESTING)
   add_subdirectory(test)
 endif()
+
+# ---------------------------------------------------------------------------
+# Internal Documetation - Doxygen
+# ---------------------------------------------------------------------------
+# ***!!! By default should be OFF, for testing it is set to ON !!!***
+# ---------------------------------------------------------------------------
+#
+#option(DLA_INTERNAL_DOCUMENTATION "Build internal documentation" OFF)
+option(DLA_INTERNAL_DOCUMENTATION "Build internal documentation" ON)
+
+if (DLA_INTERNAL_DOCUMENTATION)
+  add_subdirectory(doc)
+endif()
+

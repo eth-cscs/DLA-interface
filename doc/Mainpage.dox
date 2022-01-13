@@ -1,0 +1,18 @@
+/** \mainpage notitle
+
+This is the API documentation for <b>DLA Interface</b> (<b>DLAI</b>). You can <a href="https://github.com/eth-cscs/DLA-interface" target="_blank">download</a> it as a zip file or using Git clone command
+
+\verbatim
+$ git clone https://github.com/eth-cscs/DLA-interface.git DLA-Interface
+\endverbatim
+
+For a first contact with DLA Interface, the best place is to have a look at the \link GettingStarted Getting started \endlink page that show you how to instal API, write and compile your first program with DLAI.
+
+Then, the \link examples Examples \endlink pages give you a quite complete description of the API in a very condensed format that is specially useful to recall the syntax of a particular feature, or to have a quick look at the API.
+ 
+<!-- 
+How to include html file
+\htmlinclude manifest.html
+-->
+
+*/

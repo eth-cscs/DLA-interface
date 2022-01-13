@@ -5,6 +5,29 @@
 - ScaLAPACK
 - Parsec/DPlasma (Optional)
 
+For building DLA interface the following packages are required, if building on
+a local machine with GNU toolchain.
+
+- Debian/Ubuntu:
+  - sudo apt-get install build-essential git cmake doxygen openmpi-bin
+- CentOS7:
+  - sudo yum groupinstall "Development Tools"
+  - sudo yum install git cmake doxygen openmpi-devel
+
+Along these packages a scalable LAPACK and BLAS/LAPACK implementations are
+required. A set of scripts are prepared for compiling OpenBLAS and ScaLAPACK
+and finally DLA interface using the previous packages to build the software
+into directory BUILD.
+
+  $ cd DLA-interface
+  $ ./tools/scripts/build-OpenBLAS.sh
+  $ ./tools/scripts/build-ScaLAPACK.sh
+  $ ./tools/scripts/build-DLAI.sh
+
+On a HPC the required packages must be loaded or installed. For CMake options
+check the tools/scripts/build-DLAI.sh to see how to provide BLAS/LAPACK and
+ScaLAPACK libraries.
+
 # Cmake options:
 
 ## BLAS, LAPACK and SCALAPACK

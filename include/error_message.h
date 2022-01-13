@@ -1,3 +1,13 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2021, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_ERROR_MESSAGE_H
 #define DLA_INTERFACE_ERROR_MESSAGE_H
 
@@ -7,7 +17,7 @@
 
 namespace dla_interface {
   namespace util {
-    // declaration of internal functions to compose the error message
+    /// Declaration of internal functions to compose the error message
     template <class... Args>
     std::string errorMessageInternal(const char* file, int line, const char* func,
                                      const Args&... args);
@@ -15,7 +25,7 @@ namespace dla_interface {
     template <class T, class... Args>
     void errorMessageCont(std::stringstream& s, const T& value, const Args&... args);
 
-    // Implementations
+    /// Implementations
     inline void errorMessageCont(std::stringstream& s) {}
 
     template <class T, class... Args>
@@ -35,13 +45,13 @@ namespace dla_interface {
   }
 }
 
-// Macro to generate the error message which add filename, line and function name.
-// The message will have the following structure:
-// "Calling function __func__: Error raised on __FILE__:__LINE__: <message>.
-// where message is composed concatenating the rest of the arguments with operator<<.
+/// Macro to generate the error message which add filename, line and function name.
+/// The message will have the following structure:
+/// "Calling function __func__: Error raised on __FILE__:__LINE__: <message>.
+/// where message is composed concatenating the rest of the arguments with operator<<.
 #define errorMessageFunc(func, ...) \
   dla_interface::util::errorMessageInternal(__FILE__, __LINE__, func, __VA_ARGS__)
-// Same as errorMessageFunc with func = __func__.
+/// Same as errorMessageFunc with func = __func__.
 #define errorMessage(...) \
   dla_interface::util::errorMessageInternal(__FILE__, __LINE__, __func__, __VA_ARGS__)
 
