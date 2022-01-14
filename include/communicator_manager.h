@@ -30,12 +30,12 @@ namespace dla_interface {
     class CommunicatorManager {
       public:
       /// Initializes the CommunicatorManager.
-      /// If DLA_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      /// If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
       /// If initialize_mpi is true:
       /// - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
       /// - MPI_Finalize is called when finalize is called.
       /// Precondition: initialize must have not been called before. (It can be called only once.)
-      /// If specified argc and argv are used in MPI and DPLASMA (if DLA_WITH_DPLASMA is true)
+      /// If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
       /// initialization (arguments after -- are passed to Parsec).
       ///
       /// @param initialize_mpi Is MPI initialized.
@@ -43,12 +43,12 @@ namespace dla_interface {
       static void initialize(bool initialize_mpi = true);
 
       /// Initializes the CommunicatorManager.
-      /// If DLA_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      /// If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
       /// If initialize_mpi is true:
       /// - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
       /// - MPI_Finalize is called when finalize is called.
       /// Precondition: initialize must have not been called before. (It can be called only once.)
-      /// If specified argc and argv are used in MPI and DPLASMA (if DLA_WITH_DPLASMA is true)
+      /// If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
       /// initialization (arguments after -- are passed to Parsec).
       /// 
       /// @param nr_cores Set number of cores to be used.
@@ -57,12 +57,12 @@ namespace dla_interface {
       static void initialize(int nr_cores, bool initialize_mpi = true);
 
       ///  Initializes the CommunicatorManager.
-      /// If DLA_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      /// If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
       /// If initialize_mpi is true:
       /// - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
       /// - MPI_Finalize is called when finalize is called.
       /// Precondition: initialize must have not been called before. (It can be called only once.)
-      /// If specified argc and argv are used in MPI and DPLASMA (if DLA_WITH_DPLASMA is true)
+      /// If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
       /// initialization (arguments after -- are passed to Parsec).
       /// 
       /// @param nr_cores Set number of cores to be used.
@@ -101,7 +101,7 @@ namespace dla_interface {
       static Communicator2DGrid& createCommunicator2DGrid(MPI_Comm base_comm, int nr_rows,
                                                           int nr_cols, Ordering comm_ordering);
 
-#ifdef DLA_WITH_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       ///  Creates a 2D grid based on the MPI communicator base_comm = Cblacs2sys_handle(blacs_handle).
       /// Calls createCommunicator2DGrid with base_comm = Cblacs2sys_handle(blacs_handle),
       /// with nr_rows rows and nr_cols columns, where the ranks are ordered in comm_ordering order.
@@ -132,7 +132,7 @@ namespace dla_interface {
     
       static Communicator2DGrid& getCommunicator2DGridFromMPIComm(MPI_Comm comm);
 
-#ifdef DLA_WITH_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       /// Returns a reference of the Communicator2DGrid created with createCommunicator2DGrid
       /// whose BLACS context index is id.
       /// 
@@ -148,7 +148,7 @@ namespace dla_interface {
 
       /// Free the Communicator2DGrid object and the related MPI communicators and BLACS grids.
       static void free2DGridFromMPIComm(MPI_Comm comm);
-#ifdef DLA_WITH_SCALAPACK
+#ifdef DLAI_WITH_SCALAPACK
       /// Free the Communicator2DGrid object and the related MPI communicators and BLACS grids.
       static void free2DGridFromBlacsContext(BlacsContextType id);
 #endif
@@ -167,7 +167,7 @@ namespace dla_interface {
                                std::cref(comm_manager_->dplasma_cpuset_));
       }
 #endif
-#ifdef DLA_WITH_HPX_LINALG
+#ifdef DLAI_WITH_HPX_LINALG
       /// Returns the number of threads and cpuset for HPX_LINALG.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getHPXLinalgConfigInfo() {
         return std::make_tuple(std::cref(comm_manager_->hpx_linalg_nr_threads_),

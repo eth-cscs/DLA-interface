@@ -168,8 +168,8 @@ namespace dla_interface {
 	/// <b>Note:</b> if original_distribution == scalapack_dist leading_nr_blocks is ignored.
 	/// @param mat Reference to matrix in memory
     DistributedMatrix(DistributionType distribution, DistributedMatrix& mat);
-#ifdef DLA_WITH_SCALAPACK
-	/// <b>Enabled</b> only if <b>DLA_WITH_SCALAPACK</b> is defined!
+#ifdef DLAI_WITH_SCALAPACK
+	/// <b>Enabled</b> only if <b>DLAI_WITH_SCALAPACK</b> is defined!
 	///
 	/// Creates a distributed matrix which has the same size, block size and rank grid
 	/// of the given Scalapack matrix and which reference the same memory (see \ref note_01 "Note (1)").
@@ -198,8 +198,8 @@ namespace dla_interface {
     DistributedMatrix(DistributionType distribution, int m, int n, ElementType* ptr,
                       ScalapackIndex i, ScalapackIndex j, constScalapackDescriptor desc);
 #endif
-#ifdef DLA_WITH_DPLASMA
-/// <b>Enabled</b> only if <b>DLA_WITH_DPLASMA</b> is defined!
+#ifdef DLAI_WITH_DPLASMA
+/// <b>Enabled</b> only if <b>DLAI_WITH_DPLASMA</b> is defined!
 ///
 /// @todo check this and test it.
 ///
@@ -307,8 +307,8 @@ namespace dla_interface {
       return res;
     }
 
-#ifdef DLA_WITH_SCALAPACK
-    /// <b>Enabled</b> only if <b>DLA_WITH_SCALAPACK</b> is defined!<br>
+#ifdef DLAI_WITH_SCALAPACK
+    /// <b>Enabled</b> only if <b>DLAI_WITH_SCALAPACK</b> is defined!<br>
     ///
     /// Returns a ptr to a new const distributed matrix which has the same size, block size and rank
     /// grid of the given Scalapack matrix and which reference the same memory (see \ref note_01 "Note (1)")..
@@ -634,8 +634,8 @@ namespace dla_interface {
     const ElementType* ptr(Local2DIndex index) const;
     ElementType* ptr(Local2DIndex index);
 
-#ifdef DLA_WITH_SCALAPACK
-    /// <b>Enabled</b> only if <b>DLA_WITH_SCALAPACK</b> is defined!<br>
+#ifdef DLAI_WITH_SCALAPACK
+    /// <b>Enabled</b> only if <b>DLAI_WITH_SCALAPACK</b> is defined!<br>
     ///
     /// Returns a tuple containing ptr, i, j and a std::array containing the descriptor, needed for
     /// ScaLAPACK calls.
@@ -646,8 +646,8 @@ namespace dla_interface {
     std::tuple<ElementType*, IndexType, IndexType, std::array<int, 9>> getScalapackDescription();
     std::tuple<const ElementType*, IndexType, IndexType, std::array<int, 9>> getScalapackDescription() const;
 #endif
-#ifdef DLA_WITH_DPLASMA
-    /// <b>Enabled</b> only if <b>DLA_WITH_DPLASMA</b> is defined!<br>
+#ifdef DLAI_WITH_DPLASMA
+    /// <b>Enabled</b> only if <b>DLAI_WITH_DPLASMA</b> is defined!<br>
     private:
     DPlasmaDescriptor getDPlasmaDescriptionInternal() const;
 
