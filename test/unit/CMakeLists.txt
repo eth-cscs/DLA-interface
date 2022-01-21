@@ -148,3 +148,4 @@ if (DLAI_WITH_FORTRAN)
     USE_MAIN FTN_MPI
     MPIRANKS 6)
 endif()
+

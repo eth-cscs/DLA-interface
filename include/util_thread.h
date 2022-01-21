@@ -1,3 +1,13 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2021, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_UTIL_THREAD_H
 #define DLA_INTERFACE_UTIL_THREAD_H
 
@@ -9,8 +19,8 @@
 namespace dla_interface {
   namespace util {
     class SetNumThreadsAndCpuBind {
-      // On costruction sets the BLAS number of threads and cpu binding to the given value.
-      // On destruction resets the BLAS number of threads and cpu binding to the original value.
+      /// On costruction sets the BLAS number of threads and cpu binding to the given value.<br>
+      /// On destruction resets the BLAS number of threads and cpu binding to the original value.
 
       public:
       SetNumThreadsAndCpuBind(std::tuple<const thread::NumThreads&, const thread::CpuSet&> settings)

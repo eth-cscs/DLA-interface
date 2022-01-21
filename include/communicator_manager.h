@@ -1,3 +1,13 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2021, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_COMMUNICATOR_MANAGER_H
 #define DLA_INTERFACE_COMMUNICATOR_MANAGER_H
 
@@ -14,102 +24,168 @@
 namespace dla_interface {
   namespace comm {
 
+  /// A CommunicatorManager class is a manager for MPI communication.
+  ///
+
     class CommunicatorManager {
       public:
-      // Initializes the CommunicatorManager.
-      // If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
-      // If initialize_mpi is true:
-      // - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
-      // - MPI_Finalize is called when finalize is called.
-      // Precondition: initialize must have not been called before. (It can be called only once.)
-      // If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
-      // initialization (arguments after -- are passed to Parsec).
+      /// Initializes the CommunicatorManager.
+      /// If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      /// If initialize_mpi is true:
+      /// - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
+      /// - MPI_Finalize is called when finalize is called.
+      /// Precondition: initialize must have not been called before. (It can be called only once.)
+      /// If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
+      /// initialization (arguments after -- are passed to Parsec).
+      ///
+      /// @param initialize_mpi Is MPI initialized.
+    
       static void initialize(bool initialize_mpi = true);
+
+      /// Initializes the CommunicatorManager.
+      /// If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      /// If initialize_mpi is true:
+      /// - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
+      /// - MPI_Finalize is called when finalize is called.
+      /// Precondition: initialize must have not been called before. (It can be called only once.)
+      /// If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
+      /// initialization (arguments after -- are passed to Parsec).
+      /// 
+      /// @param nr_cores Set number of cores to be used.
+      /// @param initialize_mpi Is MPI initialized.
+    
       static void initialize(int nr_cores, bool initialize_mpi = true);
+
+      ///  Initializes the CommunicatorManager.
+      /// If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      /// If initialize_mpi is true:
+      /// - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
+      /// - MPI_Finalize is called when finalize is called.
+      /// Precondition: initialize must have not been called before. (It can be called only once.)
+      /// If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
+      /// initialization (arguments after -- are passed to Parsec).
+      /// 
+      /// @param nr_cores Set number of cores to be used.
+      /// @param argc Number of arguments.
+      /// @param argv Arguments values.
+      /// @param initialize_mpi Is MPI initialized.
+       
       static void initialize(int nr_cores, int* argc, char*** argv, bool initialize_mpi = true);
-      // Destructs all the 2Dgrids created with createCommunicator2DGrid() and
-      // if initialize was called with initialize_mpi == true this function finalize MPI as well.
-      // Precondition: initialize must have been called before and
-      //               finalize must have not been called before. (It can be called only once.)
+
+      /// Finalize communication. Destructs all the 2Dgrids created with createCommunicator2DGrid() and
+      /// if initialize was called with initialize_mpi == true this function finalize MPI as well.
+      /// Precondition: initialize must have been called before and finalize must have not been
+      /// called before. (It can be called only once.)
+    
       static void finalize();
 #ifdef DLAI_WITH_DPLASMA
       // Returns the parsec context.
       static ParsecContext getParsecContext();
 #endif
 
-      // Creates a 2D grid based on the given MPI communicator, with nr_rows rows
-      // and nr_cols columns, where the ranks are ordered in comm_ordering order.
-      // The created Communicator2DGrid object is stored and a reference to it is returned.
-      // Throws a std::invalid_argument exception
-      // if the number of ranks in base_comm is different from nr_rows * nr_cols.
-      // Precondition: initialize must have been called before and
-      //               finalize must have not been called before.
+      /// Creates a 2D grid based on the given MPI communicator.
+      /// Creates a 2D grid based on the given MPI communicator, with nr_rows rows
+      /// and nr_cols columns, where the ranks are ordered in comm_ordering order.
+      /// The created Communicator2DGrid object is stored and a reference to it is returned.
+      /// Precondition: initialize must have been called before and
+      ///               finalize must have not been called before.
+      /// 
+      /// @throws std::invalid_argument if the number of ranks in base_comm is different from nr_rows * nr_cols.
+      /// 
+      /// @param base_comm MPI base communicator.
+      /// @param nr_rows Number of rows.
+      /// @param nr_cols Number of columns.
+      /// @param comm_ordering Ordering type (Row or Column based).
+      /// @return Communicator2DGrid&
+    
       static Communicator2DGrid& createCommunicator2DGrid(MPI_Comm base_comm, int nr_rows,
                                                           int nr_cols, Ordering comm_ordering);
 
 #ifdef DLAI_WITH_SCALAPACK
-      // Creates a 2D grid based on the MPI communicator base_comm =
-      // Cblacs2sys_handle(blacs_handle), with nr_rows rows
-      // and nr_cols columns, where the ranks are ordered in comm_ordering order.
-      // The created Communicator2DGrid object is stored and a reference to it is returned.
-      // Throws a std::invalid_argument exception
-      // if the number of ranks in base_comm is different from nr_rows * nr_cols.
-      // Precondition: initialize must have been called before and
-      //               finalize must have not been called before.
-      // Calls createCommunicator2DGrid with base_comm = Cblacs2sys_handle(blacs_handle).
+      ///  Creates a 2D grid based on the MPI communicator base_comm = Cblacs2sys_handle(blacs_handle).
+      /// Calls createCommunicator2DGrid with base_comm = Cblacs2sys_handle(blacs_handle),
+      /// with nr_rows rows and nr_cols columns, where the ranks are ordered in comm_ordering order.
+      /// The created Communicator2DGrid object is stored and a reference to it is returned.
+      /// Precondition: initialize must have been called before and
+      ///               finalize must have not been called before.
+      /// 
+      /// @throws std::invalid_argument if the number of ranks in base_comm is different from nr_rows * nr_cols.
+      /// 
+      /// @param blacs_handle Pointer to BLACS.
+      /// @param nr_rows Number of rows.
+      /// @param nr_cols Number of columns.
+      /// @param comm_ordering Ordering type (Row or Column based).
+      /// @return Communicator2DGrid&
+    
       static Communicator2DGrid& createCommunicator2DGridBlacs(int blacs_handle, int nr_rows,
                                                                int nr_cols, Ordering comm_ordering);
 #endif
 
-      // Returns a reference of the Communicator2DGrid created with createCommunicator2DGrid
-      // whose row, col or row_ordered (TODO: or col_ordered) communicator is comm.
-      // Throws a std::invalid_argument exception if no Communicator2DGrid is found.
+      /// Returns a reference of the Communicator2DGrid.
+      /// Returns a reference of the Communicator2DGrid created with createCommunicator2DGrid
+      /// whose row, col or row_ordered (TODO: or col_ordered) communicator is comm.
+      /// 
+      /// @throws std::invalid_argument if no Communicator2DGrid is found.
+      /// 
+      /// @param comm MPI base communicator.
+      /// @return Communicator2DGrid&
+    
       static Communicator2DGrid& getCommunicator2DGridFromMPIComm(MPI_Comm comm);
 
 #ifdef DLAI_WITH_SCALAPACK
-      // Returns a reference of the Communicator2DGrid created with createCommunicator2DGrid
-      // whose BLACS context index is id.
-      // Throws a std::invalid_argument exception if no Communicator2DGrid is found.
+      /// Returns a reference of the Communicator2DGrid created with createCommunicator2DGrid
+      /// whose BLACS context index is id.
+      /// 
+      /// @throws std::invalid_argument if no Communicator2DGrid is found.
+      /// 
+      /// @param id BlacsContextType
+    
       static Communicator2DGrid& getCommunicator2DGridFromBlacsContext(BlacsContextType id);
 #endif
 
-      // Free the Communicator2DGrid object and the related MPI communicators and BLACS grids.
+      /// Free the Communicator2DGrid object and the related MPI communicators and BLACS grids.
       static void free2DGrid(Communicator2DGrid& grid);
+
+      /// Free the Communicator2DGrid object and the related MPI communicators and BLACS grids.
       static void free2DGridFromMPIComm(MPI_Comm comm);
 #ifdef DLAI_WITH_SCALAPACK
+      /// Free the Communicator2DGrid object and the related MPI communicators and BLACS grids.
       static void free2DGridFromBlacsContext(BlacsContextType id);
 #endif
 
 #ifdef DLAI_WITH_SCALAPACK
-      // Returns the number of threads and cpuset for Scalapack.
+      /// Returns the number of threads and cpuset for Scalapack.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getScalapackConfigInfo() {
         return std::make_tuple(std::cref(comm_manager_->scalapack_nr_threads_),
                                std::cref(comm_manager_->scalapack_cpuset_));
       }
 #endif
 #ifdef DLAI_WITH_DPLASMA
-      // Returns the number of threads and cpuset for DPlasma.
+      /// Returns the number of threads and cpuset for DPlasma.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getDPlasmaConfigInfo() {
         return std::make_tuple(std::cref(comm_manager_->dplasma_nr_threads_),
                                std::cref(comm_manager_->dplasma_cpuset_));
       }
 #endif
 #ifdef DLAI_WITH_HPX_LINALG
-      // Returns the number of threads and cpuset for HPX_LINALG.
+      /// Returns the number of threads and cpuset for HPX_LINALG.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getHPXLinalgConfigInfo() {
         return std::make_tuple(std::cref(comm_manager_->hpx_linalg_nr_threads_),
                                std::cref(comm_manager_->hpx_linalg_cpuset_));
       }
 #endif
 
+      /// Returns the thread CpuSet binding.
       static thread::CpuSet getCpuBind() {
         return comm_manager_->getCpuBindInternal();
       }
 
+      /// Sets the thread CpuSet binding.
       static void setCpuBind(const thread::CpuSet& cpuset) {
         comm_manager_->setCpuBindInternal(cpuset);
       }
 
+      /// Returns the Fall back information.
       static FallbackInfo& getFallbackInfo() {
         return comm_manager_->fall_back_info_;
       }

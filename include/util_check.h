@@ -1,3 +1,13 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2021, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_UTIL_CHECK_H
 #define DLA_INTERFACE_UTIL_CHECK_H
 
@@ -33,8 +43,8 @@ namespace dla_interface {
                                  matrix.blockSize(), ", base index is ", matrix.baseIndex(), ")"));
     }
 
-    // Returns 0 if all the matrices have the same communicator or the position (0-based) of the
-    // first matrix with a different communicator.
+    /// Returns 0 if all the matrices have the same communicator or the position (0-based) of the
+    /// first matrix with a different communicator.
     template <class DistMatrix1, class DistMatrix2>
     int compareComm2D(int n, const DistMatrix1& mat_0, const DistMatrix2& mat_n) {
       if (&mat_0.commGrid() != &mat_n.commGrid())
@@ -59,7 +69,7 @@ namespace dla_interface {
   }
 }
 
-// Throws a std::invalid_argument if matrix is not square.
+/// @throws std::invalid_argument if matrix is not square.
 #define dlai__util__checkIsSquare(matrix) \
   dla_interface::util::checkIsSquare(matrix, __FILE__, __LINE__, __func__, #matrix)
 

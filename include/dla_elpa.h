@@ -1,3 +1,13 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2021, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_DLA_ELPA_H
 #define DLA_INTERFACE_DLA_ELPA_H
 
@@ -37,7 +47,7 @@ const char* elpa_strerr(int elpa_error);
 namespace dla_interface {
   namespace elpa {
     namespace generic {
-      // C++ Generic equivalent of elpa_set.
+      /// C++ Generic equivalent of elpa_set.
       template <class T>
       void set(elpa_t, const char*, T, int*);
       template <>

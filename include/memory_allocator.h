@@ -1,3 +1,13 @@
+//
+// Distributed Linear Algebra Interface (DLAI)
+//
+// Copyright (c) 2018-2021, ETH Zurich
+// All rights reserved.
+//
+// Please, refer to the LICENSE file in the root directory.
+// SPDX-License-Identifier: BSD-3-Clause
+//
+
 #ifndef DLA_INTERFACE_MEMORY_ALLOCATOR_H
 #define DLA_INTERFACE_MEMORY_ALLOCATOR_H
 
@@ -13,7 +23,7 @@ namespace dla_interface {
       public:
       using ElementType = ElType;
 
-      // Creates nullptr object.
+      /// Creates nullptr object.
       MemoryAllocator() : ptr_(nullptr), size_(0), allocated_(false) {}
       // Allocates size ElementType and cretes an object.
       MemoryAllocator(size_t size) : ptr_(nullptr), size_(size), allocated_(false) {
@@ -40,20 +50,22 @@ namespace dla_interface {
         return *this;
       }
 
-      // Use the memory pointed by ptr and creates an object.
-      // Precondition: ptr[i] is valid for i < size.
+      /// Use the memory pointed by ptr and creates an object.
+      ///
+      /// <b>Precondition:</b> ptr[i] is valid for i < size.
       MemoryAllocator(ElementType* ptr, size_t size) : ptr_(ptr), size_(size), allocated_(false) {
         if (size > 0 && ptr == nullptr)
           throw std::invalid_argument(errorMessage("ptr == nullptr for size (", size, ") > 0."));
       }
 
-      // Deallocates the elements if they were allocated by this class.
+      /// Deallocates the elements if they were allocated by this class.
       ~MemoryAllocator() {
         deallocate();
       }
 
-      // Returns the i-th element.
-      // Precondition: i == 0 or i < size_;
+      /// Returns the i-th element.
+      ///
+      /// <b>Precondition:</b> i == 0 or i < size_;
       const ElementType* ptr(std::size_t i = 0) const {
         assert(i < size_ || i == 0);
         return ptr_ + i;
