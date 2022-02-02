@@ -32,8 +32,7 @@ option(DLAI_BUILD_TESTING "Build tests" ON)
 # ----- BACKENDs
 option(DLAI_WITH_DPLASMA "Enable DPLASMA backend" OFF)
 option(DLAI_WITH_ELPA "Enable ELPA backend" OFF)
-# TODO this is going to be replaced by DLAF
-option(DLAI_WITH_HPXLINALG "Enable HPXLINALG backend" OFF)
+option(DLAI_WITH_DLAF "Enable DLA-Future backend" OFF)
 
 # ----- others
 option(DLAI_PRINT_DEBUG_INFO "Enables extra output for debugging purpose." OFF)

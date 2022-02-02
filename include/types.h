@@ -11,16 +11,18 @@
 
 namespace dla_interface {
 
-  // Note: When an element is added to a enum the corresponding
-  //       SET and name map (if it exists) have to be updated as well.
-  enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, Chameleon = 4, HPX_LINALG = 5 };
-  MAYBE_UNUSED constexpr auto SOLVER_SET = {ScaLAPACK, ELPA, DPlasma, Chameleon, HPX_LINALG};
+  /// @note
+  /// When an element is added to a enum the corresponding
+  /// SET and name map (if it exists) have to be updated as well.
+  enum SolverType { ScaLAPACK = 1, ELPA = 2, DPlasma = 3, DLAF = 4, Chameleon = 5};
+  MAYBE_UNUSED constexpr auto SOLVER_SET = {ScaLAPACK, ELPA, DPlasma, DLAF, Chameleon};
 
   const std::map<SolverType, std::string> solver_names = {{ScaLAPACK, "ScaLAPACK"},
                                                           {ELPA, "ELPA"},
                                                           {DPlasma, "DPLASMA"},
+														  {DLAF, "DLA-Future"},
                                                           {Chameleon, "Chameleon"},
-                                                          {HPX_LINALG, "HPX_LINALG"}};
+  };
 
   enum OpTrans { NoTrans = 'N', Trans = 'T', ConjTrans = 'C' };
   MAYBE_UNUSED constexpr auto OPTRANS_SET = {NoTrans, Trans, ConjTrans};
@@ -31,9 +33,9 @@ namespace dla_interface {
   enum Diag { Unit = 'U', NonUnit = 'N' };
   MAYBE_UNUSED constexpr auto DIAG_SET = {Unit, NonUnit};
 
-  // Distributed matrix distribution (see documentation for details):
-  // Scalapack = 2D block cyclic distribution,
-  // Tile = 2D block cyclic tile distribution.
+  /// Distributed matrix distribution (see documentation for details):<br>
+  /// Scalapack = 2D block cyclic distribution,<br>
+  /// Tile = 2D block cyclic tile distribution.
   enum DistributionType { scalapack_dist = 1, tile_dist = 2 };
   MAYBE_UNUSED constexpr auto DISTRIBUTION_SET = {scalapack_dist, tile_dist};
 
@@ -57,13 +59,15 @@ namespace dla_interface {
   enum Ordering { RowMajor = 'R', ColMajor = 'C' };
   MAYBE_UNUSED constexpr auto ORDER_SET = {RowMajor, ColMajor};
 
-  // structure to access BaseType and ComplexType
-  // defined in the following way:
-  // ElType,               BaseType, ComplexType
-  // float,                float,    std::complex<float>
-  // double,               double,   std::complex<double>
-  // std::complex<float>,  float,    std::complex<float>
-  // std::complex<double>, double,   std::complex<double>
+  /// structure to access BaseType and ComplexType defined in the following way:<br>
+  ///
+  /// <ul>
+  /// 	<li>ElType, BaseType: ComplexType<br></li>
+  /// 	<li>float, float:    std::complex<float></li>
+  /// 	<li>double, double:   std::complex<double></li>
+  /// 	<li>std::complex<float>, float: std::complex<float></li>
+  /// 	<li>std::complex<double>, double: std::complex<double></li>
+  /// </ul>
   template <class ElType>
   struct TypeInfo {};
 
