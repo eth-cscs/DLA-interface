@@ -31,7 +31,7 @@ set(DLAI_WITH_DLAF_INTERNAL OFF)
 	unset(DLAF_FOUND CACHE)
 
 if (DLAF_ROOT)
-	setoption(DLAF_DIR PATH ${DLAF_ROOT} "DLAF_DIR directory")
+	set(DLAF_DIR PATH ${DLAF_ROOT} "DLAF_DIR directory")
 	message(STATUS "DLA-Future path: ${DLAF_DIR}")
 else()
 	message(STATUS "To enable DLAF must set DLAFROOT variable!")
