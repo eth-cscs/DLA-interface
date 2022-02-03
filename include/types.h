@@ -20,7 +20,7 @@ namespace dla_interface {
   const std::map<SolverType, std::string> solver_names = {{ScaLAPACK, "ScaLAPACK"},
                                                           {ELPA, "ELPA"},
                                                           {DPlasma, "DPLASMA"},
-														  {DLAF, "DLA-Future"},
+														  {DLAF, "DLAF"},
                                                           {Chameleon, "Chameleon"},
   };
 
@@ -51,6 +51,7 @@ namespace dla_interface {
   using constScalapackDescriptor = const int*;
   using BlacsContextType = int;
 #endif
+
 #ifdef DLAI_WITH_DPLASMA
   using ParsecContext = parsec_context_t*;
   using DPlasmaDescriptor = two_dim_block_cyclic_t;

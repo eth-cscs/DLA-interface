@@ -160,7 +160,7 @@ namespace dla_interface {
     DistributedMatrix(DistributionType distribution, DistributedMatrix& mat);
 
     #ifdef DLAI_WITH_SCALAPACK
-	/// <b>Enabled</b> only if <b>DLA_HAVE_SCALAPACK</b> is defined!
+	/// <b>Enabled</b> only if <b>DLAI_WITH_SCALAPACK</b> is defined!
 	///
 	/// Creates a distributed matrix which has the same size, block size and rank grid
 	/// of the given Scalapack matrix and which reference the same memory (see \ref note_01 "Note (1)").
@@ -190,7 +190,7 @@ namespace dla_interface {
                       ScalapackIndex i, ScalapackIndex j, constScalapackDescriptor desc);
 #endif
 #ifdef DLAI_WITH_DPLASMA
-	/// <b>Enabled</b> only if <b>DLA_HAVE_DPLASMA</b> is defined!
+	/// <b>Enabled</b> only if <b>DLAI_WITH_DPLASMA</b> is defined!
 	///
 	/// @todo check this and test it.
 	///
@@ -202,8 +202,8 @@ namespace dla_interface {
 
 #endif
 
-#ifdef DLA_HAVE_DLAF
-	/// <b>Enabled</b> only if <b>DLA_HAVE_DLAF</b> is defined!
+#ifdef DLAI_WITH_DLAF
+	/// <b>Enabled</b> only if <b>DLAI_WITH_DLAF</b> is defined!
 	///
 	/// @todo check this and test it.
 	///
@@ -312,7 +312,7 @@ namespace dla_interface {
     }
 
 #ifdef DLAI_WITH_SCALAPACK
-    /// <b>Enabled</b> only if <b>DLA_HAVE_SCALAPACK</b> is defined!<br>
+    /// <b>Enabled</b> only if <b>DLAI_WITH_SCALAPACK</b> is defined!<br>
     ///
     /// Returns a ptr to a new const distributed matrix which has the same size, block size and rank
     /// grid of the given Scalapack matrix and which reference the same memory (see \ref note_01 "Note (1)")..
@@ -640,7 +640,7 @@ namespace dla_interface {
     ElementType* ptr(Local2DIndex index);
 
 #ifdef DLAI_WITH_SCALAPACK
-    /// <b>Enabled</b> only if <b>DLA_HAVE_SCALAPACK</b> is defined!<br>
+    /// <b>Enabled</b> only if <b>DLAI_WITH_SCALAPACK</b> is defined!<br>
     ///
     /// Returns a tuple containing ptr, i, j and a std::array containing the descriptor, needed for
     /// ScaLAPACK calls.
@@ -652,7 +652,7 @@ namespace dla_interface {
     std::tuple<const ElementType*, IndexType, IndexType, std::array<int, 9>> getScalapackDescription() const;
 #endif
 #ifdef DLAI_WITH_DPLASMA
-    /// <b>Enabled</b> only if <b>DLA_HAVE_DPLASMA</b> is defined!<br>
+    /// <b>Enabled</b> only if <b>DLAI_WITH_DPLASMA</b> is defined!<br>
     private:
     DPlasmaDescriptor getDPlasmaDescriptionInternal() const;
 
@@ -668,9 +668,9 @@ namespace dla_interface {
     std::tuple<const DPlasmaDescriptor, MPI_Comm> getDPlasmaDescription() const;
 #endif
 
-#ifdef DLA_HAVE_DLAF
+#ifdef DLAI_WITH_DLAF
     /*
-    /// <b>Enabled</b> only if <b>DLA_HAVE_DLAF</b> is defined!<br>
+    /// <b>Enabled</b> only if <b>DLAI_WITH_DLAF</b> is defined!<br>
     private:
     DLAFDescriptor getDLAFDescriptionInternal() const;
 

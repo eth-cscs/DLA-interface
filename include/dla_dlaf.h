@@ -11,7 +11,7 @@
 #ifndef DLA_INTERFACE_DLA_DLAF_H_
 #define DLA_INTERFACE_DLA_DLAF_H_
 
-#ifdef DLA_HAVE_DLAF
+#ifdef DLAI_WITH_DLAF
 
 #include <string>
 #include <vector>
@@ -141,5 +141,5 @@ namespace dla_interface {
 	} // dlaf_wrappers
 } // dla_interface
 
-#endif // DLA_HAVE_DLAF
+#endif // DLAI_WITH_DLAF
 #endif /* DLA_INTERFACE__DLA_DLAF_H_ */

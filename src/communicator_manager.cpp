@@ -188,7 +188,7 @@ namespace dla_interface {
       topo_.setCpuBind(application_cpuset);
 #endif
 
-#ifdef DLA_HAVE_DLAF
+#ifdef DLAI_WITH_DLAF
       std::vector<std::string> cfg = {"hpx.commandline.allow_unknown=1",
                                       "hpx.commandline.aliasing=0"};
       if (nr_cores > 0) {
@@ -232,7 +232,7 @@ namespace dla_interface {
 #ifdef DLAI_WITH_DPLASMA
       parsec_fini(&parsec_handle_);
 #endif
-#ifdef DLA_HAVE_DLAF
+#ifdef DLAI_WITH_DLAF
       hpx_wrappers::stop();
 #endif
 

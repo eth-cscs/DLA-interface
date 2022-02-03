@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
   comm::CommunicatorManager::initialize(nr_threads, &argc, &argv, true);
 
-#ifdef DLA_WITH_DLAF
+#ifdef DLAI_WITH_DLAF
   // Takes the ownership of MPI_comm
   dlaf_wrappers::Communicator world(MPI_COMM_WORLD);
 

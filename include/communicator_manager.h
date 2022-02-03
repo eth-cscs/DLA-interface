@@ -19,12 +19,12 @@ namespace dla_interface {
     class CommunicatorManager {
       public:
       /// Initializes the CommunicatorManager.
-      /// If DLA_HAVE_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      /// If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
       /// If initialize_mpi is true:
       ///- MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
       ///- MPI_Finalize is called when finalize is called.
       /// **Precondition:** initialize must have not been called before. (It can be called only once.)
-      /// If specified argc and argv are used in MPI and DPLASMA (if DLA_HAVE_DPLASMA is true)
+      /// If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
       /// initialization (arguments after -- are passed to Parsec).
       /// 
       /// @param initialize_mpi Is MPI initialized.
@@ -32,12 +32,12 @@ namespace dla_interface {
       static void initialize(bool initialize_mpi = true);
 
       ///  Initializes the CommunicatorManager.
-      /// If DLA_HAVE_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      /// If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
       /// If initialize_mpi is true:
       /// - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
       /// - MPI_Finalize is called when finalize is called.
       /// **Precondition:** initialize must have not been called before. (It can be called only once.)
-      /// If specified argc and argv are used in MPI and DPLASMA (if DLA_HAVE_DPLASMA is true)
+      /// If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
       /// initialization (arguments after -- are passed to Parsec).
       /// 
       /// @param nr_cores Set number of cores to be used.
@@ -46,12 +46,12 @@ namespace dla_interface {
       static void initialize(int nr_cores, bool initialize_mpi = true);
 
       /// Initializes the CommunicatorManager.
-      /// If DLA_HAVE_DPLASMA is true parsec is initialized with nr_cores (default -1).
+      /// If DLAI_WITH_DPLASMA is true parsec is initialized with nr_cores (default -1).
       /// If initialize_mpi is true:
       /// - MPI_Init_thread is called using MPI_THREAD_SERIALIZED,
       /// - MPI_Finalize is called when finalize is called.
       /// Precondition: initialize must have not been called before. (It can be called only once.)
-      /// If specified argc and argv are used in MPI and DPLASMA (if DLA_HAVE_DPLASMA is true)
+      /// If specified argc and argv are used in MPI and DPLASMA (if DLAI_WITH_DPLASMA is true)
       /// initialization (arguments after -- are passed to Parsec).
       /// 
       /// @param nr_cores Set number of cores to be used.
@@ -155,7 +155,7 @@ namespace dla_interface {
                                std::cref(commManager()->dplasma_cpuset_));
       }
 #endif
-#ifdef DLA_HAVE_DLAF
+#ifdef DLAI_WITH_DLAF
       /// Returns the number of threads and cpuset for DLA-Future.
       static std::tuple<const thread::NumThreads&, const thread::CpuSet&> getDLAFConfigInfo() {
         return std::make_tuple(std::cref(commManager()->dlaf_nr_threads_),
