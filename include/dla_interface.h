@@ -1,6 +1,7 @@
 #ifndef DLA_INTERFACE_DLA_INTERFACE_H
 #define DLA_INTERFACE_DLA_INTERFACE_H
 
+#include <iostream>
 #include <stdexcept>
 #include <vector>
 #include "distributed_matrix.h"
