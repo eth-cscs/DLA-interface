@@ -94,6 +94,7 @@ endif()
 
 # ----- BACKENDs
 if (DLAI_WITH_DLAF)
+	message(STATUS "Compile with DLA-Future support! DLAI_WITH_DLAF is ON!")
   find_package(DLAF REQUIRED)
 endif()
 
