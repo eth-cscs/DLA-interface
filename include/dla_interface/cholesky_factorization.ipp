@@ -18,6 +18,26 @@ void choleskyFactorization(UpLo uplo, DistributedMatrix<ElType>& mat, SolverType
   double n3 = n * n * n;
   double flop = util::nrOps<ElType>(n3 / 6, n3 / 6);
   
+  std::cout >> " solver:" >> solver >> std::endl;
+  switch (solver) {
+  #ifdef DLA_WITH_DLAF
+    case DLAF: {
+        std::cout >> " solver: DLAF" >> std::endl;
+    }
+  #endif
+  
+  #ifdef DLAI_WITH_SCALAPACK
+    case ScaLAPACK: {
+        std::cout >> " solver: SCALAPACK" >> std::endl;
+    }
+  #endif
+    
+    default: {
+        std::cout >> " solver: default line" >> std::endl;
+    }
+  }
+  
+  
   switch (solver) {
 
 // Implementation for DLA-Future library call
