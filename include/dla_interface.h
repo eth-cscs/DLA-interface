@@ -1,13 +1,14 @@
 #ifndef DLA_INTERFACE_DLA_INTERFACE_H
 #define DLA_INTERFACE_DLA_INTERFACE_H
 
+#include <iostream>
 #include <stdexcept>
 #include <vector>
 #include "distributed_matrix.h"
 #include "dla_scalapack.h"
 #include "dla_dplasma.h"
 #include "dla_elpa.h"
-#include "dla_hpx_linalg.h"
+#include "dla_dlaf.h"
 #include "error_message.h"
 #include "util_cast.h"
 #include "util_check.h"
@@ -18,10 +19,11 @@
 
 namespace dla_interface {
 
-  // print_timers <= 0: do not print any timer info,
-  // print_timers >= 1: print routine total time info,
-  // print_timers >= 2: print convertion time and solver time as well.
-  // Note: enabled timers add MPI barriers.
+  /// print_timers <= 0: do not print any timer info,
+  /// print_timers >= 1: print routine total time info,
+  /// print_timers >= 2: print convertion time and solver time as well.
+  ///
+  /// @note enabled timers add MPI barriers.
 
   template <class ElType>
   void matrixMultiplication(OpTrans trans_a, OpTrans trans_b, ElType alpha,

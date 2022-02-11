@@ -59,7 +59,10 @@ find_package(HWLOC)
 find_package(OpenMP REQUIRED)
 
 find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
 mpi_preset_setup()
+
+find_package(Umpire REQUIRED)
 
 # ----- LAPACK/SCALAPACK
 if (DLAI_WITH_MKL)
@@ -95,7 +98,7 @@ endif()
 
 # ----- BACKENDs
 if (DLAI_WITH_DLAF)
-  find_package(DLAF REQUIRED)
+  find_package(DLA-Future REQUIRED)
 endif()
 
 if (DLAI_WITH_DPLASMA)
