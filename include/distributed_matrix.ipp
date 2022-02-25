@@ -70,7 +70,7 @@ DistributedMatrix<ElType>::DistributedMatrix(DistributionType distribution, int 
                                .size2D()
                                .second))),
           desc[8], 1, scalapack_dist) {}
-#endif
+#endif //DLAI_WITH_SCALAPACK
 
 template <class ElType>
 DistributedMatrix<ElType>::~DistributedMatrix() {
@@ -319,6 +319,7 @@ std::tuple<const ElType*, IndexType, IndexType, std::array<int, 9>> DistributedM
   return std::make_tuple(ptr_->ptr(), i, j, std::move(desc));
 }
 #endif
+
 #ifdef DLAI_WITH_DPLASMA
 template <class ElType>
 DPlasmaDescriptor DistributedMatrix<ElType>::getDPlasmaDescriptionInternal() const {
@@ -372,7 +373,7 @@ std::tuple<const DPlasmaDescriptor, MPI_Comm> DistributedMatrix<ElType>::getDPla
 
   return std::make_tuple(desc, row_ordered_comm);
 }
-#endif
+#endif //DLAI_WITH_DPLASMA
 
 template <class ElType>
 template <class Out>

@@ -9,19 +9,15 @@
 #include "blacs.h"
 #include "communicator_grid.h"
 #include "communicator_manager.h"
+#include "dla_dlaf.h"
 #include "dla_elpa.h"
 #include "internal_error.h"
 #include "types.h"
-
-#ifdef DLAI_WITH_HPX_LINALG
-#include "hpx_linalg/hpx_linalg.h"
-#endif
 
 namespace dla_interface {
   namespace comm {
     // static members:
     CommunicatorManager::Status CommunicatorManager::status_(CommunicatorManager::non_initialized);
-    std::unique_ptr<CommunicatorManager> CommunicatorManager::comm_manager_(nullptr);
 
     void CommunicatorManager::initialize(bool initialize_mpi) {
       initialize(-1, initialize_mpi);
@@ -30,46 +26,49 @@ namespace dla_interface {
       initialize(nr_cores, nullptr, nullptr, initialize_mpi);
     }
     void CommunicatorManager::initialize(int nr_cores, int* argc, char*** argv, bool initialize_mpi) {
-      comm_manager_.reset(new CommunicatorManager(nr_cores, argc, argv, initialize_mpi));
+      // Initialize HPX before static CommunicatorManager,
+      // such that HPX can stopped by the destructor before its static members are destructed.
+      auto tmp = new CommunicatorManager(nr_cores, argc, argv, initialize_mpi);
+      commManager().reset(tmp);
       status_ = initialized;
     }
 
     void CommunicatorManager::finalize() {
       status_ = finalized;
-      comm_manager_ = nullptr;
+      commManager() = nullptr;
     }
 
 #ifdef DLAI_WITH_DPLASMA
     ParsecContext CommunicatorManager::getParsecContext() {
-      return comm_manager_->parsec_handle_;
+      return commManager()->parsec_handle_;
     }
 #endif
 
     Communicator2DGrid& CommunicatorManager::createCommunicator2DGrid(  //
         MPI_Comm base_comm, int nr_rows, int nr_cols, Ordering comm_ordering) {
-      return comm_manager_->communicator2DGrid(base_comm, nr_rows, nr_cols, comm_ordering);
+      return commManager()->communicator2DGrid(base_comm, nr_rows, nr_cols, comm_ordering);
     }
 
 #ifdef DLAI_WITH_SCALAPACK
     Communicator2DGrid& CommunicatorManager::createCommunicator2DGridBlacs(  //
         int blacs_handle, int nr_rows, int nr_cols, Ordering comm_ordering) {
-      return comm_manager_->communicator2DGrid(blacs::Cblacs2sys_handle(blacs_handle), nr_rows,
+      return commManager()->communicator2DGrid(blacs::Cblacs2sys_handle(blacs_handle), nr_rows,
                                                nr_cols, comm_ordering);
     }
 #endif
 
     Communicator2DGrid& CommunicatorManager::getCommunicator2DGridFromMPIComm(MPI_Comm comm) {
-      return comm_manager_->communicator2DGridFromMPIComm(comm);
+      return commManager()->communicator2DGridFromMPIComm(comm);
     }
 
 #ifdef DLAI_WITH_SCALAPACK
     Communicator2DGrid& CommunicatorManager::getCommunicator2DGridFromBlacsContext(BlacsContextType id) {
-      return comm_manager_->communicator2DGridFromBlacsContext(id);
+      return commManager()->communicator2DGridFromBlacsContext(id);
     }
 #endif
 
     void CommunicatorManager::free2DGrid(Communicator2DGrid& grid) {
-      return comm_manager_->destroy2DGrid(grid);
+      return commManager()->destroy2DGrid(grid);
     }
     void CommunicatorManager::free2DGridFromMPIComm(MPI_Comm comm) {
       free2DGrid(getCommunicator2DGridFromMPIComm(comm));
@@ -102,8 +101,9 @@ namespace dla_interface {
       try {
         return *comm_grid_map_.at(comm);
       }
-      catch (std::out_of_range) {
-        throw std::invalid_argument("No communicator2DGrid found with the given MPI_Comm");
+      catch (const std::out_of_range& err) {
+    	  std::string msg = "No communicator2DGrid found with the given MPI_Comm. Err: " + std::string(err.what());
+        throw std::invalid_argument(msg);
       }
     }
 #ifdef DLAI_WITH_SCALAPACK
@@ -111,8 +111,9 @@ namespace dla_interface {
       try {
         return *ictxt_grid_map_.at(id);
       }
-      catch (std::out_of_range) {
-        throw std::invalid_argument("No communicator2DGrid found with the given BLACS context id");
+      catch (const std::out_of_range& err) {
+          	  std::string msg = "No communicator2DGrid found with the given BLACS context id. Err: " + std::string(err.what());
+              throw std::invalid_argument(msg);
       }
     }
 #endif
@@ -187,7 +188,7 @@ namespace dla_interface {
       topo_.setCpuBind(application_cpuset);
 #endif
 
-#ifdef DLAI_WITH_HPX_LINALG
+#ifdef DLAI_WITH_DLAF
       std::vector<std::string> cfg = {"hpx.commandline.allow_unknown=1",
                                       "hpx.commandline.aliasing=0"};
       if (nr_cores > 0) {
@@ -198,14 +199,14 @@ namespace dla_interface {
         char name[] = "dla_interface_hpx_linalg";
         char* argv_hpx_linalg[] = {name, nullptr};
         int argc_hpx_linalg = 1;
-        hpx_linalg::start(argc_hpx_linalg, argv_hpx_linalg, cfg);
+        hpx_wrappers::start(argc_hpx_linalg, argv_hpx_linalg, cfg);
       }
       else {
-        hpx_linalg::start(*argc, *argv, cfg);
+        hpx_wrappers::start(*argc, *argv, cfg);
       }
 
-      hpx_linalg_cpuset_ = application_cpuset;
-      hpx_linalg_nr_threads_ = thread::NumThreads(1);
+      dlaf_cpuset_ = application_cpuset;
+      dlaf_nr_threads_ = thread::NumThreads(1);
 
       // Restore main thread binding in case it has been modified.
       topo_.setCpuBind(application_cpuset);
@@ -231,8 +232,8 @@ namespace dla_interface {
 #ifdef DLAI_WITH_DPLASMA
       parsec_fini(&parsec_handle_);
 #endif
-#ifdef DLAI_WITH_HPX_LINALG
-      hpx_linalg::stop();
+#ifdef DLAI_WITH_DLAF
+      hpx_wrappers::stop();
 #endif
 
       if (init_mpi_) {
